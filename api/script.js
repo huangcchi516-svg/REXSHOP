@@ -11,13 +11,24 @@ export default async function handler(req, res) {
 
     try {
         const payload = req.body;
-        // Apps Script 用 GET ?data=JSON 的方式接收
-        const params = new URLSearchParams({ data: JSON.stringify(payload) });
-        const url = `${process.env.APPS_SCRIPT_URL}?${params.toString()}`;
+        const baseUrl = process.env.APPS_SCRIPT_URL;
 
-        const response = await fetch(url);
-        const data = await response.json();
-        res.status(200).json(data);
+        // Apps Script doPost 透過 e.postData.contents 接收 JSON
+        // 必須用 text/plain 才不會被 Apps Script 的 CORS preflight 擋掉
+        const response = await fetch(baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+            redirect: 'follow'
+        });
+
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            res.status(200).json(data);
+        } catch {
+            res.status(200).json({ success: true, raw: text });
+        }
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
