@@ -5142,10 +5142,19 @@ async function loadSystemSettings() {
                 if (row[0] === '匯款帳號')     systemSettings.bankAccount    = row[1] || '';
                 if (row[0] === '匯款戶名')     systemSettings.bankHolder     = row[1] || '';
                 if (row[0] === 'LINE Pay帳號') systemSettings.linePayAccount  = row[1] || '';
-                // 維護模式：值為 TRUE 時啟動
+                // ADMIN白名單：逗號分隔的LINE ID（先解析，維護模式判斷時使用）
+                if (row[0] === 'ADMIN白名單') {
+                    window._adminWhitelist = String(row[1] || '').split(',').map(s => s.trim()).filter(Boolean);
+                }
+                // 維護模式：值為 TRUE 時啟動，ADMIN白名單內的LINE ID可繞過
                 if (row[0] === '維護模式') {
                     const isMaintenance = String(row[1] || '').trim().toUpperCase() === 'TRUE';
-                    if (isMaintenance) showMaintenanceScreen();
+                    if (isMaintenance) {
+                        const currentLineId = currentMember ? currentMember.lineId : '';
+                        const isAdmin = window._adminWhitelist && currentLineId &&
+                            window._adminWhitelist.includes(currentLineId);
+                        if (!isAdmin) showMaintenanceScreen();
+                    }
                 }
             });
             
@@ -5201,10 +5210,18 @@ async function pollMaintenanceStatus() {
         const res  = await fetch(url);
         const data = await res.json();
         const rows = data.values || [];
+        // 同步更新ADMIN白名單
+        const adminRow = rows.find(r => String(r[0]).trim() === 'ADMIN白名單');
+        if (adminRow) {
+            window._adminWhitelist = String(adminRow[1] || '').split(',').map(s => s.trim()).filter(Boolean);
+        }
         const row  = rows.find(r => String(r[0]).trim() === '維護模式');
         const isOn = row ? String(row[1]).trim().toUpperCase() === 'TRUE' : false;
         if (isOn && !window.isMaintenanceMode) {
-            showMaintenanceScreen();
+            const currentLineId = currentMember ? currentMember.lineId : '';
+            const isAdmin = window._adminWhitelist && currentLineId &&
+                window._adminWhitelist.includes(currentLineId);
+            if (!isAdmin) showMaintenanceScreen();
         }
     } catch (e) {
         // 網路問題時不影響，靜默忽略
