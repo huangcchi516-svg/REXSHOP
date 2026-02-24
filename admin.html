@@ -894,7 +894,7 @@
 // ✅ 金鑰已移至 Vercel 環境變數，前端不再暴露任何 API Key
 // LINE_CHANNEL_ID 為公開的 Client ID，非 secret，可保留前端
 const LINE_CHANNEL_ID   = '2009217612';
-const LINE_REDIRECT_URI = '/admin-callback.html';
+const LINE_REDIRECT_URI = location.origin + '/admin-callback.html';
 
 // 授權管理員 LINE ID 清單
 const ADMIN_LINE_IDS  = [
