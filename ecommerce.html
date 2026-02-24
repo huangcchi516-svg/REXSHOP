@@ -3346,7 +3346,7 @@ function formatCategoryName(name) {
 async function loadCategoryImages() {
     try {
         const sheetName = '分類照片設定';
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}?key=${API_KEY}`;
+        const url = `/api/sheets?sheet=${encodeURIComponent(sheetName)}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -3407,7 +3407,7 @@ async function loadCategories() {
     try {
         // 從 Google Sheets 讀取「分類設定」工作表
         const categoriesSheetName = '分類設定';
-        const categoriesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${categoriesSheetName}?key=${API_KEY}`;
+        const categoriesUrl = `/api/sheets?sheet=${encodeURIComponent(categoriesSheetName)}`;
         
         categories = [];  // 🔥 使用全域變數
         
@@ -5255,7 +5255,7 @@ async function submitOrder() {
     try {
         await fetch('/api/script', {
             method: 'POST',
-            mode: 'no-cors',
+
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
@@ -5662,7 +5662,7 @@ async function cancelExpiredOrder(orderId) {
         console.log('🔥 自動取消逾時訂單:', orderId);
         await fetch('/api/script', {
             method: 'POST',
-            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'cancelExpiredOrder',
                 orderId: orderId
@@ -5707,10 +5707,10 @@ async function submitPaymentCode(orderId) {
     btn.disabled = true;
     
     try {
-        // no-cors 模式送出，不等回傳
+        // 送出付款碼
         await fetch('/api/script', {
             method: 'POST',
-            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'updatePaymentCode',
                 orderId: orderId,
@@ -6192,7 +6192,6 @@ async function submitProfileUpdate() {
         // 更新到 Google Sheets
         await fetch('/api/script', {
             method: 'POST',
-            mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/json'
             },
