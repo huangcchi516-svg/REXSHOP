@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入中...</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a; color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+        }
+        .box { text-align: center; padding: 48px 32px; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid rgba(255,215,0,0.2);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 24px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h2 { font-size: 18px; color: #FFD700; margin-bottom: 8px; }
+        p  { font-size: 14px; color: #666; }
+        .error-box {
+            display: none;
+            background: rgba(255,68,68,0.1);
+            border: 1px solid #ff4444;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-top: 24px;
+            color: #ff4444;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="spinner"></div>
+    <h2>⏳ 登入驗證中...</h2>
+    <p>請稍候，正在取得您的資料</p>
+    <div class="error-box" id="errorBox"></div>
+</div>
+
+<script>
+const MAIN_PAGE = '/';  // 登入完成後跳回首頁
+
+function showError(msg) {
+    document.querySelector('.spinner').style.display = 'none';
+    document.querySelector('h2').textContent = '❌ 登入失敗';
+    document.querySelector('p').style.display = 'none';
+    const box = document.getElementById('errorBox');
+    box.style.display = 'block';
+    box.textContent = msg;
+    setTimeout(() => { window.location.href = MAIN_PAGE; }, 3000);
+}
+
+async function handleCallback() {
+    const params = new URLSearchParams(location.search);
+    const code  = params.get('code');
+    const error = params.get('error');
+
+    if (error) { showError('LINE 授權被拒絕：' + error); return; }
+    if (!code)  { showError('未收到授權碼，請重新登入'); return; }
+
+    try {
+        // Step 1: 透過 Vercel API 換 token（secret 在伺服器端）
+        const redirectUri = encodeURIComponent(location.origin + '/callback.html');
+        const res = await fetch(`/api/line-callback?code=${encodeURIComponent(code)}&redirectUri=${redirectUri}`);
+        const data = await res.json();
+
+        if (!data.success || !data.userId) {
+            showError(data.error || '登入驗證失敗');
+            return;
+        }
+
+        // Step 2: 儲存到 localStorage
+        const member = {
+            lineId:      data.userId,
+            displayName: data.displayName,
+            pictureUrl:  data.pictureUrl,
+            approvalStatus: '待審核'
+        };
+        localStorage.setItem('candyboss_member', JSON.stringify(member));
+
+        // Step 3: 呼叫 /api/script 儲存會員到 Google Sheet
+        await fetch('/api/script', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action:      'saveMember',
+                lineId:      data.userId,
+                displayName: data.displayName,
+                pictureUrl:  data.pictureUrl
+            })
+        });
+
+        // Step 4: 跳回首頁
+        window.location.href = MAIN_PAGE;
+
+    } catch (e) {
+        showError('網路錯誤：' + e.message);
+    }
+}
+
+handleCallback();
+</script>
+</body>
+</html>
