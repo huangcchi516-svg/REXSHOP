@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/ecommerce.html" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/admin-callback", "dest": "/admin-callback.html" }
   ]
 }
