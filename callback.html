@@ -90,10 +90,11 @@ async function handleCallback() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                action:      'saveMember',
-                lineId:      data.userId,
-                displayName: data.displayName,
-                pictureUrl:  data.pictureUrl
+                action:         'saveMember',
+                lineId:         data.userId,
+                displayName:    data.displayName,
+                pictureUrl:     data.pictureUrl,
+                approvalStatus: '待審核'
             })
         });
 
