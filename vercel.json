@@ -3,6 +3,9 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/", "dest": "/ecommerce.html" },
     { "src": "/admin", "dest": "/admin.html" },
-    { "src": "/admin-callback", "dest": "/admin-callback.html" }
+    { "src": "/admin-callback", "dest": "/admin-callback.html" },
+    { "src": "/admin-callback.html", "dest": "/admin-callback.html" },
+    { "src": "/callback.html", "dest": "/callback.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
