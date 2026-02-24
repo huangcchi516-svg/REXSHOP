@@ -2415,10 +2415,7 @@ let quantity = 1;
 // 🆕 綠界物流設定（正式環境）
 // ==========================================
 const ECPAY_CONFIG = {
-    MerchantID: '3490304',
-    HashKey: 'O7MpUtX9Inc7e4Ud',  // 注意：第一個字元是大寫 O
-    HashIV: 'B6BxB56xLdGv4fBd',
-    // 正式環境
+    MerchantID: '3490304',  // ✅ MerchantID 為公開商家識別碼，可留前端
     MapURL: 'https://logistics.ecpay.com.tw/Express/map'
 };
 
@@ -2452,32 +2449,7 @@ function ecpayUrlEncode(str) {
 /**
  * 產生 CheckMacValue
  */
-function generateCheckMacValue(params, hashKey, hashIV) {
-    // 1. 參數依照 A-Z 排序
-    const sortedKeys = Object.keys(params).sort((a, b) => {
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
-    
-    // 2. 組成字串：key1=value1&key2=value2...
-    let checkStr = sortedKeys.map(key => {
-        return `${key}=${params[key]}`;
-    }).join('&');
-    
-    // 3. 前後加上 HashKey 和 HashIV
-    checkStr = `HashKey=${hashKey}&${checkStr}&HashIV=${hashIV}`;
-    
-    // 4. URL Encode
-    checkStr = ecpayUrlEncode(checkStr);
-    
-    // 5. 轉小寫
-    checkStr = checkStr.toLowerCase();
-    
-    // 6. SHA256 加密
-    let hash = CryptoJS.SHA256(checkStr).toString(CryptoJS.enc.Hex);
-    
-    // 7. 轉大寫
-    return hash.toUpperCase();
-}
+// generateCheckMacValue 已移至後端 /api/ecpay-map
 
 /**
  * 產生訂單編號
@@ -2498,7 +2470,7 @@ function getDeviceType() {
 // ==========================================
 // 🆕 開啟綠界地圖選擇門市
 // ==========================================
-function openECPayMap() {
+async function openECPayMap() {
     if (checkMaintenance()) return;
     console.log('========================================');
     console.log('🚀 開始執行 openECPayMap');
@@ -2539,25 +2511,39 @@ function openECPayMap() {
     console.log('ClientReplyURL:', params.ClientReplyURL);
     console.log('Device:', params.Device);
     
-    // 產生檢查碼
-    const checkMacValue = generateCheckMacValue(
-        params,
-        ECPAY_CONFIG.HashKey,
-        ECPAY_CONFIG.HashIV
-    );
-    
-    console.log('CheckMacValue:', checkMacValue);
-    console.log('========================================');
-    
+    // 由後端計算 CheckMacValue（保護 HashKey/HashIV）
+    let apiResult;
+    try {
+        const apiRes = await fetch('/api/ecpay-map', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                merchantTradeNo,
+                serverReplyURL,
+                clientReplyURL,
+                device: getDeviceType()
+            })
+        });
+        apiResult = await apiRes.json();
+        if (!apiResult.success) throw new Error(apiResult.error);
+    } catch (err) {
+        showToast('門市選擇初始化失敗，請稍後再試', 'error');
+        console.error('ecpay-map API 錯誤:', err);
+        return;
+    }
+
+    const p = apiResult.params;
+    console.log('CheckMacValue 由後端產生 ✅');
+
     // 填入表單
-    document.getElementById('ecpay_MerchantID').value = params.MerchantID;
-    document.getElementById('ecpay_MerchantTradeNo').value = params.MerchantTradeNo;
-    document.getElementById('ecpay_LogisticsSubType').value = params.LogisticsSubType;
-    document.getElementById('ecpay_ServerReplyURL').value = params.ServerReplyURL;
-    document.getElementById('ecpay_ClientReplyURL').value = params.ClientReplyURL;
-    document.getElementById('ecpay_ExtraData').value = params.ExtraData;
-    document.getElementById('ecpay_Device').value = params.Device;
-    document.getElementById('ecpay_CheckMacValue').value = checkMacValue;
+    document.getElementById('ecpay_MerchantID').value = p.MerchantID;
+    document.getElementById('ecpay_MerchantTradeNo').value = p.MerchantTradeNo;
+    document.getElementById('ecpay_LogisticsSubType').value = p.LogisticsSubType;
+    document.getElementById('ecpay_ServerReplyURL').value = p.ServerReplyURL;
+    document.getElementById('ecpay_ClientReplyURL').value = p.ClientReplyURL;
+    document.getElementById('ecpay_ExtraData').value = p.ExtraData;
+    document.getElementById('ecpay_Device').value = p.Device;
+    document.getElementById('ecpay_CheckMacValue').value = p.CheckMacValue;
     
     // 儲存訂單編號，供回傳時驗證
     localStorage.setItem('ecpay_merchant_trade_no', merchantTradeNo);
