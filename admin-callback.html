@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CANDY BOSS - 登入驗證中</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a; color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+        }
+        .box {
+            text-align: center; padding: 48px 32px;
+        }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid rgba(192,132,252,0.2);
+            border-top-color: #C084FC;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 24px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h2 { font-size: 18px; color: #C084FC; margin-bottom: 8px; }
+        p  { font-size: 14px; color: #666; }
+        .error-box {
+            display: none;
+            background: rgba(255,68,68,0.1);
+            border: 1px solid #ff4444;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-top: 24px;
+            color: #ff4444;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="spinner"></div>
+    <h2>⏳ 後台登入驗證中...</h2>
+    <p>請稍候</p>
+    <div class="error-box" id="errorBox"></div>
+</div>
+
+<script>
+// ✅ Channel Secret 已移至 Vercel 環境變數
+// 這裡只做「把 code 傳給 /api/line-callback」，不接觸任何 secret
+const ADMIN_PAGE = '/admin.html';
+
+function showError(msg) {
+    document.querySelector('.spinner').style.display = 'none';
+    document.querySelector('h2').textContent = '❌ 登入失敗';
+    document.querySelector('p').style.display = 'none';
+    const box = document.getElementById('errorBox');
+    box.style.display = 'block';
+    box.textContent = msg;
+    setTimeout(() => { window.location.href = ADMIN_PAGE; }, 3000);
+}
+
+async function handleCallback() {
+    const params = new URLSearchParams(location.search);
+    const code  = params.get('code');
+    const state = params.get('state');
+    const error = params.get('error');
+
+    if (error) { showError('LINE 授權被拒絕：' + error); return; }
+    if (!code)  { showError('未收到授權碼，請重新登入'); return; }
+
+    // 驗證 state（防 CSRF）
+    const savedState = localStorage.getItem('admin_line_state');
+    if (!savedState || savedState !== state) {
+        showError('安全驗證失敗（state 不符），請重新登入');
+        return;
+    }
+    localStorage.removeItem('admin_line_state');
+
+    try {
+        // ✅ 透過 Vercel API Route 換 token，secret 在伺服器端
+        const redirectUri = encodeURIComponent(location.origin + '/admin-callback.html');
+        const res = await fetch(`/api/line-callback?code=${encodeURIComponent(code)}&redirectUri=${redirectUri}`);
+        const data = await res.json();
+
+        if (!data.success || !data.userId) {
+            showError(data.error || '登入驗證失敗');
+            return;
+        }
+
+        // 跳回 admin.html
+        const redirectUrl = ADMIN_PAGE + '?' + new URLSearchParams({
+            access_token: data.accessToken,
+            lineId:       data.userId,
+            name:         encodeURIComponent(data.displayName),
+            picture:      encodeURIComponent(data.pictureUrl)
+        });
+        window.location.href = redirectUrl;
+
+    } catch (e) {
+        showError('網路錯誤：' + e.message);
+    }
+}
+
+handleCallback();
+</script>
+</body>
+</html>
