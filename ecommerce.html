@@ -490,6 +490,52 @@
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
         }
 
+        /* 客服浮動按鈕 */
+        .service-float {
+            position: fixed;
+            bottom: 115px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 200, 255, 0.45);
+            transition: all 0.3s ease;
+            z-index: 999;
+            overflow: hidden;
+            border: 3px solid rgba(0, 200, 255, 0.6);
+            background: #0a0a0a;
+        }
+
+        .service-float img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .service-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(0, 200, 255, 0.65);
+        }
+
+        .service-float-label {
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 200, 255, 0.9);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
         /* 購物車浮動按鈕 */
         .cart-float {
             position: fixed;
@@ -1294,6 +1340,13 @@
                 aspect-ratio: 1 / 1;
             }
 
+            .service-float {
+                width: 50px;
+                height: 50px;
+                bottom: 80px;
+                right: 15px;
+            }
+
             .cart-float {
                 width: 50px;
                 height: 50px;
@@ -1495,6 +1548,13 @@
                 font-size: 13px;
                 margin-bottom: 8px;
                 padding-bottom: 5px;
+            }
+
+            .service-float {
+                width: 60px;
+                height: 60px;
+                bottom: 100px;
+                right: 20px;
             }
 
             .cart-float {
@@ -2087,6 +2147,12 @@
             
             <div class="products-grid" id="productsGrid"></div>
         </section>
+    </div>
+
+    <!-- 客服浮動按鈕 -->
+    <div class="service-float" onclick="window.open('https://line.me/ti/p/~rex52077', '_blank')" title="聯繫客服">
+        <img src="https://drive.google.com/thumbnail?id=1Z47Lr_gefght-7cfROWS4jM286NIWbkv&sz=w200" alt="客服" onerror="this.parentElement.innerHTML='💬<span class=\'service-float-label\'>客服</span>'">
+        <span class="service-float-label">客服</span>
     </div>
 
     <!-- 購物車浮動按鈕 -->
