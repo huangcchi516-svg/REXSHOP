@@ -6,6 +6,7 @@
     { "src": "/admin-callback", "dest": "/admin-callback.html" },
     { "src": "/admin-callback.html", "dest": "/admin-callback.html" },
     { "src": "/callback.html", "dest": "/callback.html" },
+    { "src": "/admin.html", "dest": "/admin.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
