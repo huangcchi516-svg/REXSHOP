@@ -2276,14 +2276,14 @@
     </div>
 
     <!-- 訂單查詢彈窗 -->
-    <div class="modal" id="orderSearchModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">📦 我的訂單</div>
-                <button class="close-modal" onclick="closeOrderSearch()">×</button>
+    <!-- 查詢訂單獨立全頁面 -->
+    <div id="orderSearchModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0a0a0a; z-index:2000; overflow-y:auto;">
+        <div style="max-width:600px; margin:0 auto; padding:0 0 40px 0;">
+            <div style="display:flex; align-items:center; padding:16px; border-bottom:1px solid rgba(255,215,0,0.2); position:sticky; top:0; background:#0a0a0a; z-index:10;">
+                <button onclick="closeOrderSearch()" style="background:none; border:none; color:#FFD700; font-size:28px; cursor:pointer; padding:4px 12px 4px 0; line-height:1;">‹</button>
+                <div style="font-size:18px; font-weight:900; color:#FFD700;">📦 我的訂單</div>
             </div>
-            
-            <div id="ordersList" style="max-height: 500px; overflow-y: auto;">
+            <div id="ordersList" style="padding:16px;">
                 <!-- 訂單列表會動態生成 -->
             </div>
         </div>
@@ -4268,7 +4268,7 @@ window.addEventListener('popstate', function(event) {
     } else if (checkoutModal && checkoutModal.classList.contains('active')) {
         closeCheckout();
         isModalOpen = false;
-    } else if (orderSearchModal && orderSearchModal.classList.contains('active')) {
+    } else if (orderSearchModal && orderSearchModal.style.display === 'block') {
         closeOrderSearch();
         isModalOpen = false;
     } else if (profileUpdateModal && profileUpdateModal.classList.contains('active')) {
@@ -5330,15 +5330,16 @@ async function openOrderSearch() {
         return;
     }
     
-    // 顯示模態框（重置任何 style.display 覆蓋）
+    // 顯示全頁面
     const osm = document.getElementById('orderSearchModal');
-    osm.style.display = '';
-    osm.classList.add('active');
+    osm.style.display = 'block';
     window._orderDetailFromSearch = false;
     
     // 🔥 添加歷史記錄
     history.pushState({ modal: 'orderSearch' }, '');
     isModalOpen = true;
+    // 捲到頂部
+    osm.scrollTop = 0;
     
     // 顯示載入中
     document.getElementById('ordersList').innerHTML = `
@@ -5355,10 +5356,11 @@ async function openOrderSearch() {
 
 function closeOrderSearch() {
     const osm = document.getElementById('orderSearchModal');
-    osm.classList.remove('active');
-    osm.style.display = '';
+    osm.style.display = 'none';
     isModalOpen = false;
     window._orderDetailFromSearch = false;
+    // 返回首頁（捲到頂部）
+    window.scrollTo(0, 0);
 }
 
 // ==========================================
@@ -5426,7 +5428,7 @@ function showOrderDetailByData(order) {
         showToast('訂單資料格式錯誤', 'error');
         // 恢復 orderSearch modal
         const osm = document.getElementById('orderSearchModal');
-        if (osm) { osm.style.display = ''; osm.classList.add('active'); }
+        if (osm) { osm.style.display = 'block'; }
         return;
     }
     // 確保關鍵欄位有值（避免 .replace 在 undefined 上爆炸）
@@ -5465,7 +5467,7 @@ function showOrderDetailByData(order) {
         try {
             const orderTime = new Date(order.訂購時間);
             const now = new Date();
-            const deadline = new Date(orderTime.getTime() + 1 * 60 * 1000); // 1分鐘
+            const deadline = new Date(orderTime.getTime() + 30 * 60 * 1000); // 30分鐘
             const remaining = deadline - now;
             
             if (remaining > 0) {
@@ -5604,7 +5606,7 @@ function startCountdown(orderId, orderTime) {
         try {
             const orderDate = new Date(orderTime);
             const now = new Date();
-            const deadline = new Date(orderDate.getTime() + 1 * 60 * 1000); // 下單後1分鐘
+            const deadline = new Date(orderDate.getTime() + 30 * 60 * 1000); // 下單後30分鐘
             const remaining = deadline - now;
             
             if (remaining <= 0) {
@@ -5776,8 +5778,7 @@ function closeOrderDetail() {
     if (window._orderDetailFromSearch) {
         window._orderDetailFromSearch = false;
         const orderSearchModal = document.getElementById('orderSearchModal');
-        orderSearchModal.style.display = '';   // 恢復 display
-        orderSearchModal.classList.add('active');
+        orderSearchModal.style.display = 'block';  // 恢復顯示
         isModalOpen = true;
         // 補一筆 history state，讓再按返回可以關掉 orderSearch
         history.pushState({ modal: 'orderSearch' }, '');
@@ -5910,7 +5911,7 @@ async function autoCheckExpiredOrders() {
 
             const orderTime = new Date(order.訂購時間);
             if (isNaN(orderTime)) return;
-            const deadline = new Date(orderTime.getTime() + 60 * 1000); // 1分鐘
+            const deadline = new Date(orderTime.getTime() + 30 * 60 * 1000); // 30分鐘
             if (now >= deadline) {
                 console.log('🔥 背景掃描：發現逾時訂單，自動取消', order.訂單編號);
                 cancelExpiredOrder(order.訂單編號);
