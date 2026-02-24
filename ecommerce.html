@@ -5796,7 +5796,7 @@ async function loadMemberOrders() {
     }
     
     try {
-        const response = await fetch('/api/script', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ _query: `action=getOrdersByLine&lineId=${encodeURIComponent(currentMember.lineId)}` }) });
+        const response = await fetch(`/api/script-get?action=getOrdersByLine&lineId=${encodeURIComponent(currentMember.lineId)}`);
         const result = await response.json();
         
         const ordersList = document.getElementById('ordersList');
@@ -5891,7 +5891,7 @@ async function loadMemberOrders() {
 async function autoCheckExpiredOrders() {
     if (!currentMember || !currentMember.lineId) return;
     try {
-        const response = await fetch('/api/script', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ _query: `action=getOrdersByLine&lineId=${encodeURIComponent(currentMember.lineId)}` }) });
+        const response = await fetch(`/api/script-get?action=getOrdersByLine&lineId=${encodeURIComponent(currentMember.lineId)}`);
         const result = await response.json();
         if (!result.success || !result.orders) return;
 
