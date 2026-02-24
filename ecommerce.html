@@ -2367,7 +2367,7 @@
 
 // LINE Login 設定
 const LINE_CHANNEL_ID = '2009217612';
-const LINE_REDIRECT_URI = 'https://rexshop.vercel.app/callback.html';
+const LINE_REDIRECT_URI = 'https://rexshop-delta.vercel.app/callback.html';
 const LINE_STATE = 'random_state_' + Math.random().toString(36).substr(2, 9);
 
 const PRODUCTS_SHEET = '商品列表';
@@ -2496,9 +2496,9 @@ function openECPayMap() {
     // ServerReplyURL 和 ClientReplyURL 都指向 Vercel API
     // Vercel API 接收 POST → 回傳 HTML 給彈窗 → 彈窗關閉
     // GAS 另外用 fetch 通知（記錄訂單用）
-    const serverReplyURL = 'https://cbc-lake.vercel.app/api/ecpay-callback';
-    const clientReplyURL = 'https://cbc-lake.vercel.app/api/ecpay-callback';
-    
+    const serverReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
+    const clientReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
+
     console.log('ServerReplyURL:', serverReplyURL);
     console.log('ClientReplyURL:', clientReplyURL);
     
