@@ -162,6 +162,122 @@
             100% { opacity: 0; transform: translateY(10px); }
         }
 
+
+        /* ── 蛋博士布告欄 ── */
+        .bulletin-board {
+            display: none;
+            margin: 16px auto 0;
+            max-width: 700px;
+            background: #1a1a1a;
+            border: 3px solid #5a3e1b;
+            border-radius: 12px;
+            box-shadow: 0 0 0 2px #8B6914, 0 8px 32px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.5);
+            padding: 18px 20px 16px;
+            position: relative;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .bulletin-board.active { display: block; }
+
+        /* 木框上緣釘子裝飾 */
+        .bulletin-board::before,
+        .bulletin-board::after {
+            content: '';
+            position: absolute;
+            top: -7px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #e8c97a, #8B6914);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        }
+        .bulletin-board::before { left: 24px; }
+        .bulletin-board::after  { right: 24px; }
+
+        .bulletin-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #4a3a1a;
+        }
+        .bulletin-egg {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #8B6914;
+            flex-shrink: 0;
+        }
+        .bulletin-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e8c97a;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(232,201,122,0.4);
+        }
+        .bulletin-title span {
+            display: block;
+            font-size: 10px;
+            color: #888;
+            font-weight: 400;
+            margin-top: 2px;
+            letter-spacing: 0;
+        }
+
+        .bulletin-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .bulletin-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid #8B6914;
+            border-radius: 0 6px 6px 0;
+            cursor: default;
+            transition: background 0.2s;
+        }
+        .bulletin-item.has-link { cursor: pointer; }
+        .bulletin-item.has-link:hover { background: rgba(139,105,20,0.15); }
+        .bulletin-item-num {
+            font-size: 11px;
+            color: #8B6914;
+            font-weight: 700;
+            min-width: 18px;
+            margin-top: 1px;
+        }
+        .bulletin-item-text {
+            font-size: 13px;
+            color: #d4c5a0;
+            line-height: 1.6;
+            flex: 1;
+        }
+        .bulletin-item-arrow {
+            color: #8B6914;
+            font-size: 12px;
+            margin-top: 3px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .bulletin-item.has-link:hover .bulletin-item-arrow { opacity: 1; }
+
+        /* 粉筆紋理底部裝飾 */
+        .bulletin-footer {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #4a3a1a;
+            text-align: right;
+            font-size: 10px;
+            color: #555;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .bulletin-board { margin: 12px 12px 0; }
+        }
+
         /* 主要容器 */
         .container {
             max-width: 1200px;
@@ -2083,6 +2199,20 @@
         </div>
     </div>
 
+
+    <!-- 🥚 蛋博士布告欄 -->
+    <div class="bulletin-board" id="bulletinBoard">
+        <div class="bulletin-header">
+            <img class="bulletin-egg" id="bulletinEggImg" src="" alt="蛋博士">
+            <div class="bulletin-title">
+                蛋博士布告欄
+                <span>📋 REX LAB 最新消息</span>
+            </div>
+        </div>
+        <div class="bulletin-items" id="bulletinItems"></div>
+        <div class="bulletin-footer">— REX LAB —</div>
+    </div>
+
     <!-- 主要內容 -->
     <div class="container">
         <!-- 登入牆 -->
@@ -2891,17 +3021,25 @@ async function loadAnnouncements() {
         }
         
         // 解析公告資料
-        // 格式：A欄=公告內容, B欄=啟用狀態（是/否）, C欄=連結(可選)
-        announcements = data.values.slice(1)
-            .filter(row => row[0] && (row[1] || '').trim() === '是')  // 只取啟用的公告
+        // 格式：A欄=公告內容, B欄=啟用狀態（是/否）, C欄=連結(可選), D欄=顯示位置（跑馬燈/布告欄/兩者，空白=兩者）
+        const allAnnouncements = data.values.slice(1)
+            .filter(row => row[0] && (row[1] || '').trim() === '是')
             .map(row => ({
                 text: row[0] || '',
-                link: row[2] || ''
+                link: row[2] || '',
+                location: (row[3] || '').trim() || '兩者'
             }));
-        
-        if (announcements.length > 0) {
-            displayAnnouncements();
-        }
+
+        // 依顯示位置分流
+        announcements = allAnnouncements.filter(a =>
+            a.location === '跑馬燈' || a.location === '兩者'
+        );
+        window._bulletinAnnouncements = allAnnouncements.filter(a =>
+            a.location === '布告欄' || a.location === '兩者'
+        );
+
+        if (announcements.length > 0) displayAnnouncements();
+        displayBulletinBoard();
         
     } catch (error) {
         console.error('載入公告失敗:', error);
@@ -2911,6 +3049,41 @@ async function loadAnnouncements() {
 /**
  * 顯示公告
  */
+
+// 🥚 蛋博士布告欄
+function displayBulletinBoard() {
+    const board = document.getElementById('bulletinBoard');
+    const itemsEl = document.getElementById('bulletinItems');
+    const eggImg = document.getElementById('bulletinEggImg');
+
+    // 複用客服按鈕的蛋博士圖片
+    const serviceImg = document.getElementById('serviceFloatImg');
+    if (serviceImg) eggImg.src = serviceImg.src;
+
+    const bulletinList = window._bulletinAnnouncements || [];
+    if (bulletinList.length === 0) {
+        board.classList.remove('active');
+        return;
+    }
+
+    board.classList.add('active');
+    itemsEl.innerHTML = '';
+
+    bulletinList.forEach((ann, i) => {
+        const item = document.createElement('div');
+        item.className = 'bulletin-item' + (ann.link ? ' has-link' : '');
+        item.innerHTML = `
+            <span class="bulletin-item-num">${i + 1}.</span>
+            <span class="bulletin-item-text">${ann.text}</span>
+            ${ann.link ? '<span class="bulletin-item-arrow">▶</span>' : ''}
+        `;
+        if (ann.link) {
+            item.onclick = () => window.open(ann.link, '_blank');
+        }
+        itemsEl.appendChild(item);
+    });
+}
+
 function displayAnnouncements() {
     const announcementBar = document.getElementById('announcementBar');
     const announcementText = document.getElementById('announcementText');
