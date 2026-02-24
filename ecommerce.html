@@ -3582,7 +3582,7 @@ function displayFeaturedProducts() {
             });
         });
         
-        let imageUrl = categoryImages['主打商品'] || featuredProducts[0]?.image || '';
+        let imageUrl = categoryImages['本月激推🔥'] || featuredProducts[0]?.image || '';
         if (imageUrl && !imageUrl.startsWith('http')) imageUrl = 'https://' + imageUrl;
         if (!imageUrl) imageUrl = '';
         
@@ -3758,7 +3758,7 @@ function openFeaturedCategoryModal() {
     document.getElementById('specModalTitle').textContent = '本月激推🔥';
     // 🆕 設定副標題
     const _sub2 = document.getElementById('specModalSubtitle');
-    const _st2 = categorySubtitles['主打商品'] || '';
+    const _st2 = categorySubtitles['本月激推🔥'] || '';
     if (_sub2) { _sub2.textContent = _st2; _sub2.style.display = _st2 ? 'inline' : 'none'; }
     document.getElementById('specModal').classList.add('active');
     setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
@@ -3768,9 +3768,9 @@ function openFeaturedCategoryModal() {
     isModalOpen = true;
     
     // 🆕 初始化輪播圖（主打商品使用「主打商品」這個分類名稱）
-    window._currentModalCategoryName = '主打商品';
+    window._currentModalCategoryName = '本月激推🔥';
     window._isRegularCategoryModal = false;
-    initCarousel('主打商品');
+    initCarousel('本月激推🔥');
     
     // 渲染主打商品選項
     renderFeaturedFlavorOptions();
