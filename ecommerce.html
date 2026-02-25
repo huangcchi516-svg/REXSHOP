@@ -163,125 +163,126 @@
         }
 
 
-        /* ── 蛋博士布告欄 ── */
+        /* ── 蛋博士布告欄（RPG對話框） ── */
         .bulletin-board {
             display: none;
             margin: 16px auto 0;
             max-width: 700px;
             position: relative;
             font-family: 'Noto Sans TC', sans-serif;
+            padding-left: 95px;
+            min-height: 110px;
         }
-        .bulletin-board.active { display: flex; align-items: flex-end; }
+        .bulletin-board.active { display: block; }
 
-        /* 左邊內容框 */
-        .bulletin-inner {
-            flex: 1;
-            background: rgba(255,255,255,0.07);
-            border: 2px solid rgba(255,215,0,0.35);
-            border-radius: 16px 4px 16px 16px;
-            padding: 16px 18px 14px;
-            position: relative;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-        }
-        .bulletin-inner::after {
-            content: '';
-            position: absolute;
-            top: 18px;
-            right: -12px;
-            border-width: 8px 0 8px 12px;
-            border-style: solid;
-            border-color: transparent transparent transparent rgba(255,215,0,0.35);
-        }
-        .bulletin-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #e8c97a;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed rgba(139,105,20,0.5);
-            text-shadow: 0 0 8px rgba(232,201,122,0.4);
-        }
-        .bulletin-title span {
-            display: block;
-            font-size: 10px;
-            color: #888;
-            font-weight: 400;
-            margin-top: 2px;
-            letter-spacing: 0;
-        }
-
-        .bulletin-items {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .bulletin-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            padding: 8px 10px;
-            background: rgba(255,255,255,0.03);
-            border-left: 3px solid #8B6914;
-            border-radius: 0 6px 6px 0;
-            cursor: default;
-            transition: background 0.2s;
-        }
-        .bulletin-item.has-link { cursor: pointer; }
-        .bulletin-item.has-link:hover { background: rgba(139,105,20,0.15); }
-        .bulletin-item-num {
-            font-size: 11px;
-            color: #8B6914;
-            font-weight: 700;
-            min-width: 18px;
-            margin-top: 1px;
-        }
-        .bulletin-item-text {
-            font-size: 13px;
-            color: #d4c5a0;
-            line-height: 1.6;
-            flex: 1;
-        }
-        .bulletin-item-arrow {
-            color: #8B6914;
-            font-size: 12px;
-            margin-top: 3px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .bulletin-item.has-link:hover .bulletin-item-arrow { opacity: 1; }
-
-        /* 粉筆紋理底部裝飾 */
-        .bulletin-footer {
-            margin-top: 8px;
-            padding-top: 7px;
-            border-top: 1px dashed rgba(74,58,26,0.6);
-            text-align: right;
-            font-size: 10px;
-            color: #555;
-            letter-spacing: 1px;
-        }
-
-        /* 右邊人物圖片 */
+        /* 人物立繪（左邊貼底） */
         .bulletin-egg-wrap {
-            flex-shrink: 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 90px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            margin-left: 4px;
+            z-index: 2;
         }
         .bulletin-egg {
             width: 90px;
             height: auto;
             object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.7));
+            display: block;
         }
 
+        /* 對話框主體 */
+        .bulletin-inner {
+            background: rgba(8,8,20,0.93);
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px rgba(255,215,0,0.15), 0 0 18px rgba(255,215,0,0.12), inset 0 0 24px rgba(0,0,0,0.5);
+            padding: 12px 14px 12px;
+            position: relative;
+        }
+
+        /* 左側對話框三角 */
+        .bulletin-inner::before {
+            content: '';
+            position: absolute;
+            bottom: 22px;
+            left: -11px;
+            border-width: 7px 11px 7px 0;
+            border-style: solid;
+            border-color: transparent #FFD700 transparent transparent;
+        }
+        .bulletin-inner::after {
+            content: '';
+            position: absolute;
+            bottom: 24px;
+            left: -8px;
+            border-width: 5px 8px 5px 0;
+            border-style: solid;
+            border-color: transparent rgba(8,8,20,0.93) transparent transparent;
+        }
+
+        /* 名字標籤 */
+        .bulletin-title {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 900;
+            color: #0a0a14;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 2px 10px 2px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+        }
+        .bulletin-title span { display: none; }
+
+        .bulletin-items {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .bulletin-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            padding: 0;
+            background: none;
+            border-left: none;
+            border-radius: 0;
+            cursor: default;
+        }
+        .bulletin-item.has-link { cursor: pointer; }
+        .bulletin-item.has-link:hover .bulletin-item-text { color: #FFD700; }
+        .bulletin-item-num {
+            font-size: 12px;
+            color: #FFD700;
+            font-weight: 700;
+            min-width: 18px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+        .bulletin-item-text {
+            font-size: 13px;
+            color: #e8e8e8;
+            line-height: 1.7;
+            flex: 1;
+            transition: color 0.2s;
+        }
+        .bulletin-item-arrow {
+            color: #FFD700;
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .bulletin-item.has-link:hover .bulletin-item-arrow { opacity: 1; }
+        .bulletin-footer { display: none; }
+
         @media (max-width: 768px) {
-            .bulletin-board { margin: 12px 12px 0; }
-            .bulletin-egg-wrap { width: 70px; }
-            .bulletin-egg { width: 70px; }
+            .bulletin-board { margin: 12px 12px 0; padding-left: 72px; min-height: 90px; }
+            .bulletin-egg-wrap { width: 68px; }
+            .bulletin-egg { width: 68px; }
         }
 
         /* 主要容器 */
@@ -2180,9 +2181,6 @@
         <div style="display:flex; align-items:center; gap:10px;">
             <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain;">
             <div class="logo">REX LAB</div>
-            <a class="cs-btn" href="https://line.me/ti/p/~rex52077" target="_blank">
-                💬 客服
-            </a>
         </div>
         <div class="nav-buttons" id="navButtons" style="display:none;">
             <button class="nav-btn" id="lineLoginBtn" onclick="lineLogin()" style="display:none;">
@@ -2208,16 +2206,13 @@
 
     <!-- 🥚 蛋博士布告欄 -->
     <div class="bulletin-board" id="bulletinBoard">
-        <div class="bulletin-inner">
-            <div class="bulletin-title">
-                蛋博士布告欄
-                <span>📋 REX LAB 最新消息</span>
-            </div>
-            <div class="bulletin-items" id="bulletinItems"></div>
-            <div class="bulletin-footer">— REX LAB —</div>
-        </div>
         <div class="bulletin-egg-wrap">
             <img class="bulletin-egg" id="bulletinEggImg" src="" alt="蛋博士">
+        </div>
+        <div class="bulletin-inner">
+            <div class="bulletin-title">蛋博士布告欄</div>
+            <div class="bulletin-items" id="bulletinItems"></div>
+            <div class="bulletin-footer"></div>
         </div>
     </div>
 
@@ -3058,15 +3053,16 @@ async function loadAnnouncements() {
  * 顯示公告
  */
 
-// 🥚 蛋博士布告欄
+    // 🥚 蛋博士布告欄
 function displayBulletinBoard() {
     const board = document.getElementById('bulletinBoard');
     const itemsEl = document.getElementById('bulletinItems');
     const eggImg = document.getElementById('bulletinEggImg');
 
-    // 複用客服按鈕的蛋博士圖片
-    const serviceImg = document.getElementById('serviceFloatImg');
-    if (serviceImg) eggImg.src = serviceImg.src;
+    // 使用系統設定的「布告欄圖片」
+    if (systemSettings.bulletinImage) {
+        eggImg.src = systemSettings.bulletinImage;
+    }
 
     const bulletinList = window._bulletinAnnouncements || [];
     if (bulletinList.length === 0) {
@@ -5325,6 +5321,7 @@ async function loadSystemSettings() {
                 if (row[0] === 'LINE Pay帳號') systemSettings.linePayAccount  = row[1] || '';
                 if (row[0] === 'LOGO圖片')     systemSettings.logoImage      = row[1] || '';
                 if (row[0] === '客服圖片')     systemSettings.csImage        = row[1] || '';
+                if (row[0] === '布告欄圖片')   systemSettings.bulletinImage  = row[1] || '';
                 // ADMIN白名單：逗號分隔的LINE ID（先解析，維護模式判斷時使用）
                 if (row[0] === 'ADMIN白名單') {
                     window._adminWhitelist = String(row[1] || '').split(',').map(s => s.trim()).filter(Boolean);
