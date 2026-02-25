@@ -2836,11 +2836,7 @@ async function openECPayMap() {
     const isLineBrowser = /Line\//i.test(navigator.userAgent);
 
     const serverReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
-
-    // LINE 瀏覽器：clientReplyURL 改為 store-callback.html，選完跳回主頁帶 query string
-    const clientReplyURL = isLineBrowser
-        ? 'https://rexshop-delta.vercel.app/store-callback.html'
-        : 'https://rexshop-delta.vercel.app/api/ecpay-callback';
+    const clientReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
 
     let apiResult;
     try {
