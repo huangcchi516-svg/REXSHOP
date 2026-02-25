@@ -4936,6 +4936,18 @@ async function loadSystemSettings() {
             if (csEl && systemSettings.csImage) {
                 csEl.src = systemSettings.csImage;
             }
+            // 布告欄圖片載入後立即更新（避免與 loadProductsData 競爭）
+            const eggImg = document.getElementById('bulletinEggImg');
+            const eggPlaceholder = document.getElementById('bulletinEggPlaceholder');
+            if (eggImg) {
+                if (systemSettings.bulletinImage) {
+                    eggImg.src = systemSettings.bulletinImage;
+                    eggImg.style.display = 'block';
+                    if (eggPlaceholder) eggPlaceholder.style.display = 'none';
+                } else {
+                    eggImg.style.display = 'none';
+                }
+            }
         }
     } catch (error) {
         systemSettings = {
