@@ -1379,10 +1379,10 @@
         }
 
         .login-wall-btn {
-            background: #06C755;
+            background: #ffffff;
             border: none;
-            color: white;
-            padding: 15px 40px;
+            color: #06C755;
+            padding: 14px 36px;
             border-radius: 8px;
             font-size: 18px;
             font-weight: 700;
@@ -1390,15 +1390,17 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             margin: 0 auto;
-            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.3);
+            min-width: 220px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .login-wall-btn:hover {
-            background: #05B34A;
+            background: #f0f0f0;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(6, 199, 85, 0.4);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
 
         .login-wall-btn:active {
@@ -1406,16 +1408,17 @@
         }
         
         .line-icon {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            background: #06C755;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            color: #06C755;
-            font-size: 16px;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
         }
 
         /* 審核狀態樣式 */
@@ -6430,7 +6433,7 @@ function showLoginWall() {
     const cartFloat = document.querySelector('.cart-float');
     if (cartFloat) cartFloat.style.display = 'none';
 
-    // 登入前：整個 navButtons 隱藏（只留 REX LAB 標題）
+    // 顯示導航按鈕區域，並顯示 LINE 登入按鈕
     document.getElementById('navButtons').style.display = 'none';
     document.getElementById('lineLoginBtn').style.display = 'none';
     document.getElementById('memberInfo').style.display = 'none';
@@ -6515,7 +6518,7 @@ function logout() {
         currentMember = null;
         localStorage.removeItem('candyboss_member');
         
-        // 重置 UI：登出後隱藏所有導覽按鈕
+        // 重置 UI
         document.getElementById('navButtons').style.display = 'none';
         document.getElementById('lineLoginBtn').style.display = 'none';
         document.getElementById('memberInfo').style.display = 'none';
