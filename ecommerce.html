@@ -2878,6 +2878,18 @@ async function openECPayMap() {
         const params = new URLSearchParams();
         formData.forEach((v, k) => params.append(k, v));
         localStorage.setItem('ecpay_merchant_trade_no', merchantTradeNo);
+
+        // ✅ 跳轉前儲存購物車 & 結帳表單狀態，跳回後還原
+        const checkoutSnapshot = {
+            cart: cart,
+            customerName:    document.getElementById('customerName')?.value  || '',
+            customerPhone:   document.getElementById('customerPhone')?.value || '',
+            shippingMethod:  document.querySelector('input[name="shipping"]:checked')?.value || '711',
+            paymentMethod:   document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cash',
+            storePayment:    document.querySelector('input[name="storePayment"]:checked')?.value  || 'transfer',
+        };
+        localStorage.setItem('checkout_snapshot', JSON.stringify(checkoutSnapshot));
+
         showToast('正在開啟門市選擇...', 'success');
         // 直接跳轉到中繼 API（用 GET query string）
         location.href = '/api/ecpay-map-redirect?' + params.toString();
@@ -5942,6 +5954,35 @@ window.addEventListener('load', () => {
                     address: decodeURIComponent(address || ''),
                     phone:   telephone || ''
                 };
+
+                // ✅ 還原跳轉前的購物車 & 結帳表單狀態
+                const snapshotJson = localStorage.getItem('checkout_snapshot');
+                if (snapshotJson) {
+                    try {
+                        const snap = JSON.parse(snapshotJson);
+                        // 還原購物車
+                        if (Array.isArray(snap.cart) && snap.cart.length > 0) {
+                            cart = snap.cart;
+                            updateCart();
+                        }
+                        // 還原姓名、電話
+                        const nameInput  = document.getElementById('customerName');
+                        const phoneInput = document.getElementById('customerPhone');
+                        if (nameInput  && snap.customerName)  nameInput.value  = snap.customerName;
+                        if (phoneInput && snap.customerPhone) phoneInput.value = snap.customerPhone;
+                        // 還原取貨方式
+                        const shippingRadio = document.querySelector(`input[name="shipping"][value="${snap.shippingMethod}"]`);
+                        if (shippingRadio) shippingRadio.checked = true;
+                        // 還原付款方式（自取）
+                        const paymentRadio = document.querySelector(`input[name="paymentMethod"][value="${snap.paymentMethod}"]`);
+                        if (paymentRadio) paymentRadio.checked = true;
+                        // 還原付款方式（7-11）
+                        const storePayRadio = document.querySelector(`input[name="storePayment"][value="${snap.storePayment}"]`);
+                        if (storePayRadio) storePayRadio.checked = true;
+                    } catch(e) {}
+                    localStorage.removeItem('checkout_snapshot');
+                }
+
                 // 確保購物車側欄是關閉的
                 const cartSidebar = document.getElementById('cartSidebar');
                 if (cartSidebar && cartSidebar.classList.contains('active')) toggleCart();
