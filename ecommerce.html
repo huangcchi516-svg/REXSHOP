@@ -305,28 +305,40 @@
             background: #111111;
             border: 1.5px solid rgba(255,215,0,0.45);
             border-radius: 18px;
-            padding: 0 16px;
-            margin-left: 12px;
+            padding: 16px 20px;
+            margin-left: 18px;
             margin-bottom: 18px;
             height: 195px;
             max-height: 195px;
             display: flex;
             align-items: center;
+            justify-content: center;
             align-self: center;
             overflow: hidden;
         }
-        .bulletin-speech::before { display: none; }
-        /* 左側尖角 */
+        /* 箭頭外框（金色邊框色） */
+        .bulletin-speech::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0; height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 14px solid rgba(255,215,0,0.45);
+        }
+        /* 箭頭內填（對話框背景色，蓋住邊框製造空心效果） */
         .bulletin-speech::after {
             content: '';
             position: absolute;
-            left: -12px;
+            left: -11px;
             top: 50%;
             transform: translateY(-50%);
             width: 0; height: 0;
             border-top: 8px solid transparent;
             border-bottom: 8px solid transparent;
-            border-right: 12px solid rgba(255,215,0,0.45);
+            border-right: 11px solid #111111;
         }
 
         /* 公告 */
@@ -339,11 +351,19 @@
             text-align: center;
         }
         .bulletin-item-text {
-            font-size: 13.5px;
-            color: #d0d0d0;
-            line-height: 1.7;
+            font-size: 15px;
+            font-weight: 500;
+            color: #f0f0f0;
+            line-height: 1.9;
             display: block;
             text-align: center;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        }
+        .bulletin-item-text strong,
+        .bulletin-item-text b {
+            color: var(--primary);
+            font-weight: 700;
         }
 
         /* RWD */
@@ -353,14 +373,26 @@
             .bulletin-egg { width: 105px; height: 126px; }
             .bulletin-egg-placeholder { font-size: 72px; }
             .bulletin-speech {
-                margin-left: 8px;
+                margin-left: 14px;
                 margin-bottom: 12px;
-                padding: 0 12px;
+                padding: 12px 14px;
                 border-radius: 14px;
                 height: 126px;
                 max-height: 126px;
             }
-            .bulletin-item-text { font-size: 12px; line-height: 1.6; }
+            .bulletin-speech::before {
+                left: -12px;
+                border-top-width: 8px;
+                border-bottom-width: 8px;
+                border-right-width: 12px;
+            }
+            .bulletin-speech::after {
+                left: -9px;
+                border-top-width: 6px;
+                border-bottom-width: 6px;
+                border-right-width: 9px;
+            }
+            .bulletin-item-text { font-size: 13px; line-height: 1.75; }
         }
 
 
