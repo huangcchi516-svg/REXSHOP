@@ -4854,7 +4854,7 @@ function toggleShippingMethod() {
         storeSelector.classList.add('active');
         pickupPayment.classList.remove('active');
         storePayment.style.display = 'none';
-        selectedStore = null;
+        // ✅ 切換到 7-11 時不清除 selectedStore，避免跳回後門市資料消失
     } else {
         storeSelector.classList.remove('active');
         pickupPayment.classList.add('active');
