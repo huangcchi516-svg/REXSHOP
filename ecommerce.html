@@ -6346,64 +6346,14 @@ function showToast(message, type = 'success') {
 // ==========================================
 
 function lineLogin() {
-    const ua = navigator.userAgent;
-    const isInLineApp = /Line\//.test(ua);
-    const isIOS       = /iPhone|iPad|iPod/i.test(ua);
-    const isAndroid   = /Android/i.test(ua);
-
-    // 網頁版授權 URL（所有裝置的 fallback）
-    const webUrl =
-        `https://access.line.me/oauth2/v2.1/authorize` +
-        `?response_type=code` +
+    const url = `https://access.line.me/oauth2/v2.1/authorize?` +
+        `response_type=code` +
         `&client_id=${LINE_CHANNEL_ID}` +
         `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
         `&state=${LINE_STATE}` +
-        `&scope=profile%20openid` +
-        `&bot_prompt=normal`;
+        `&scope=profile%20openid`;
 
-    if (isInLineApp) {
-        // 已在 LINE App 內 → 直接用網頁版即可
-        window.location.href = webUrl;
-        return;
-    }
-
-    if (isIOS) {
-        // ✅ iOS Safari 解法：
-        // 用 Universal Link 直接喚起 LINE App 授權頁
-        // 若 LINE 未安裝，iOS 會自動改開網頁版（不會卡住）
-        const lineUniversalUrl =
-            `https://line.me/oauth2/v2.1/authorize` +
-            `?response_type=code` +
-            `&client_id=${LINE_CHANNEL_ID}` +
-            `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
-            `&state=${LINE_STATE}` +
-            `&scope=profile%20openid` +
-            `&bot_prompt=normal`;
-
-        window.location.href = lineUniversalUrl;
-        return;
-    }
-
-    if (isAndroid) {
-        // Android：用 Intent scheme 直接喚起 LINE App
-        // fallback 到網頁版避免卡住
-        const intentUrl =
-            `intent://access.line.me/oauth2/v2.1/authorize` +
-            `?response_type=code` +
-            `&client_id=${LINE_CHANNEL_ID}` +
-            `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
-            `&state=${LINE_STATE}` +
-            `&scope=profile%20openid` +
-            `&bot_prompt=normal` +
-            `#Intent;scheme=https;package=jp.naver.line.android;` +
-            `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
-
-        window.location.href = intentUrl;
-        return;
-    }
-
-    // 其他（桌機等）
-    window.location.href = webUrl;
+    window.location.href = url;
 }
 
 async function checkMemberStatus() {
