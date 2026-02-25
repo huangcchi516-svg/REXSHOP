@@ -882,9 +882,9 @@
 
         .cart-item-right {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             flex-shrink: 0;
         }
 
@@ -898,27 +898,34 @@
             background: var(--primary);
             color: var(--secondary);
             border: none;
-            width: 26px;
-            height: 26px;
+            width: 30px;
+            height: 30px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             touch-action: manipulation;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             line-height: 1;
+            padding: 0;
         }
 
         .remove-item {
             background: #ff4444;
             color: white;
             border: none;
-            padding: 3px 8px;
-            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 700;
-            font-size: 11px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .cart-footer {
@@ -4672,10 +4679,10 @@ function updateCart() {
             <div class="cart-item-right">
                 <div class="cart-item-qty">
                     <button class="qty-btn" onclick="updateCartQuantity(${index}, -1)">−</button>
-                    <span style="font-size:14px; min-width:16px; text-align:center;">${item.quantity}</span>
+                    <span style="font-size:14px; min-width:18px; text-align:center;">${item.quantity}</span>
                     <button class="qty-btn" onclick="updateCartQuantity(${index}, 1)">+</button>
                 </div>
-                <button class="remove-item" onclick="removeCartItem(${index})">🗑️ 移除</button>
+                <button class="remove-item" onclick="removeCartItem(${index})" title="移除">🗑️</button>
             </div>
         </div>
     `).join('');
@@ -5917,6 +5924,8 @@ async function submitProfileUpdate() {
 window.addEventListener('load', () => {
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (event) => {
+        // qty-btn 需要連點，不阻擋
+        if (event.target.classList.contains('qty-btn')) return;
         const now = Date.now();
         if (now - lastTouchEnd <= 300) {
             event.preventDefault(); // 阻止雙擊事件
