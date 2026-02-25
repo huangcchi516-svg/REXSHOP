@@ -397,13 +397,13 @@
 
         
         .products-section {
-            margin-top: 30px;
+            margin-top: 10px;
         }
         
         
         .featured-section {
             margin-bottom: 50px;
-            padding: 20px 0;
+            padding: 8px 0;
             position: relative;
             overflow: hidden;
         }
@@ -725,27 +725,39 @@
             height: 70px;
             border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0, 200, 255, 0.45);
+            box-shadow: 0 8px 25px rgba(6, 199, 85, 0.5);
             transition: all 0.3s ease;
             z-index: 999;
             overflow: hidden;
-            border: 3px solid rgba(0, 200, 255, 0.6);
-            background: #0a0a0a;
+            border: 3px solid rgba(6, 199, 85, 0.8);
+            background: #06C755;
+            gap: 2px;
         }
 
         .service-float img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
+            display: none;
+        }
+
+        .service-float-icon {
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        .service-float-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+            letter-spacing: 1px;
         }
 
         .service-float:hover {
             transform: scale(1.1);
-            box-shadow: 0 10px 30px rgba(0, 200, 255, 0.65);
+            box-shadow: 0 10px 30px rgba(6, 199, 85, 0.7);
         }
 
         
@@ -1561,6 +1573,8 @@
                 bottom: 80px;
                 right: 15px;
             }
+            .service-float-icon { font-size: 20px; }
+            .service-float-label { font-size: 10px; }
 
             .cart-float {
                 width: 50px;
@@ -2392,8 +2406,9 @@
 
     <!-- 客服浮動按鈕 -->
     <div class="service-float" onclick="window.open('https://line.me/ti/p/~rex52077', '_blank')" title="聯繫客服">
-        <img id="serviceFloatImg" src="" alt="客服">
-
+        <img id="serviceFloatImg" src="" alt="" style="display:none;">
+        <span class="service-float-icon">💬</span>
+        <span class="service-float-label">客服</span>
     </div>
 
     <!-- 購物車浮動按鈕 -->
