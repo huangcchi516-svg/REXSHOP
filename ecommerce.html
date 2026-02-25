@@ -6423,8 +6423,14 @@ function showLoginWall() {
     document.getElementById('pendingApproval').style.display = 'none';
     document.getElementById('rejectedApproval').style.display = 'none';
     document.getElementById('productsSection').style.display = 'none';
-    
-    // 🔥 修正：顯示導航按鈕區域，並顯示 LINE 登入按鈕
+
+    // 登入前隱藏多餘區塊，只留 navbar（REX LAB）
+    document.getElementById('announcementBar').style.display = 'none';
+    document.getElementById('bulletinBoard').style.display = 'none';
+    const cartFloat = document.querySelector('.cart-float');
+    if (cartFloat) cartFloat.style.display = 'none';
+
+    // 顯示導航按鈕區域，並顯示 LINE 登入按鈕
     document.getElementById('navButtons').style.display = 'flex';
     document.getElementById('lineLoginBtn').style.display = 'block';
     document.getElementById('memberInfo').style.display = 'none';
@@ -6438,7 +6444,13 @@ function updateMemberUI() {
         document.getElementById('memberInfo').style.display = 'flex';
         document.getElementById('memberAvatar').src = currentMember.pictureUrl || '';
         // 不顯示名稱
-        
+
+        // 登入後恢復顯示公告列、布告欄、購物車
+        document.getElementById('announcementBar').style.display = '';
+        document.getElementById('bulletinBoard').style.display = '';
+        const cartFloat = document.querySelector('.cart-float');
+        if (cartFloat) cartFloat.style.display = '';
+
         // 根據審核狀態顯示不同內容
         const approvalStatus = currentMember.approvalStatus || '待審核';
         
