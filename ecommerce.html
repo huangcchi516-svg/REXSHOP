@@ -203,18 +203,25 @@
         }
         
         .announcement-icon {
-            font-size: 20px;
+            font-size: 16px;
             animation: pulse 2s ease-in-out infinite;
             flex-shrink: 0;
         }
         
         .announcement-text {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--primary);
             white-space: nowrap;
             display: inline-block;
             transition: opacity 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .announcement-bar { padding: 8px 0; }
+            .announcement-icon { font-size: 14px; }
+            .announcement-text { font-size: 12px; }
+            .announcement-content { gap: 8px; padding: 0 12px; }
         }
         
         /* 跑馬燈效果（單則公告） */
@@ -291,29 +298,20 @@
             justify-content: center;
         }
 
-        /* 右側對話框：黑金卡片 */
+        /* 右側對話框：純黑 */
         .bulletin-speech {
             flex: 1;
             position: relative;
-            background: #1a1a2e;
+            background: #111111;
             border: 1.5px solid rgba(255,215,0,0.45);
             border-radius: 18px;
             padding: 12px 16px;
             margin-left: 12px;
             margin-bottom: 18px;
             min-height: 64px;
-            box-shadow:
-                0 0 0 1px rgba(255,215,0,0.08),
-                inset 0 1px 0 rgba(255,255,255,0.05);
         }
-        /* 頂部金色高光線 */
-        .bulletin-speech::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 24px; right: 24px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.5), transparent);
-        }
+        /* 高光線隱藏 */
+        .bulletin-speech::before { display: none; }
         /* 左側尖角 */
         .bulletin-speech::after {
             content: '';
