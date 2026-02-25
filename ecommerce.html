@@ -2905,73 +2905,161 @@ function clearSelectedStore() {
 async function loadProductsData() {
     try {
         showToast('載入商品資料中...', 'success');
-        const productsUrl = `/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`;
-        const productsResponse = await fetch(productsUrl);
-        
-        if (!productsResponse.ok) throw new Error('無法載入商品資料');
-        
-        const productsData = await productsResponse.json();
-        
-        if (!productsData.values || productsData.values.length < 2) {
-            throw new Error('商品資料為空');
-        }
+
+        // ✅ 合併請求：同時發出所有需要的 fetch，減少 Function Invocations
+        const [
+            productsRes, specsRes, categoryImgRes,
+            categoriesRes, announcementRes, promotionRes
+        ] = await Promise.all([
+            fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`)
+        ]);
+
+        // --- 商品 ---
+        if (!productsRes.ok) throw new Error('無法載入商品資料');
+        const productsData = await productsRes.json();
+        if (!productsData.values || productsData.values.length < 2) throw new Error('商品資料為空');
 
         products = productsData.values.slice(1).map(row => ({
             id: row[0] || '',
             name: row[1] || '',
             image: row[2] || '',
-            isFeatured: (row[3] || '').trim() === '是',  // D欄：主打，填「是」表示主打
-            category: row[4] || '',  // E欄：商品類別（口味分類，如 PLOOM蛋、GLO蛋）
-            tags: (row[5] || '').split(',').map(t => t.trim()).filter(t => t),  // F欄：大分類標籤
-            customBlock: (row[6] || '').trim(),  // 🆕 G欄：自定義區塊名稱（填區塊名稱即加入該區塊）
+            isFeatured: (row[3] || '').trim() === '是',
+            category: row[4] || '',
+            tags: (row[5] || '').split(',').map(t => t.trim()).filter(t => t),
+            customBlock: (row[6] || '').trim(),
             price: 0,
             stock: 0
         })).filter(p => p.id);
-        const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`;
-        const specsResponse = await fetch(specsUrl);
-        
-        if (!specsResponse.ok) throw new Error('無法載入規格資料');
-        
-        const specsData = await specsResponse.json();
-        
-        if (specsData.values && specsData.values.length > 1) {
-            specsData.values.slice(1).forEach(row => {
-                const productId = row[0];
-                const _salePrice = parseInt(row[3]) || 0;
-                const _normalPrice = parseInt(row[5]) || 0;
-                const spec = {
-                    productId: row[0] || '',
-                    productName: row[1] || '',
-                    specName: row[2] || '',
-                    price: _salePrice > 0 ? _salePrice : _normalPrice,  // D有特價用特價，否則用F原價
-                    originalPrice: _salePrice > 0 ? _normalPrice : 0,   // 有特價才顯示劃線原價
-                    stock: parseInt(row[4]) || 0,
-                    image: '',                                  // 無圖片欄
-                    quantityMultiplier: parseInt(row[6]) || 1   // G欄：倍數
-                };
-                
-                if (!productSpecs[productId]) {
-                    productSpecs[productId] = [];
-                }
-                productSpecs[productId].push(spec);
-            });
-            products.forEach(product => {
-                const specs = productSpecs[product.id];
-                if (specs && specs.length > 0) {
-                    product.price = Math.min(...specs.map(s => s.price));
-                    product.stock = specs.reduce((sum, spec) => sum + spec.stock, 0);
-                }
-            });
+
+        // --- 規格 ---
+        if (specsRes.ok) {
+            const specsData = await specsRes.json();
+            if (specsData.values && specsData.values.length > 1) {
+                specsData.values.slice(1).forEach(row => {
+                    const productId = row[0];
+                    const _salePrice = parseInt(row[3]) || 0;
+                    const _normalPrice = parseInt(row[5]) || 0;
+                    const spec = {
+                        productId: row[0] || '',
+                        productName: row[1] || '',
+                        specName: row[2] || '',
+                        price: _salePrice > 0 ? _salePrice : _normalPrice,
+                        originalPrice: _salePrice > 0 ? _normalPrice : 0,
+                        stock: parseInt(row[4]) || 0,
+                        image: '',
+                        quantityMultiplier: parseInt(row[6]) || 1
+                    };
+                    if (!productSpecs[productId]) productSpecs[productId] = [];
+                    productSpecs[productId].push(spec);
+                });
+                products.forEach(product => {
+                    const specs = productSpecs[product.id];
+                    if (specs && specs.length > 0) {
+                        product.price = Math.min(...specs.map(s => s.price));
+                        product.stock = specs.reduce((sum, spec) => sum + spec.stock, 0);
+                    }
+                });
+            }
         }
-        await loadCategoryImages();   // 等待載入完成
-        
-        displayFeaturedProducts();  // 顯示主打商品
-        displayProducts();          // 顯示所有商品
-        loadCategories();           // 🆕 載入並生成分類按鈕
-        loadAnnouncements();        // 🆕 載入公告
-        loadPromotions();           // 🆕 載入優惠設定
+
+        // --- 分類照片 ---
+        if (categoryImgRes.ok) {
+            const data = await categoryImgRes.json();
+            if (data.values && data.values.length > 1) {
+                categoryImages = {}; categoryCarouselImages = {}; categorySubtitles = {};
+                data.values.slice(1).forEach(row => {
+                    const categoryName = row[0] || '';
+                    if (!categoryName) return;
+                    const bVal = (row[1] || '').trim();
+                    let subtitle = '', cardImage = '', carouselStartIdx = 2;
+                    if (bVal && !bVal.startsWith('http')) {
+                        subtitle = bVal; cardImage = (row[2] || '').trim(); carouselStartIdx = 3;
+                    } else {
+                        cardImage = bVal; carouselStartIdx = 2;
+                    }
+                    if (subtitle) categorySubtitles[categoryName] = subtitle;
+                    if (cardImage) categoryImages[categoryName] = cardImage;
+                    const carouselImgs = [];
+                    for (let i = carouselStartIdx; i < row.length; i++) {
+                        if (row[i] && row[i].trim()) carouselImgs.push(row[i].trim());
+                    }
+                    if (carouselImgs.length > 0) categoryCarouselImages[categoryName] = carouselImgs;
+                });
+            }
+        }
+
+        // --- 分類設定 ---
+        categories = [];
+        if (categoriesRes.ok) {
+            const data = await categoriesRes.json();
+            if (data.values && data.values.length > 1) {
+                categories = data.values.slice(1).map(row => ({
+                    name: row[0] || '',
+                    order: parseInt(row[1]) || 999,
+                    enabled: (row[2] || '').toString().toUpperCase() === 'TRUE'
+                }))
+                .filter(c => c.name && c.enabled)
+                .filter(c => c.name !== '全部')
+                .sort((a, b) => a.order - b.order);
+            }
+        }
+        if (categories.length === 0) {
+            const allTags = new Set();
+            products.forEach(p => { if (p.tags) p.tags.forEach(tag => allTags.add(tag)); });
+            categories = [...allTags].map((name, i) => ({ name, order: i + 1, enabled: true }));
+        }
+        const categoryTabs = document.getElementById('categoryTabs');
+        categoryTabs.innerHTML = '<button class="category-tab active" onclick="filterCategory(\'all\')">全部</button>';
+        categories.forEach(category => {
+            const button = document.createElement('button');
+            button.className = 'category-tab';
+            button.onclick = () => filterCategory(category.name);
+            button.textContent = formatCategoryName(category.name);
+            categoryTabs.appendChild(button);
+        });
+
+        // --- 公告 ---
+        if (announcementRes.ok) {
+            const data = await announcementRes.json();
+            if (data.values && data.values.length > 1) {
+                const allAnnouncements = data.values.slice(1)
+                    .filter(row => row[0] && (row[1] || '').trim() === '是')
+                    .map(row => ({ text: row[0] || '', link: row[2] || '', location: (row[3] || '').trim() || '兩者' }));
+                announcements = allAnnouncements.filter(a => a.location === '跑馬燈' || a.location === '兩者');
+                window._bulletinAnnouncements = allAnnouncements.filter(a => a.location === '布告欄' || a.location === '兩者');
+                if (announcements.length > 0) displayAnnouncements();
+                displayBulletinBoard();
+            }
+        }
+
+        // --- 優惠 ---
+        if (promotionRes.ok) {
+            const data = await promotionRes.json();
+            if (data.values && data.values.length > 1) {
+                promotions = data.values.slice(1)
+                    .filter(row => row[0] && (row[5] || '').trim() === '是')
+                    .map(row => ({
+                        name: row[0] || '',
+                        type: row[1] || '',
+                        unit: row[2] || '',
+                        threshold: parseFloat(row[3]) || 0,
+                        discount: parseFloat(row[4]) || 0,
+                        description: row[6] || '',
+                        allowedCategories: row[7] ? row[7].split(',').map(c => c.trim()).filter(c => c) : [],
+                        allowedSpecs: row[8] ? row[8].split(',').map(s => s.trim()).filter(s => s) : []
+                    }));
+            }
+        }
+
+        displayFeaturedProducts();
+        displayProducts();
         showToast('商品載入完成!', 'success');
-        
+
     } catch (error) {
         showToast('載入商品失敗：' + error.message, 'error');
     }
@@ -2981,39 +3069,9 @@ async function loadProductsData() {
  * 載入公告資料
  */
 async function loadAnnouncements() {
-    try {
-        const announcementUrl = `/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`;
-        const response = await fetch(announcementUrl);
-        
-        if (!response.ok) {
-            return;
-        }
-        
-        const data = await response.json();
-        
-        if (!data.values || data.values.length < 2) {
-            return;
-        }
-        const allAnnouncements = data.values.slice(1)
-            .filter(row => row[0] && (row[1] || '').trim() === '是')
-            .map(row => ({
-                text: row[0] || '',
-                link: row[2] || '',
-                location: (row[3] || '').trim() || '兩者'
-            }));
-        announcements = allAnnouncements.filter(a =>
-            a.location === '跑馬燈' || a.location === '兩者'
-        );
-        window._bulletinAnnouncements = allAnnouncements.filter(a =>
-            a.location === '布告欄' || a.location === '兩者'
-        );
-
-        if (announcements.length > 0) displayAnnouncements();
-        displayBulletinBoard();
-        
-    } catch (error) {
-    }
+    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
 }
+
 
 /**
  * 顯示公告
@@ -3121,35 +3179,9 @@ function displayAnnouncements() {
  * 載入優惠設定
  */
 async function loadPromotions() {
-    try {
-        const promotionUrl = `/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`;
-        const response = await fetch(promotionUrl);
-        
-        if (!response.ok) {
-            return;
-        }
-        
-        const data = await response.json();
-        
-        if (!data.values || data.values.length < 2) {
-            return;
-        }
-        promotions = data.values.slice(1)
-            .filter(row => row[0] && (row[5] || '').trim() === '是')  // F欄：啟用
-            .map(row => ({
-                name: row[0] || '',
-                type: row[1] || '',
-                unit: row[2] || '',
-                threshold: parseFloat(row[3]) || 0,
-                discount: parseFloat(row[4]) || 0,
-                description: row[6] || '',
-                allowedCategories: row[7] ? row[7].split(',').map(c => c.trim()).filter(c => c) : [],  // 🆕 適用類別
-                allowedSpecs: row[8] ? row[8].split(',').map(s => s.trim()).filter(s => s) : []        // 🆕 適用規格
-            }));
-        
-    } catch (error) {
-    }
+    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
 }
+
 
 /**
  * 計算優惠折扣
@@ -3430,7 +3462,7 @@ async function refreshAllStock() {
     }
 }
 
-function startAutoRefresh(intervalSeconds = 30) {
+function startAutoRefresh(intervalSeconds = 120) {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
     }
@@ -3455,99 +3487,10 @@ function formatCategoryName(name) {
 }
 
 async function loadCategoryImages() {
-    try {
-        const sheetName = '分類照片設定';
-        const url = `/api/sheets?sheet=${encodeURIComponent(sheetName)}`;
-        
-        const response = await fetch(url);
-        if (response.ok) {
-            const data = await response.json();
-            if (data.values && data.values.length > 1) {
-                categoryImages = {};
-                categoryCarouselImages = {};
-                categorySubtitles = {};   // 🆕 副標題
-                data.values.slice(1).forEach(row => {
-                    const categoryName = row[0] || '';   // A欄：分類名稱
-                    if (!categoryName) return;
-                    const bVal = (row[1] || '').trim();
-                    let subtitle = '';
-                    let cardImage = '';
-                    let carouselStartIdx = 2;
-
-                    if (bVal && !bVal.startsWith('http')) {
-                        subtitle   = bVal;
-                        cardImage  = (row[2] || '').trim();
-                        carouselStartIdx = 3;
-                    } else {
-                        cardImage  = bVal;
-                        carouselStartIdx = 2;
-                    }
-
-                    if (subtitle)   categorySubtitles[categoryName] = subtitle;
-                    if (cardImage)  categoryImages[categoryName]    = cardImage;
-                    const carouselImgs = [];
-                    for (let i = carouselStartIdx; i < row.length; i++) {
-                        if (row[i] && row[i].trim()) carouselImgs.push(row[i].trim());
-                    }
-                    if (carouselImgs.length > 0) {
-                        categoryCarouselImages[categoryName] = carouselImgs;
-                    }
-                });
-            }
-        }
-    } catch (error) {
-    }
+    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
 }
 async function loadCategories() {
-    try {
-        const categoriesSheetName = '分類設定';
-        const categoriesUrl = `/api/sheets?sheet=${encodeURIComponent(categoriesSheetName)}`;
-        
-        categories = [];  // 🔥 使用全域變數
-        
-        try {
-            const response = await fetch(categoriesUrl);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.values && data.values.length > 1) {
-                    categories = data.values.slice(1).map(row => ({
-                        name: row[0] || '',                    // A欄：分類名稱
-                        order: parseInt(row[1]) || 999,        // B欄：排序順序
-                        enabled: (row[2] || '').toString().toUpperCase() === 'TRUE'  // C欄：是否啟用（TRUE/FALSE）
-                    }))
-                    .filter(c => c.name && c.enabled)  // 🔥 只保留已啟用的分類
-                    .filter(c => c.name !== '全部')    // 🔥 排除「全部」分類（因為會自動生成）
-                    .sort((a, b) => a.order - b.order);  // 依照順序排序
-                }
-            }
-        } catch (err) {
-        }
-        if (categories.length === 0) {
-            const allTags = new Set();
-            products.forEach(p => {
-                if (p.tags && p.tags.length > 0) {
-                    p.tags.forEach(tag => allTags.add(tag));
-                }
-            });
-            
-            categories = [...allTags].map((name, index) => ({
-                name: name,
-                order: index + 1,
-                enabled: true
-            }));
-        }
-        const categoryTabs = document.getElementById('categoryTabs');
-        categoryTabs.innerHTML = '<button class="category-tab active" onclick="filterCategory(\'all\')">全部</button>';
-        categories.forEach(category => {
-            const button = document.createElement('button');
-            button.className = 'category-tab';
-            button.onclick = () => filterCategory(category.name);
-            button.textContent = formatCategoryName(category.name);
-            categoryTabs.appendChild(button);
-        });
-        
-    } catch (error) {
-    }
+    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
 }
 
 /**
@@ -4924,14 +4867,14 @@ function checkMaintenance() {
 async function pollMaintenanceStatus() {
     try {
         const url = `/api/sheets?sheet=${encodeURIComponent('系統設定')}`;
-        const res  = await fetch(url);
+        const res = await fetch(url);
         const data = await res.json();
         const rows = data.values || [];
         const adminRow = rows.find(r => String(r[0]).trim() === 'ADMIN白名單');
         if (adminRow) {
             window._adminWhitelist = String(adminRow[1] || '').split(',').map(s => s.trim()).filter(Boolean);
         }
-        const row  = rows.find(r => String(r[0]).trim() === '維護模式');
+        const row = rows.find(r => String(r[0]).trim() === '維護模式');
         const isOn = row ? String(row[1]).trim().toUpperCase() === 'TRUE' : false;
         if (isOn && !window.isMaintenanceMode) {
             const currentLineId = currentMember ? currentMember.lineId : '';
@@ -5844,15 +5787,39 @@ window.addEventListener('load', () => {
     loadSystemSettings();
     updateCart();
     checkMemberStatus();
-    startAutoRefresh(30);
-    setInterval(pollMaintenanceStatus, 30000);
+    startAutoRefresh(120);
+
+    // 維護模式輪詢
+    window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
+
+    // 逾時訂單背景掃描
     setTimeout(() => {
         autoCheckExpiredOrders();
         setInterval(autoCheckExpiredOrders, 60 * 1000);
     }, 30000);
+
+    // ✅ Tab 不活躍時暫停所有輪詢，恢復時重啟
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopAutoRefresh();
+            if (window._maintenanceInterval) {
+                clearInterval(window._maintenanceInterval);
+                window._maintenanceInterval = null;
+            }
+        } else {
+            startAutoRefresh(120);
+            refreshAllStock();
+            if (!window._maintenanceInterval) {
+                window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
+            }
+        }
+    });
 });
 window.addEventListener('beforeunload', () => {
     stopAutoRefresh();
+    if (window._maintenanceInterval) clearInterval(window._maintenanceInterval);
+    if (window._bulletinInterval) clearInterval(window._bulletinInterval);
+    if (window._announcementInterval) clearInterval(window._announcementInterval);
 });
     </script>
 </body>
