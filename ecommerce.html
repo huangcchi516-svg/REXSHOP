@@ -4017,18 +4017,6 @@ function openCustomBlockModal(blockName) {
     // 渲染商品口味選項（與主打商品完全相同格式）
     const optionsContainer = document.getElementById('specOptions');
     const flavorTitle = `<div class="spec-section-title" style="grid-column:1/-1;">🎯 選擇商品 (${currentCategoryProducts.length} 種選項)</div>`;
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        return `
-            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''}"
-                 onclick="selectFlavor(${index})" id="flavor-${index}"
-                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
-            </div>`;
-    }).join('');
-
     // 🆕 預設顯示「選擇項目」
     const firstCustomProduct = currentCategoryProducts.find(p => {
         const s = productSpecs[p.id];
@@ -4039,6 +4027,19 @@ function openCustomBlockModal(blockName) {
 
     // 預先設定 selectedFlavor 為第一個有庫存的口味
     selectedFlavor = firstCustomProduct || null;
+
+    const flavorOptions = currentCategoryProducts.map((product, index) => {
+        const specs = productSpecs[product.id];
+        const hasStock = specs && specs.some(s => s.stock > 0);
+        const hasSale = specs && specs.some(s => s.originalPrice > 0);
+        const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
+        return `
+            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+                 onclick="selectFlavor(${index})" id="flavor-${index}"
+                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+            </div>`;
+    }).join('');
     selectedSpec = null;
     quantity = 1;
     updateQuantityDisplay();
@@ -4098,13 +4099,6 @@ function openFeaturedCategoryModal() {
     
     // 渲染主打商品選項
     renderFeaturedFlavorOptions();
-    
-    // 重置選擇狀態
-    selectedFlavor = null;
-    selectedSpec = null;
-    quantity = 1;
-    updateQuantityDisplay();
-    updateAddToCartButton();
 }
 
 function renderFeaturedFlavorOptions() {
@@ -4147,22 +4141,6 @@ function renderFeaturedFlavorOptions() {
     // 生成商品選項（2列網格布局）
     const flavorTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">🎯 選擇商品 (${currentCategoryProducts.length} 種選項)</div>`;
     
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const isOutOfStock = !hasStock;
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        
-        return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}" 
-                 onclick="selectFlavor(${index})"
-                 id="flavor-${index}"
-                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
-            </div>
-        `;
-    }).join('');
-    
     // 🆕 預設顯示「選擇項目」
     const firstFeaturedProduct = currentCategoryProducts.find(p => {
         const s = productSpecs[p.id];
@@ -4177,6 +4155,23 @@ function renderFeaturedFlavorOptions() {
     quantity = 1;
     updateQuantityDisplay();
     updateAddToCartButton();
+
+    const flavorOptions = currentCategoryProducts.map((product, index) => {
+        const specs = productSpecs[product.id];
+        const hasStock = specs && specs.some(s => s.stock > 0);
+        const isOutOfStock = !hasStock;
+        const hasSale = specs && specs.some(s => s.originalPrice > 0);
+        const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
+        
+        return `
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+                 onclick="selectFlavor(${index})"
+                 id="flavor-${index}"
+                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+            </div>
+        `;
+    }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
@@ -4392,22 +4387,6 @@ function renderFlavorOptions(categoryName) {
     // 生成口味選項（2列網格布局）
     const flavorTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">🎯 選擇口味 (${currentCategoryProducts.length} 種選項)</div>`;
     
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const isOutOfStock = !hasStock;
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        
-        return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}" 
-                 onclick="selectFlavor(${index})"
-                 id="flavor-${index}"
-                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
-            </div>
-        `;
-    }).join('');
-    
     // 🆕 預設顯示「選擇項目」：抓第一個有庫存口味的規格
     const firstProduct = currentCategoryProducts.find(p => {
         const s = productSpecs[p.id];
@@ -4422,6 +4401,23 @@ function renderFlavorOptions(categoryName) {
     quantity = 1;
     updateQuantityDisplay();
     updateAddToCartButton();
+
+    const flavorOptions = currentCategoryProducts.map((product, index) => {
+        const specs = productSpecs[product.id];
+        const hasStock = specs && specs.some(s => s.stock > 0);
+        const isOutOfStock = !hasStock;
+        const hasSale = specs && specs.some(s => s.originalPrice > 0);
+        const isSelected = firstProduct && product.id === firstProduct.id;
+        
+        return `
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+                 onclick="selectFlavor(${index})"
+                 id="flavor-${index}"
+                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+            </div>
+        `;
+    }).join('');
 
     if (defaultSpecs.length > 0) {
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
