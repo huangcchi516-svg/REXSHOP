@@ -21,6 +21,88 @@
             });
         }
     </script>
+
+    <!-- ✅ 手機限定鎖定：電腦一律黑屏 -->
+    <style>
+        #desktop-block {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+        }
+        #desktop-block .db-icon {
+            font-size: 64px;
+            animation: db-float 3s ease-in-out infinite;
+        }
+        @keyframes db-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        #desktop-block .db-title {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            color: #FFD700;
+            letter-spacing: 3px;
+            text-align: center;
+        }
+        #desktop-block .db-sub {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            line-height: 1.8;
+        }
+        #desktop-block .db-qr-hint {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,215,0,0.07);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 13px;
+            color: #aaa;
+        }
+        #desktop-block .db-qr-hint span { font-size: 22px; }
+    </style>
+    <script>
+        (function() {
+            function isMobile() {
+                // 用 User-Agent 判斷手機 / 平板
+                var ua = navigator.userAgent || '';
+                var mobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
+                // 螢幕寬度 ≤ 1024px 且觸控支援 → 視為行動裝置
+                var narrowTouch = (window.screen.width <= 1024 && navigator.maxTouchPoints > 0);
+                return mobileUA || narrowTouch;
+            }
+
+            function applyBlock() {
+                if (!isMobile()) {
+                    var el = document.getElementById('desktop-block');
+                    if (el) el.style.display = 'flex';
+                    // 鎖住 body 捲動
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            // DOM 準備好就執行
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyBlock);
+            } else {
+                applyBlock();
+            }
+
+            // 視窗大小變化時重新判斷（防止縮放繞過）
+            window.addEventListener('resize', applyBlock);
+        })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -2153,6 +2235,20 @@
     </style>
 </head>
 <body>
+
+<!-- ========== 電腦封鎖畫面（手機才能看） ========== -->
+<div id="desktop-block">
+    <div class="db-icon">📱</div>
+    <div class="db-title">請用手機開啟</div>
+    <div class="db-sub">
+        本商城僅支援手機瀏覽<br>
+        請用手機掃描 QR Code 或直接輸入網址
+    </div>
+    <div class="db-qr-hint">
+        <span>💡</span>
+        用手機相機掃描頁面上的 QR Code 即可進入
+    </div>
+</div>
 
 <!-- ========== 維護中畫面 ========== -->
 <!-- 透明攔截層：蓋住所有內容，點任何地方都會 show 維護畫面 -->
@@ -6250,14 +6346,64 @@ function showToast(message, type = 'success') {
 // ==========================================
 
 function lineLogin() {
-    const url = `https://access.line.me/oauth2/v2.1/authorize?` +
-        `response_type=code` +
+    const ua = navigator.userAgent;
+    const isInLineApp = /Line\//.test(ua);
+    const isIOS       = /iPhone|iPad|iPod/i.test(ua);
+    const isAndroid   = /Android/i.test(ua);
+
+    // 網頁版授權 URL（所有裝置的 fallback）
+    const webUrl =
+        `https://access.line.me/oauth2/v2.1/authorize` +
+        `?response_type=code` +
         `&client_id=${LINE_CHANNEL_ID}` +
         `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
         `&state=${LINE_STATE}` +
-        `&scope=profile%20openid`;
-    
-    window.location.href = url;
+        `&scope=profile%20openid` +
+        `&bot_prompt=normal`;
+
+    if (isInLineApp) {
+        // 已在 LINE App 內 → 直接用網頁版即可
+        window.location.href = webUrl;
+        return;
+    }
+
+    if (isIOS) {
+        // ✅ iOS Safari 解法：
+        // 用 Universal Link 直接喚起 LINE App 授權頁
+        // 若 LINE 未安裝，iOS 會自動改開網頁版（不會卡住）
+        const lineUniversalUrl =
+            `https://line.me/oauth2/v2.1/authorize` +
+            `?response_type=code` +
+            `&client_id=${LINE_CHANNEL_ID}` +
+            `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
+            `&state=${LINE_STATE}` +
+            `&scope=profile%20openid` +
+            `&bot_prompt=normal`;
+
+        window.location.href = lineUniversalUrl;
+        return;
+    }
+
+    if (isAndroid) {
+        // Android：用 Intent scheme 直接喚起 LINE App
+        // fallback 到網頁版避免卡住
+        const intentUrl =
+            `intent://access.line.me/oauth2/v2.1/authorize` +
+            `?response_type=code` +
+            `&client_id=${LINE_CHANNEL_ID}` +
+            `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
+            `&state=${LINE_STATE}` +
+            `&scope=profile%20openid` +
+            `&bot_prompt=normal` +
+            `#Intent;scheme=https;package=jp.naver.line.android;` +
+            `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
+
+        window.location.href = intentUrl;
+        return;
+    }
+
+    // 其他（桌機等）
+    window.location.href = webUrl;
 }
 
 async function checkMemberStatus() {
