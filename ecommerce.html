@@ -2832,18 +2832,15 @@ async function openECPayMap() {
     if (checkMaintenance()) return;
     const merchantTradeNo = generateMerchantTradeNo();
     const serverReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
-    const clientReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
-    const params = {
-        MerchantID: ECPAY_CONFIG.MerchantID,
-        MerchantTradeNo: merchantTradeNo,
-        LogisticsType: 'CVS',
-        LogisticsSubType: 'UNIMARTC2C',
-        IsCollection: 'N',
-        ServerReplyURL: serverReplyURL,
-        ClientReplyURL: clientReplyURL,
-        ExtraData: '',
-        Device: getDeviceType()
-    };
+
+    // LINE 瀏覽器偵測
+    const isLineBrowser = /Line\//i.test(navigator.userAgent);
+
+    // LINE 瀏覽器：clientReplyURL 帶 query string 跳回本頁
+    const clientReplyURL = isLineBrowser
+        ? 'https://rexshop-delta.vercel.app/api/ecpay-redirect'
+        : 'https://rexshop-delta.vercel.app/api/ecpay-callback';
+
     let apiResult;
     try {
         const apiRes = await fetch('/api/ecpay-map', {
@@ -2874,21 +2871,21 @@ async function openECPayMap() {
     document.getElementById('ecpay_CheckMacValue').value = p.CheckMacValue;
     localStorage.setItem('ecpay_merchant_trade_no', merchantTradeNo);
 
-    // 偵測 LINE 瀏覽器
-    const isLineBrowser = /Line\//i.test(navigator.userAgent);
+    const form = document.getElementById('ecpayMapForm');
 
     if (isLineBrowser) {
-        // LINE 瀏覽器：用內嵌 iframe modal，避免 window.open 被封鎖
-        const form = document.getElementById('ecpayMapForm');
-        form.target = 'ecpayIframe';
-        document.getElementById('ecpayIframeModal').classList.add('active');
-        document.getElementById('ecpayIframe').name = 'ecpayIframe';
-        form.submit();
-        showToast('請選擇門市', 'success');
-        startListeningForStoreData();
+        // LINE 瀏覽器：POST form submit 會導致空白頁
+        // 改用 server redirect：把參數送到中繼 API，收到 302 GET redirect 到綠界
+        // 這樣 LINE 瀏覽器收到的是 GET 請求，可以正常渲染
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        formData.forEach((v, k) => params.append(k, v));
+        localStorage.setItem('ecpay_merchant_trade_no', merchantTradeNo);
+        showToast('正在開啟門市選擇...', 'success');
+        // 直接跳轉到中繼 API（用 GET query string）
+        location.href = '/api/ecpay-map-redirect?' + params.toString();
     } else {
         // 一般瀏覽器：開新視窗
-        const form = document.getElementById('ecpayMapForm');
         form.target = 'ecpayWindow';
         const ecpayWindow = window.open('', 'ecpayWindow', 'width=800,height=600,scrollbars=yes');
         if (ecpayWindow) {
@@ -2896,13 +2893,9 @@ async function openECPayMap() {
             showToast('開啟門市選擇視窗...', 'success');
             startListeningForStoreData();
         } else {
-            // window.open 被擋住，fallback 到 iframe
-            form.target = 'ecpayIframe';
-            document.getElementById('ecpayIframeModal').classList.add('active');
-            document.getElementById('ecpayIframe').name = 'ecpayIframe';
+            // fallback：同頁跳轉
+            form.target = '_top';
             form.submit();
-            showToast('請選擇門市', 'success');
-            startListeningForStoreData();
         }
     }
 }
@@ -5922,6 +5915,40 @@ window.addEventListener('load', () => {
             }
         }
     });
+
+    // ✅ LINE 瀏覽器：頁面跳回後從 URL 讀取門市資料
+    (function checkUrlStoreData() {
+        const params = new URLSearchParams(window.location.search);
+        const storeId   = params.get('CVSStoreID');
+        const storeName = params.get('CVSStoreName');
+        const address   = params.get('CVSAddress');
+        const tradeNo   = params.get('MerchantTradeNo');
+        if (storeId && storeName) {
+            // 清除 URL 參數避免重複處理
+            window.history.replaceState({}, '', window.location.pathname);
+            // 等登入狀態確認後再顯示門市
+            const applyStore = () => {
+                selectedStore = {
+                    id: storeId,
+                    name: decodeURIComponent(storeName),
+                    address: decodeURIComponent(address || ''),
+                    phone: ''
+                };
+                // 打開購物車並顯示門市
+                const cartSidebar = document.getElementById('cartSidebar');
+                if (cartSidebar && !cartSidebar.classList.contains('active')) {
+                    toggleCart();
+                }
+                // 切換到 7-11 取貨
+                const radio711 = document.querySelector('input[name="shipping"][value="711"]');
+                if (radio711) { radio711.checked = true; toggleShippingMethod(); }
+                displaySelectedStore();
+                showToast('✅ 門市選擇成功：' + decodeURIComponent(storeName), 'success');
+            };
+            // 延遲等頁面初始化完成
+            setTimeout(applyStore, 1500);
+        }
+    })();
 });
 window.addEventListener('beforeunload', () => {
     stopAutoRefresh();
