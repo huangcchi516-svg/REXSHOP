@@ -5942,12 +5942,16 @@ window.addEventListener('load', () => {
                     address: decodeURIComponent(address || ''),
                     phone:   telephone || ''
                 };
-                // 確保購物車打開並切到 7-11
+                // 確保購物車側欄是關閉的
                 const cartSidebar = document.getElementById('cartSidebar');
-                if (cartSidebar && !cartSidebar.classList.contains('active')) toggleCart();
+                if (cartSidebar && cartSidebar.classList.contains('active')) toggleCart();
+                // 切到 7-11 運送方式
                 const radio711 = document.querySelector('input[name="shipping"][value="711"]');
                 if (radio711) { radio711.checked = true; toggleShippingMethod(); }
+                // 顯示已選門市資訊
                 displaySelectedStore();
+                // ✅ 直接打開結帳視窗（而非停在購物車側欄）
+                openCheckout();
                 showToast('✅ 門市選擇成功：' + decodeURIComponent(storeName), 'success');
             };
             setTimeout(applyStore, 1500);
