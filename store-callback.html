@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>門市選擇中...</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a; color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+        }
+        .box { text-align: center; padding: 48px 32px; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid rgba(255,215,0,0.2);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 24px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h2 { font-size: 18px; color: #FFD700; margin-bottom: 8px; }
+        p  { font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="spinner"></div>
+    <h2>✅ 門市已選擇</h2>
+    <p>正在返回購物頁面...</p>
+</div>
+
+<script>
+(function() {
+    const MAIN_PAGE = '/';
+
+    // 綠界 ClientReplyURL 會用 GET 帶參數過來
+    const params = new URLSearchParams(location.search);
+
+    const storeId   = params.get('CVSStoreID')   || '';
+    const storeName = params.get('CVSStoreName') || '';
+    const address   = params.get('CVSAddress')   || '';
+    const telephone = params.get('CVSTelephone') || '';
+    const tradeNo   = params.get('MerchantTradeNo') || '';
+
+    if (!storeId) {
+        // 沒有門市資料，直接跳回
+        window.location.href = MAIN_PAGE;
+        return;
+    }
+
+    // 把門市資料帶回主頁的 URL query string
+    const backParams = new URLSearchParams({
+        store_id:    storeId,
+        store_name:  storeName,
+        store_addr:  address,
+        store_tel:   telephone,
+        trade_no:    tradeNo
+    });
+
+    window.location.href = MAIN_PAGE + '?' + backParams.toString();
+})();
+</script>
+</body>
+</html>

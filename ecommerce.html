@@ -2831,14 +2831,15 @@ function getDeviceType() {
 async function openECPayMap() {
     if (checkMaintenance()) return;
     const merchantTradeNo = generateMerchantTradeNo();
-    const serverReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
 
-    // LINE 瀏覽器偵測
+    // LINE 瀏覽器偵測（最先宣告，後面多處用到）
     const isLineBrowser = /Line\//i.test(navigator.userAgent);
 
-    // LINE 瀏覽器：clientReplyURL 帶 query string 跳回本頁
+    const serverReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
+
+    // LINE 瀏覽器：clientReplyURL 改為 store-callback.html，選完跳回主頁帶 query string
     const clientReplyURL = isLineBrowser
-        ? 'https://rexshop-delta.vercel.app/api/ecpay-redirect'
+        ? 'https://rexshop-delta.vercel.app/store-callback.html'
         : 'https://rexshop-delta.vercel.app/api/ecpay-callback';
 
     let apiResult;
@@ -5916,36 +5917,31 @@ window.addEventListener('load', () => {
         }
     });
 
-    // ✅ LINE 瀏覽器：頁面跳回後從 URL 讀取門市資料
+    // ✅ LINE 瀏覽器：頁面跳回後從 URL 讀取門市資料（store-callback.html 帶回來的）
     (function checkUrlStoreData() {
         const params = new URLSearchParams(window.location.search);
-        const storeId   = params.get('CVSStoreID');
-        const storeName = params.get('CVSStoreName');
-        const address   = params.get('CVSAddress');
-        const tradeNo   = params.get('MerchantTradeNo');
+        const storeId   = params.get('store_id');
+        const storeName = params.get('store_name');
+        const address   = params.get('store_addr');
+        const telephone = params.get('store_tel');
         if (storeId && storeName) {
             // 清除 URL 參數避免重複處理
             window.history.replaceState({}, '', window.location.pathname);
-            // 等登入狀態確認後再顯示門市
             const applyStore = () => {
                 selectedStore = {
-                    id: storeId,
-                    name: decodeURIComponent(storeName),
+                    id:      storeId,
+                    name:    decodeURIComponent(storeName),
                     address: decodeURIComponent(address || ''),
-                    phone: ''
+                    phone:   telephone || ''
                 };
-                // 打開購物車並顯示門市
+                // 確保購物車打開並切到 7-11
                 const cartSidebar = document.getElementById('cartSidebar');
-                if (cartSidebar && !cartSidebar.classList.contains('active')) {
-                    toggleCart();
-                }
-                // 切換到 7-11 取貨
+                if (cartSidebar && !cartSidebar.classList.contains('active')) toggleCart();
                 const radio711 = document.querySelector('input[name="shipping"][value="711"]');
                 if (radio711) { radio711.checked = true; toggleShippingMethod(); }
                 displaySelectedStore();
                 showToast('✅ 門市選擇成功：' + decodeURIComponent(storeName), 'success');
             };
-            // 延遲等頁面初始化完成
             setTimeout(applyStore, 1500);
         }
     })();
