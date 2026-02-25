@@ -2172,7 +2172,7 @@
     <!-- 導航列 -->
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:10px;">
-            <img src="" alt="REX LAB" style="width:42px; height:42px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;">
+            <img id="logoImage" src="" alt="REX LAB" style="width:42px; height:42px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;">
             <div class="logo">REX LAB</div>
             <a class="cs-btn" href="https://line.me/ti/p/~rex52077" target="_blank">
                 💬 客服
@@ -5315,6 +5315,8 @@ async function loadSystemSettings() {
                 if (row[0] === '匯款帳號')     systemSettings.bankAccount    = row[1] || '';
                 if (row[0] === '匯款戶名')     systemSettings.bankHolder     = row[1] || '';
                 if (row[0] === 'LINE Pay帳號') systemSettings.linePayAccount  = row[1] || '';
+                if (row[0] === 'LOGO圖片')     systemSettings.logoImage      = row[1] || '';
+                if (row[0] === '客服圖片')     systemSettings.csImage        = row[1] || '';
                 // ADMIN白名單：逗號分隔的LINE ID（先解析，維護模式判斷時使用）
                 if (row[0] === 'ADMIN白名單') {
                     window._adminWhitelist = String(row[1] || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -5333,6 +5335,18 @@ async function loadSystemSettings() {
             
             console.log('✅ 系統設定載入成功:', systemSettings);
             updateBankInfo();
+
+            // 套用 LOGO 圖片
+            const logoEl = document.getElementById('logoImage');
+            if (logoEl && systemSettings.logoImage) {
+                logoEl.src = systemSettings.logoImage;
+            }
+
+            // 套用客服浮動圖片
+            const csEl = document.getElementById('serviceFloatImg');
+            if (csEl && systemSettings.csImage) {
+                csEl.src = systemSettings.csImage;
+            }
         }
     } catch (error) {
         console.error('❌ 載入系統設定失敗:', error);
