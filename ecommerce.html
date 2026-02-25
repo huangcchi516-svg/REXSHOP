@@ -247,13 +247,12 @@
         
         .bulletin-board {
             display: none;
-            margin: 14px auto 0;
+            margin: 10px auto 0;
             max-width: 860px;
             padding: 0 14px;
         }
         .bulletin-board.active { display: block; }
 
-        
         .bulletin-inner {
             display: flex;
             align-items: flex-end;
@@ -264,7 +263,7 @@
             padding: 4px 0 0;
         }
 
-        
+        /* 左側人物 */
         .bulletin-egg-wrap {
             flex-shrink: 0;
             width: 165px;
@@ -272,6 +271,8 @@
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            position: relative;
+            z-index: 2;
         }
         .bulletin-egg {
             width: 165px;
@@ -279,7 +280,7 @@
             object-fit: contain;
             object-position: bottom;
             display: block;
-            filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.5));
+            filter: drop-shadow(2px 6px 12px rgba(0,0,0,0.7));
         }
         .bulletin-egg-placeholder {
             font-size: 108px;
@@ -289,67 +290,80 @@
             justify-content: center;
         }
 
-        
+        /* 右側遊戲對話框 */
         .bulletin-speech {
             flex: 1;
             position: relative;
-            background: #111111;
-            border: 1.5px solid rgba(255,215,0,0.45);
-            border-radius: 18px;
-            padding: 16px 20px;
-            margin-left: 18px;
-            margin-bottom: 18px;
+            background: linear-gradient(160deg, rgba(20,18,10,0.97) 0%, rgba(10,9,5,0.99) 100%);
+            border: 1.5px solid rgba(255,215,0,0.5);
+            border-radius: 6px;
+            padding: 36px 18px 16px;
+            margin-left: -10px;
+            margin-bottom: 10px;
             height: 195px;
             max-height: 195px;
             display: flex;
             align-items: center;
             justify-content: center;
-            align-self: center;
+            align-self: flex-end;
             overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(255,215,0,0.04), 0 4px 20px rgba(0,0,0,0.6);
         }
-        
+        /* 四角裝飾 */
         .bulletin-speech::before {
             content: '';
             position: absolute;
-            left: -14px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0; height: 0;
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
-            border-right: 14px solid rgba(255,215,0,0.45);
+            inset: 4px;
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 4px;
+            pointer-events: none;
         }
-        
         .bulletin-speech::after {
             content: '';
             position: absolute;
-            left: -11px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0; height: 0;
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
-            border-right: 11px solid #111111;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,215,0,0.04) 0%, transparent 40%);
+            pointer-events: none;
+            border-radius: 6px;
         }
 
-        
+        /* 角色名稱標籤 */
+        .bulletin-name-tag {
+            position: absolute;
+            top: -1px;
+            left: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, #FFA500 100%);
+            color: #000;
+            font-size: 12px;
+            font-weight: 900;
+            padding: 3px 14px 3px 10px;
+            letter-spacing: 2px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 0 100%);
+            text-shadow: none;
+            z-index: 3;
+        }
+
+        /* 文字區 */
         .bulletin-header { display: none !important; }
         .bulletin-footer { display: none !important; }
         .bulletin-item-num,
         .bulletin-item-arrow { display: none !important; }
         .bulletin-items {
             width: 100%;
-            text-align: center;
+            text-align: left;
+            position: relative;
+            z-index: 1;
         }
         .bulletin-item-text {
             font-size: 15px;
-            font-weight: 500;
-            color: #f0f0f0;
-            line-height: 1.9;
+            font-weight: 400;
+            color: #e8e0cc;
+            line-height: 1.95;
             display: block;
-            text-align: center;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            text-align: left;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+            font-family: 'Noto Sans TC', sans-serif;
         }
         .bulletin-item-text strong,
         .bulletin-item-text b {
@@ -357,33 +371,26 @@
             font-weight: 700;
         }
 
-        
+        /* RWD */
         @media (max-width: 768px) {
             .bulletin-board { padding: 0 10px; margin: 10px auto 0; }
             .bulletin-egg-wrap { width: 105px; height: 126px; }
             .bulletin-egg { width: 105px; height: 126px; }
             .bulletin-egg-placeholder { font-size: 72px; }
             .bulletin-speech {
-                margin-left: 14px;
-                margin-bottom: 12px;
-                padding: 12px 14px;
-                border-radius: 14px;
+                margin-left: -6px;
+                margin-bottom: 8px;
+                padding: 28px 12px 12px;
+                border-radius: 5px;
                 height: 126px;
                 max-height: 126px;
             }
-            .bulletin-speech::before {
-                left: -12px;
-                border-top-width: 8px;
-                border-bottom-width: 8px;
-                border-right-width: 12px;
+            .bulletin-name-tag {
+                font-size: 11px;
+                padding: 2px 12px 2px 8px;
+                letter-spacing: 1.5px;
             }
-            .bulletin-speech::after {
-                left: -9px;
-                border-top-width: 6px;
-                border-bottom-width: 6px;
-                border-right-width: 9px;
-            }
-            .bulletin-item-text { font-size: 13px; line-height: 1.75; }
+            .bulletin-item-text { font-size: 12.5px; line-height: 1.8; }
         }
 
         
@@ -2345,8 +2352,9 @@
                 <div class="bulletin-egg-placeholder" id="bulletinEggPlaceholder">🥚</div>
                 <img class="bulletin-egg" id="bulletinEggImg" src="" alt="" style="display:none;">
             </div>
-            <!-- 右側對話框 -->
+            <!-- 右側遊戲對話框 -->
             <div class="bulletin-speech">
+                <div class="bulletin-name-tag" id="bulletinNameTag">REX LAB</div>
                 <div class="bulletin-items" id="bulletinItems"></div>
             </div>
         </div>
