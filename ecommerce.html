@@ -3745,7 +3745,8 @@ function openCustomBlockModal(blockName) {
     isModalOpen = true;
     window._currentModalCategoryName = blockName;
     window._isRegularCategoryModal = false;
-    initCarousel(blockName);
+    // 主打/自訂區塊：輪播來自各商品自己的 image，不混入分類照片設定
+    initCarouselFromProductImages(currentCategoryProducts);
     let totalStock = 0, minPrice = Infinity, maxPrice = 0;
     currentCategoryProducts.forEach(product => {
         const specs = productSpecs[product.id];
@@ -3824,7 +3825,8 @@ function openFeaturedCategoryModal() {
     isModalOpen = true;
     window._currentModalCategoryName = '本月激推🔥';
     window._isRegularCategoryModal = false;
-    initCarousel('本月激推🔥');
+    // 主打/自訂區塊：輪播來自各商品自己的 image，不混入分類照片設定
+    initCarouselFromProductImages(currentCategoryProducts);
     renderFeaturedFlavorOptions();
 }
 
@@ -4117,20 +4119,16 @@ function selectFlavor(index) {
         el.classList.toggle('selected', el.id === `flavor-${index}`);
     });
     if (!window._isRegularCategoryModal) {
-        const categoryName = window._currentModalCategoryName || '';
-        const carouselBase = categoryCarouselImages[categoryName] || [];
-        const seen = new Set();
-        const merged = [];
+        // 切換口味時：只顯示該商品自己的圖，不混入分類照片設定
         let productImg = product.image || '';
         if (productImg && !productImg.startsWith('http')) productImg = 'https://' + productImg;
-        if (productImg && !seen.has(productImg)) { seen.add(productImg); merged.push(productImg); }
-        carouselBase.forEach(u => { if (!seen.has(u)) { seen.add(u); merged.push(u); } });
-        if (merged.length === 0) {
-            const coverImg = categoryImages[categoryName] || '';
-            if (coverImg) merged.push(coverImg);
+        if (productImg) {
+            initCarouselFromUrls([productImg]);
+        } else {
+            // 商品沒有圖就隱藏輪播
+            const carousel = document.getElementById('productCarousel');
+            if (carousel) carousel.style.display = 'none';
         }
-
-        if (merged.length > 0) initCarouselFromUrls(merged);
     }
     renderQuantitySpecOptions(specs);
     let autoSelectIndex = -1;
@@ -4305,6 +4303,22 @@ function initCarousel(categoryName) {
         });
     }
 
+    initCarouselFromUrls(imgs);
+}
+
+/**
+ * 主打/自訂區塊專用：用所有商品的 product.image 組成輪播
+ * 每個商品一張，去重、過濾空值
+ */
+function initCarouselFromProductImages(productList) {
+    const seen = new Set();
+    const imgs = [];
+    (productList || []).forEach(p => {
+        let img = (p.image || '').trim();
+        if (!img) return;
+        if (!img.startsWith('http')) img = 'https://' + img;
+        if (!seen.has(img)) { seen.add(img); imgs.push(img); }
+    });
     initCarouselFromUrls(imgs);
 }
 
