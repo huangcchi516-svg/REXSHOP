@@ -168,50 +168,38 @@
             display: none;
             margin: 16px auto 0;
             max-width: 700px;
-            background: #1a1a1a;
-            border: 3px solid #5a3e1b;
-            border-radius: 12px;
-            box-shadow: 0 0 0 2px #8B6914, 0 8px 32px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.5);
-            padding: 18px 20px 16px;
             position: relative;
             font-family: 'Noto Sans TC', sans-serif;
         }
-        .bulletin-board.active { display: block; }
+        .bulletin-board.active { display: flex; align-items: flex-end; }
 
-        /* 木框上緣釘子裝飾 */
-        .bulletin-board::before,
-        .bulletin-board::after {
+        /* 左邊內容框 */
+        .bulletin-inner {
+            flex: 1;
+            background: rgba(255,255,255,0.07);
+            border: 2px solid rgba(255,215,0,0.35);
+            border-radius: 16px 4px 16px 16px;
+            padding: 16px 18px 14px;
+            position: relative;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+        .bulletin-inner::after {
             content: '';
             position: absolute;
-            top: -7px;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 40% 35%, #e8c97a, #8B6914);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
-        }
-        .bulletin-board::before { left: 24px; }
-        .bulletin-board::after  { right: 24px; }
-
-        .bulletin-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed #4a3a1a;
-        }
-        .bulletin-egg {
-            width: 48px; height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #8B6914;
-            flex-shrink: 0;
+            top: 18px;
+            right: -12px;
+            border-width: 8px 0 8px 12px;
+            border-style: solid;
+            border-color: transparent transparent transparent rgba(255,215,0,0.35);
         }
         .bulletin-title {
             font-size: 13px;
             font-weight: 700;
             color: #e8c97a;
             letter-spacing: 1px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed rgba(139,105,20,0.5);
             text-shadow: 0 0 8px rgba(232,201,122,0.4);
         }
         .bulletin-title span {
@@ -265,17 +253,35 @@
 
         /* 粉筆紋理底部裝飾 */
         .bulletin-footer {
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed #4a3a1a;
+            margin-top: 8px;
+            padding-top: 7px;
+            border-top: 1px dashed rgba(74,58,26,0.6);
             text-align: right;
             font-size: 10px;
             color: #555;
             letter-spacing: 1px;
         }
 
+        /* 右邊人物圖片 */
+        .bulletin-egg-wrap {
+            flex-shrink: 0;
+            width: 90px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            margin-left: 4px;
+        }
+        .bulletin-egg {
+            width: 90px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+        }
+
         @media (max-width: 768px) {
             .bulletin-board { margin: 12px 12px 0; }
+            .bulletin-egg-wrap { width: 70px; }
+            .bulletin-egg { width: 70px; }
         }
 
         /* 主要容器 */
@@ -2172,7 +2178,7 @@
     <!-- 導航列 -->
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:10px;">
-            <img id="logoImage" src="" alt="REX LAB" style="width:42px; height:42px; border-radius:50%; object-fit:cover;">
+            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain;">
             <div class="logo">REX LAB</div>
             <a class="cs-btn" href="https://line.me/ti/p/~rex52077" target="_blank">
                 💬 客服
@@ -2202,15 +2208,17 @@
 
     <!-- 🥚 蛋博士布告欄 -->
     <div class="bulletin-board" id="bulletinBoard">
-        <div class="bulletin-header">
-            <img class="bulletin-egg" id="bulletinEggImg" src="" alt="蛋博士">
+        <div class="bulletin-inner">
             <div class="bulletin-title">
                 蛋博士布告欄
                 <span>📋 REX LAB 最新消息</span>
             </div>
+            <div class="bulletin-items" id="bulletinItems"></div>
+            <div class="bulletin-footer">— REX LAB —</div>
         </div>
-        <div class="bulletin-items" id="bulletinItems"></div>
-        <div class="bulletin-footer">— REX LAB —</div>
+        <div class="bulletin-egg-wrap">
+            <img class="bulletin-egg" id="bulletinEggImg" src="" alt="蛋博士">
+        </div>
     </div>
 
     <!-- 主要內容 -->
