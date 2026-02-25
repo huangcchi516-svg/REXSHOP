@@ -4463,9 +4463,9 @@ function selectFlavor(index) {
     selectedFlavor = product;
     updateSpecThumbFromProduct(product);
     
-    // 更新口味選項的選中狀態
-    document.querySelectorAll('[id^="flavor-"]').forEach((el, i) => {
-        el.classList.toggle('selected', i === index);
+    // 更新口味選項的選中狀態（用 id 比對，避免 forEach 順序和 index 錯位）
+    document.querySelectorAll('[id^="flavor-"]').forEach((el) => {
+        el.classList.toggle('selected', el.id === `flavor-${index}`);
     });
     
     // 🆕 點選口味時：重新組合輪播（商品圖優先 + 分類輪播圖接後）
@@ -4574,9 +4574,9 @@ function selectQuantitySpec(index) {
         productImage: selectedFlavor.image
     };
     
-    // 更新選中狀態
-    document.querySelectorAll('[id^="qty-spec-"]').forEach((el, i) => {
-        el.classList.toggle('selected', i === index);
+    // 更新選中狀態（用 id 比對，避免 forEach 順序錯位）
+    document.querySelectorAll('[id^="qty-spec-"]').forEach((el) => {
+        el.classList.toggle('selected', el.id === `qty-spec-${index}`);
     });
     
     // 更新價格和庫存顯示
@@ -4942,9 +4942,9 @@ function selectSpec(index) {
 
     selectedSpec = spec;
     
-    // 更新選中狀態
-    document.querySelectorAll('.spec-option').forEach((el, i) => {
-        el.classList.toggle('selected', i === index);
+    // 更新選中狀態（只針對 spec- 元素，用 id 比對）
+    document.querySelectorAll('[id^="spec-"]').forEach((el) => {
+        el.classList.toggle('selected', el.id === `spec-${index}`);
     });
     
     // 更新圖片
