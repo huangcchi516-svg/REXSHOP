@@ -14,10 +14,18 @@ export default async function handler(req, res) {
         MerchantTradeNo = ''
     } = req.body;
 
-    console.log('✅ 收到綠界門市回傳:', CVSStoreID, CVSStoreName);
-
     const storeData = JSON.stringify({ CVSStoreID, CVSStoreName, CVSAddress, CVSTelephone, MerchantTradeNo });
     const storeTel  = CVSTelephone ? `<p>📞 ${CVSTelephone}</p>` : '';
+
+    // 主頁帶門市資料的 URL（LINE 瀏覽器同頁跳轉用）
+    const backParams = new URLSearchParams({
+        store_id:   CVSStoreID,
+        store_name: CVSStoreName,
+        store_addr: CVSAddress,
+        store_tel:  CVSTelephone,
+        trade_no:   MerchantTradeNo
+    });
+    const mainPageUrl = '/?' + backParams.toString();
 
     const html = `<!DOCTYPE html>
 <html lang="zh-TW">
@@ -46,31 +54,32 @@ export default async function handler(req, res) {
     </div>
     <script>
         var sd = ${storeData};
+        var mainPageUrl = '${mainPageUrl}';
 
-        // 傳資料回主視窗
         if (window.opener && !window.opener.closed) {
+            // 一般瀏覽器彈窗：傳資料給主視窗後關閉
             try {
-                // 先試直接呼叫（同域）
                 if (typeof window.opener.receiveStoreData === 'function') {
                     window.opener.receiveStoreData(sd);
                 } else {
                     window.opener.postMessage({ type: 'ecpay_store', data: sd }, '*');
                 }
             } catch(e) {
-                // 跨域 fallback
                 try { window.opener.postMessage({ type: 'ecpay_store', data: sd }, '*'); } catch(e2) {}
             }
+            var c = 2, el = document.getElementById('cd');
+            var t = setInterval(function() {
+                c--; el.textContent = c;
+                if (c <= 0) { clearInterval(t); window.close(); }
+            }, 1000);
         } else {
-            // 沒有 opener，存 localStorage（主頁面的輪詢會抓到）
+            // LINE 瀏覽器 / 無 opener：直接跳回主頁並帶門市資料
             try { localStorage.setItem('ecpay_store_data', JSON.stringify(sd)); } catch(e) {}
+            document.querySelector('.note').textContent = '正在返回購物頁面...';
+            setTimeout(function() {
+                window.location.href = mainPageUrl;
+            }, 1000);
         }
-
-        // 倒數關閉（Vercel 同域，window.close() 正常執行）
-        var c = 2, el = document.getElementById('cd');
-        var t = setInterval(function() {
-            c--; el.textContent = c;
-            if (c <= 0) { clearInterval(t); window.close(); }
-        }, 1000);
     </script>
 </body>
 </html>`;
