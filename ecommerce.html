@@ -292,39 +292,47 @@
             line-height: 1;
         }
 
-        /* 右側對話框 — 深色黑金風 */
+        /* 右側對話框 — 質感黑金版 */
         .bulletin-speech {
             flex: 1;
             position: relative;
-            background: linear-gradient(135deg, rgba(15,15,30,0.97) 0%, rgba(22,22,44,0.97) 100%);
-            border: 1.5px solid rgba(255,215,0,0.35);
-            border-radius: 18px;
-            padding: 13px 16px 13px 20px;
-            margin-left: 12px;
+            background: linear-gradient(145deg, #0e0e1e 0%, #161628 60%, #0a0a18 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 14px 18px 14px 22px;
+            margin-left: 14px;
             margin-bottom: 18px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,215,0,0.07), inset 0 1px 0 rgba(255,215,0,0.08);
-            min-height: 64px;
+            min-height: 68px;
+
+            /* 金色漸層外框（偽元素模擬） */
+            box-shadow:
+                0 0 0 1.5px rgba(255,215,0,0.55),
+                0 0 0 3px rgba(255,165,0,0.12),
+                0 8px 28px rgba(0,0,0,0.6),
+                0 2px 8px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,215,0,0.15),
+                inset 0 -1px 0 rgba(0,0,0,0.3);
         }
-        /* 左側尖角（深色版） */
+        /* 頂部金色高光線 */
         .bulletin-speech::before {
             content: '';
             position: absolute;
-            left: -13px;
-            bottom: 20px;
-            width: 0; height: 0;
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
-            border-right: 13px solid rgba(255,215,0,0.35);
+            top: 1px; left: 20px; right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), rgba(255,215,0,0.9), rgba(255,215,0,0.6), transparent);
+            border-radius: 1px;
         }
+        /* 左側尖角 */
         .bulletin-speech::after {
             content: '';
             position: absolute;
-            left: -10px;
-            bottom: 21px;
+            left: -11px;
+            bottom: 22px;
             width: 0; height: 0;
-            border-top: 7px solid transparent;
-            border-bottom: 7px solid transparent;
-            border-right: 11px solid rgba(18,18,36,0.97);
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 11px solid #0e0e1e;
+            filter: drop-shadow(-2px 0 0 rgba(255,215,0,0.5));
         }
 
         /* 不顯示舊的 header */
