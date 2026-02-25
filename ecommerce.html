@@ -163,95 +163,107 @@
         }
 
 
-        /* ── 蛋博士布告欄（RPG對話框） ── */
+        /* ── 布告欄（現代卡片風格） ── */
         .bulletin-board {
             display: none;
             margin: 16px auto 0;
-            max-width: 700px;
-            position: relative;
+            max-width: 860px;
+            padding: 0 16px;
             font-family: 'Noto Sans TC', sans-serif;
-            padding-left: 95px;
-            min-height: 110px;
         }
         .bulletin-board.active { display: block; }
 
-        /* 人物立繪（左邊，與對話框等高） */
-        .bulletin-egg-wrap {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 90px;
-            z-index: 2;
-            top: 0;
-            display: flex;
-            align-items: stretch;
-        }
-        .bulletin-egg {
-            width: 90px;
-            height: 100%;
-            object-fit: cover;
-            object-position: top center;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.7));
-            display: block;
-        }
-
-        /* 對話框主體 */
+        /* 布告欄外框卡片 */
         .bulletin-inner {
-            background: rgba(8,8,20,0.93);
-            border: 2px solid #FFD700;
-            border-radius: 8px;
-            box-shadow: 0 0 0 1px rgba(255,215,0,0.15), 0 0 18px rgba(255,215,0,0.12), inset 0 0 24px rgba(0,0,0,0.5);
-            padding: 12px 14px 12px;
-            position: relative;
+            background: linear-gradient(135deg, rgba(15,15,30,0.95) 0%, rgba(20,20,40,0.95) 100%);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,215,0,0.08), inset 0 1px 0 rgba(255,215,0,0.1);
+            overflow: hidden;
         }
 
-        /* 左側對話框三角 */
-        .bulletin-inner::before {
-            content: '';
-            position: absolute;
-            bottom: 22px;
-            left: -11px;
-            border-width: 7px 11px 7px 0;
-            border-style: solid;
-            border-color: transparent #FFD700 transparent transparent;
+        /* 布告欄頂部 header */
+        .bulletin-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            background: linear-gradient(90deg, rgba(255,215,0,0.12) 0%, rgba(255,140,0,0.06) 100%);
+            border-bottom: 1px solid rgba(255,215,0,0.2);
         }
-        .bulletin-inner::after {
-            content: '';
-            position: absolute;
-            bottom: 24px;
-            left: -8px;
-            border-width: 5px 8px 5px 0;
-            border-style: solid;
-            border-color: transparent rgba(8,8,20,0.93) transparent transparent;
+        .bulletin-header-icon {
+            font-size: 16px;
+            animation: pulse 2s ease-in-out infinite;
         }
-
-        /* 名字標籤 */
         .bulletin-title {
-            display: inline-block;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 900;
-            color: #0a0a14;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            padding: 2px 10px 2px 8px;
-            border-radius: 3px;
-            margin-bottom: 8px;
+            color: var(--primary);
             letter-spacing: 2px;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+            text-transform: uppercase;
         }
         .bulletin-title span { display: none; }
 
+        /* 布告欄人物圖（選配，放右側） */
+        .bulletin-egg-wrap {
+            display: none; /* 預設隱藏，如有圖片才顯示 */
+        }
+        .bulletin-egg {
+            display: none;
+        }
+
+        /* 公告列表 */
         .bulletin-items {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 0;
+            padding: 8px 0;
         }
         .bulletin-item {
             display: flex;
             align-items: flex-start;
-            gap: 6px;
-            padding: 0;
-            background: none;
+            gap: 10px;
+            padding: 10px 18px;
             border-left: none;
+            background: none;
+            border-radius: 0;
+            cursor: default;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .bulletin-item:last-child { border-bottom: none; }
+        .bulletin-item.has-link { cursor: pointer; }
+        .bulletin-item:hover { background: rgba(255,215,0,0.04); }
+        .bulletin-item.has-link:hover .bulletin-item-text { color: var(--primary); }
+        .bulletin-item-num { display: none; }
+        .bulletin-item-text {
+            font-size: 13px;
+            color: #d0d0d0;
+            line-height: 1.7;
+            flex: 1;
+            transition: color 0.2s;
+        }
+        .bulletin-item-text::before {
+            content: '▸ ';
+            color: var(--primary);
+            font-size: 11px;
+        }
+        .bulletin-item-arrow {
+            color: var(--primary);
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .bulletin-item.has-link:hover .bulletin-item-arrow { opacity: 1; }
+        .bulletin-footer { display: none; }
+
+        @media (max-width: 768px) {
+            .bulletin-board { margin: 10px 10px 0; padding: 0; }
+            .bulletin-header { padding: 10px 14px; }
+            .bulletin-item { padding: 9px 14px; }
+        }
             border-radius: 0;
             cursor: default;
         }
@@ -281,11 +293,7 @@
         .bulletin-item.has-link:hover .bulletin-item-arrow { opacity: 1; }
         .bulletin-footer { display: none; }
 
-        @media (max-width: 768px) {
-            .bulletin-board { margin: 12px 12px 0; padding-left: 72px; min-height: 90px; }
-            .bulletin-egg-wrap { width: 68px; }
-            .bulletin-egg { width: 68px; }
-        }
+        
 
         /* 主要容器 */
         .container {
@@ -2181,7 +2189,7 @@
     <!-- 導航列 -->
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:10px;">
-            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain;">
+            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;">
             <div class="logo">REX LAB</div>
         </div>
         <div class="nav-buttons" id="navButtons" style="display:none;">
@@ -2206,13 +2214,16 @@
     </div>
 
 
-    <!-- 🥚 蛋博士布告欄 -->
+    <!-- 📋 布告欄 -->
     <div class="bulletin-board" id="bulletinBoard">
-        <div class="bulletin-egg-wrap">
-            <img class="bulletin-egg" id="bulletinEggImg" src="" alt="蛋博士">
-        </div>
         <div class="bulletin-inner">
-            <div class="bulletin-title">蛋博士布告欄</div>
+            <div class="bulletin-header">
+                <span class="bulletin-header-icon">📋</span>
+                <div class="bulletin-title">最新公告</div>
+            </div>
+            <div class="bulletin-egg-wrap">
+                <img class="bulletin-egg" id="bulletinEggImg" src="" alt="">
+            </div>
             <div class="bulletin-items" id="bulletinItems"></div>
             <div class="bulletin-footer"></div>
         </div>
@@ -5349,6 +5360,9 @@ async function loadSystemSettings() {
             const logoEl = document.getElementById('logoImage');
             if (logoEl && systemSettings.logoImage) {
                 logoEl.src = systemSettings.logoImage;
+                logoEl.style.display = 'block';
+            } else if (logoEl) {
+                logoEl.style.display = 'none';
             }
 
             // 套用客服浮動圖片
