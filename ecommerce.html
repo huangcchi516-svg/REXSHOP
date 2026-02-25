@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>REX LAB - 購物商城</title>
+    <title>CANDY BOSS - 購物商城 v2.5</title>
     <!-- 強制刷新快取 - 版本 2.5 - 支援F欄大分類過濾功能 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
@@ -12,6 +12,7 @@
     <!-- Crypto-JS for SHA256 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
+        // 強制清除快取
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) {
@@ -19,81 +20,6 @@
                 }
             });
         }
-    </script>
-
-    <!-- ✅ 手機限定鎖定：電腦一律黑屏 -->
-    <style>
-        #desktop-block {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: #000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-        }
-        #desktop-block .db-icon {
-            font-size: 64px;
-            animation: db-float 3s ease-in-out infinite;
-        }
-        @keyframes db-float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-12px); }
-        }
-        #desktop-block .db-title {
-            font-family: 'Noto Sans TC', sans-serif;
-            font-size: 26px;
-            font-weight: 900;
-            color: #FFD700;
-            letter-spacing: 3px;
-            text-align: center;
-        }
-        #desktop-block .db-sub {
-            font-family: 'Noto Sans TC', sans-serif;
-            font-size: 14px;
-            color: #666;
-            text-align: center;
-            line-height: 1.8;
-        }
-        #desktop-block .db-qr-hint {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,215,0,0.07);
-            border: 1px solid rgba(255,215,0,0.2);
-            border-radius: 12px;
-            padding: 14px 24px;
-            font-family: 'Noto Sans TC', sans-serif;
-            font-size: 13px;
-            color: #aaa;
-        }
-        #desktop-block .db-qr-hint span { font-size: 22px; }
-    </style>
-    <script>
-        (function() {
-            function isMobile() {
-                var ua = navigator.userAgent || '';
-                var mobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
-                var narrowTouch = (window.screen.width <= 1024 && navigator.maxTouchPoints > 0);
-                return mobileUA || narrowTouch;
-            }
-
-            function applyBlock() {
-                if (!isMobile()) {
-                    var el = document.getElementById('desktop-block');
-                    if (el) el.style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
-                }
-            }
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', applyBlock);
-            } else {
-                applyBlock();
-            }
-            window.addEventListener('resize', applyBlock);
-        })();
     </script>
     <style>
         * {
@@ -103,8 +29,8 @@
         }
 
         html {
-            touch-action: manipulation; 
-            -webkit-text-size-adjust: 100%; 
+            touch-action: manipulation; /* 防止雙擊放大 */
+            -webkit-text-size-adjust: 100%; /* 防止 iOS 自動調整字體大小 */
         }
 
         :root {
@@ -123,11 +49,11 @@
             background: var(--bg-dark);
             color: var(--text-light);
             min-height: 100vh;
-            touch-action: manipulation; 
-            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation; /* 全域防止雙擊放大 */
+            -webkit-tap-highlight-color: transparent; /* 移除點擊高亮 */
         }
 
-        
+        /* 頂部導航 */
         .navbar {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -169,14 +95,14 @@
             color: var(--secondary);
         }
 
-        
+        /* 🆕 公告列樣式 */
         .announcement-bar {
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.1) 100%);
             border-bottom: 2px solid var(--primary);
             padding: 12px 0;
             overflow: hidden;
             position: relative;
-            display: none; 
+            display: none; /* 預設隱藏，有公告才顯示 */
         }
         
         .announcement-bar.active {
@@ -195,28 +121,21 @@
         }
         
         .announcement-icon {
-            font-size: 16px;
+            font-size: 20px;
             animation: pulse 2s ease-in-out infinite;
             flex-shrink: 0;
         }
         
         .announcement-text {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--primary);
             white-space: nowrap;
             display: inline-block;
             transition: opacity 0.3s ease;
         }
-
-        @media (max-width: 768px) {
-            .announcement-bar { padding: 8px 0; }
-            .announcement-icon { font-size: 14px; }
-            .announcement-text { font-size: 12px; }
-            .announcement-content { gap: 8px; padding: 0 12px; }
-        }
         
-        
+        /* 跑馬燈效果（單則公告） */
         .announcement-text.marquee {
             animation: marquee 30s linear infinite;
         }
@@ -230,7 +149,7 @@
             }
         }
         
-        
+        /* 淡入淡出效果（多則公告輪播） */
         .announcement-text.fade {
             animation: fadeInOut 5s ease-in-out;
             white-space: normal;
@@ -243,179 +162,27 @@
             100% { opacity: 0; transform: translateY(10px); }
         }
 
-        
-        
-        .bulletin-board {
-            display: none;
-            margin: 10px auto 0;
-            max-width: 860px;
-            padding: 0 14px;
-        }
-        .bulletin-board.active { display: block; }
-
-        .bulletin-inner {
-            display: flex;
-            align-items: flex-end;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            overflow: visible;
-            padding: 4px 0 0;
-        }
-
-        /* 左側人物 */
-        .bulletin-egg-wrap {
-            flex-shrink: 0;
-            width: 165px;
-            height: 195px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-        }
-        .bulletin-egg {
-            width: 165px;
-            height: 195px;
-            object-fit: contain;
-            object-position: bottom;
-            display: block;
-            filter: drop-shadow(2px 6px 12px rgba(0,0,0,0.7));
-        }
-        .bulletin-egg-placeholder {
-            font-size: 108px;
-            line-height: 1;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        /* 右側遊戲對話框 */
-        .bulletin-speech {
-            flex: 1;
-            position: relative;
-            background: linear-gradient(160deg, rgba(20,18,10,0.97) 0%, rgba(10,9,5,0.99) 100%);
-            border: 1.5px solid rgba(255,215,0,0.5);
-            border-radius: 6px;
-            padding: 36px 18px 16px;
-            margin-left: -10px;
-            margin-bottom: 10px;
-            height: 195px;
-            max-height: 195px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            align-self: flex-end;
-            overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(255,215,0,0.04), 0 4px 20px rgba(0,0,0,0.6);
-        }
-        /* 四角裝飾 */
-        .bulletin-speech::before {
-            content: '';
-            position: absolute;
-            inset: 4px;
-            border: 1px solid rgba(255,215,0,0.15);
-            border-radius: 4px;
-            pointer-events: none;
-        }
-        .bulletin-speech::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255,215,0,0.04) 0%, transparent 40%);
-            pointer-events: none;
-            border-radius: 6px;
-        }
-
-        /* 角色名稱標籤 */
-        .bulletin-name-tag {
-            position: absolute;
-            top: -1px;
-            left: 16px;
-            background: linear-gradient(135deg, var(--primary) 0%, #FFA500 100%);
-            color: #000;
-            font-size: 12px;
-            font-weight: 900;
-            padding: 3px 14px 3px 10px;
-            letter-spacing: 2px;
-            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 0 100%);
-            text-shadow: none;
-            z-index: 3;
-        }
-
-        /* 文字區 */
-        .bulletin-header { display: none !important; }
-        .bulletin-footer { display: none !important; }
-        .bulletin-item-num,
-        .bulletin-item-arrow { display: none !important; }
-        .bulletin-items {
-            width: 100%;
-            text-align: left;
-            position: relative;
-            z-index: 1;
-        }
-        .bulletin-item-text {
-            font-size: 15px;
-            font-weight: 400;
-            color: #e8e0cc;
-            line-height: 1.95;
-            display: block;
-            text-align: left;
-            letter-spacing: 1px;
-            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
-            font-family: 'Noto Sans TC', sans-serif;
-        }
-        .bulletin-item-text strong,
-        .bulletin-item-text b {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        /* RWD */
-        @media (max-width: 768px) {
-            .bulletin-board { padding: 0 10px; margin: 10px auto 0; }
-            .bulletin-egg-wrap { width: 105px; height: 126px; }
-            .bulletin-egg { width: 105px; height: 126px; }
-            .bulletin-egg-placeholder { font-size: 72px; }
-            .bulletin-speech {
-                margin-left: -6px;
-                margin-bottom: 8px;
-                padding: 28px 12px 12px;
-                border-radius: 5px;
-                height: 126px;
-                max-height: 126px;
-            }
-            .bulletin-name-tag {
-                font-size: 11px;
-                padding: 2px 12px 2px 8px;
-                letter-spacing: 1.5px;
-            }
-            .bulletin-item-text { font-size: 12.5px; line-height: 1.8; }
-        }
-
-        
-
-        
+        /* 主要容器 */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
+            padding: 20px;
         }
 
-        
+        /* 商品網格 */
         .products-section {
-            margin-top: 4px;
+            margin-top: 30px;
         }
         
-        
+        /* 主打商品區域 */
         .featured-section {
-            margin-bottom: 4px;
-            padding: 4px 0;
+            margin-bottom: 50px;
+            padding: 20px 0;
             position: relative;
-            overflow: visible;
+            overflow: hidden;
         }
         
-        
+        /* 主打商品背景動畫 */
         .featured-section::before {
             content: '';
             position: absolute;
@@ -456,7 +223,7 @@
             text-align: center;
             color: #999;
             font-size: 14px;
-            margin-bottom: 10px;
+            margin-bottom: 30px;
             position: relative;
             z-index: 1;
         }
@@ -485,7 +252,7 @@
             box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
         }
         
-        
+        /* 🔥 主打推薦徽章 - 使用實體元素而非偽元素 */
         .featured-badge {
             position: absolute;
             top: -12px;
@@ -501,7 +268,7 @@
             animation: bounce 2s ease-in-out infinite;
         }
 
-        
+        /* 🆕 自定義區塊卡片徽章 */
         .custom-block-badge {
             position: absolute;
             top: -12px;
@@ -517,7 +284,7 @@
             animation: bounce 2s ease-in-out infinite;
         }
 
-        
+        /* 🆕 自定義區塊卡片邊框 */
         .featured-grid .custom-block-card {
             border-color: rgba(192, 132, 252, 0.3);
         }
@@ -526,7 +293,7 @@
             box-shadow: 0 15px 40px rgba(192, 132, 252, 0.3);
         }
 
-        
+        /* 🆕 客服按鈕 */
         .cs-btn {
             display: inline-flex;
             align-items: center;
@@ -553,21 +320,21 @@
             50% { transform: translateY(-5px) rotate(3deg); }
         }
         
-        
+        /* 商品分類標籤 */
         .category-tabs {
             display: flex;
             gap: 12px;
-            margin: 4px 0;
-            padding: 4px 0;
+            margin: 30px 0;
+            padding: 20px 0;
             overflow-x: auto;
-            scrollbar-width: none; 
+            scrollbar-width: none; /* 隱藏滾動條 */
             -ms-overflow-style: none;
             justify-content: center;
             flex-wrap: wrap;
         }
         
         .category-tabs::-webkit-scrollbar {
-            display: none; 
+            display: none; /* 隱藏滾動條 */
         }
         
         .category-tab {
@@ -723,51 +490,7 @@
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
         }
 
-        
-        .service-float {
-            position: fixed;
-            bottom: 115px;
-            right: 30px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(6, 199, 85, 0.5);
-            transition: all 0.3s ease;
-            z-index: 999;
-            overflow: hidden;
-            border: 3px solid rgba(6, 199, 85, 0.8);
-            background: #06C755;
-            gap: 2px;
-        }
-
-        .service-float img {
-            display: none;
-        }
-
-        .service-float-icon {
-            font-size: 26px;
-            line-height: 1;
-        }
-
-        .service-float-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #fff;
-            line-height: 1;
-            letter-spacing: 1px;
-        }
-
-        .service-float:hover {
-            transform: scale(1.1);
-            box-shadow: 0 10px 30px rgba(6, 199, 85, 0.7);
-        }
-
-        
+        /* 購物車浮動按鈕 */
         .cart-float {
             position: fixed;
             bottom: 30px;
@@ -779,7 +502,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 32px;
             cursor: pointer;
             box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
             transition: all 0.3s ease;
@@ -806,7 +529,7 @@
             font-weight: 700;
         }
 
-        
+        /* 購物車側邊欄 */
         .cart-sidebar {
             position: fixed;
             right: -400px;
@@ -888,9 +611,9 @@
             cursor: pointer;
             font-size: 18px;
             font-weight: 700;
-            touch-action: manipulation; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation; /* 防止手機雙擊放大 */
+            user-select: none; /* 防止選取文字 */
+            -webkit-tap-highlight-color: transparent; /* 移除點擊高亮 */
         }
 
         .remove-item {
@@ -928,7 +651,7 @@
             cursor: pointer;
         }
 
-        
+        /* 彈窗共用樣式 */
         .modal {
             display: none;
             position: fixed;
@@ -981,7 +704,7 @@
             cursor: pointer;
         }
         
-        
+        /* specModal 以外的 modal 補回 padding */
         #checkoutModal .modal-content,
         #memberProfileModal .modal-content,
         #profileUpdateModal .modal-content {
@@ -989,12 +712,12 @@
             overflow-y: auto;
         }
 
-        
+        /* specModal 的 header 在照片下方，不需要額外 padding-top */
         #specModal .modal-header {
             padding-top: 8px;
         }
 
-        
+        /* 規格選擇模態框 */
         .spec-header-container {
             display: flex;
             gap: 8px;
@@ -1229,7 +952,7 @@
             cursor: not-allowed;
         }
 
-        
+        /* 結帳表單 */
         .form-group {
             margin-bottom: 20px;
         }
@@ -1309,7 +1032,7 @@
             cursor: pointer;
         }
 
-        
+        /* 訂單查詢 */
         .order-result {
             display: none;
             background: rgba(255, 255, 255, 0.05);
@@ -1330,7 +1053,7 @@
             margin-top: 10px;
         }
 
-        
+        /* Toast 提示 */
         .toast {
             position: fixed;
             bottom: -80px;
@@ -1360,7 +1083,7 @@
             color: white;
         }
 
-        
+        /* 登入牆樣式 */
         .login-wall {
             min-height: 70vh;
             display: flex;
@@ -1411,7 +1134,7 @@
             background: #06C755;
             border: none;
             color: white;
-            padding: 14px 36px;
+            padding: 15px 40px;
             border-radius: 8px;
             font-size: 18px;
             font-weight: 700;
@@ -1419,17 +1142,15 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
             margin: 0 auto;
-            min-width: 220px;
-            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4);
+            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.3);
         }
 
         .login-wall-btn:hover {
             background: #05B34A;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(6, 199, 85, 0.5);
+            box-shadow: 0 6px 20px rgba(6, 199, 85, 0.4);
         }
 
         .login-wall-btn:active {
@@ -1437,20 +1158,19 @@
         }
         
         .line-icon {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             background: white;
-            border-radius: 6px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
             color: #06C755;
-            font-size: 17px;
-            flex-shrink: 0;
+            font-size: 16px;
         }
 
-        
+        /* 審核狀態樣式 */
         .approval-status {
             min-height: 70vh;
             display: flex;
@@ -1486,7 +1206,7 @@
             margin-bottom: 10px;
         }
 
-        
+        /* 動畫效果 */
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -1496,8 +1216,8 @@
             animation: pulse 0.5s ease;
         }
 
-        
-        
+        /* 響應式設計 */
+        /* 手機版優化 (< 480px) */
         @media (max-width: 480px) {
             .navbar {
                 padding: 8px 10px;
@@ -1527,7 +1247,7 @@
                 min-width: auto;
             }
 
-            
+            /* 會員資訊區 - 橫向緊湊排列 */
             #memberInfo {
                 display: flex !important;
                 gap: 6px !important;
@@ -1541,7 +1261,7 @@
                 flex-shrink: 0;
             }
 
-            
+            /* LINE 登入按鈕 - 縮小 */
             #lineLoginBtn {
                 padding: 0 !important;
                 background: none !important;
@@ -1574,15 +1294,6 @@
                 aspect-ratio: 1 / 1;
             }
 
-            .service-float {
-                width: 50px;
-                height: 50px;
-                bottom: 80px;
-                right: 15px;
-            }
-            .service-float-icon { font-size: 20px; }
-            .service-float-label { font-size: 10px; }
-
             .cart-float {
                 width: 50px;
                 height: 50px;
@@ -1591,7 +1302,7 @@
                 right: 15px;
             }
 
-            
+            /* 模態框優化 */
             .modal-content {
                 width: 95%;
                 max-height: 90vh;
@@ -1606,7 +1317,7 @@
                 font-size: 18px;
             }
             
-            
+            /* 登入牆手機版優化 */
             .login-wall-content {
                 padding: 40px 25px;
                 max-width: 90%;
@@ -1632,11 +1343,11 @@
                 max-width: 280px;
             }
             
-            
+            /* 商品分類標籤手機版 */
             .category-tabs {
                 gap: 8px;
-                margin: 4px 0;
-                padding: 4px 0;
+                margin: 20px 0;
+                padding: 15px 0;
                 justify-content: flex-start;
                 overflow-x: auto;
                 flex-wrap: nowrap;
@@ -1647,11 +1358,10 @@
                 font-size: 13px;
             }
             
-            
+            /* 主打商品手機版 */
             .featured-section {
-                padding: 16px 10px 4px;
-                margin-bottom: 4px;
-                overflow: visible;
+                padding: 20px 10px;
+                margin-bottom: 30px;
             }
             
             .featured-title {
@@ -1787,13 +1497,6 @@
                 padding-bottom: 5px;
             }
 
-            .service-float {
-                width: 60px;
-                height: 60px;
-                bottom: 100px;
-                right: 20px;
-            }
-
             .cart-float {
                 width: 60px;
                 height: 60px;
@@ -1872,7 +1575,7 @@
             }
         }
 
-        
+        /* 訂單摘要樣式 */
         .order-summary {
             margin: 25px 0;
             padding: 20px;
@@ -1931,7 +1634,7 @@
             color: var(--primary);
         }
         
-        
+        /* 🆕 綠界門市選擇按鈕樣式 */
         .store-select-btn {
             background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
             border: none;
@@ -1960,7 +1663,7 @@
             transform: translateY(0);
         }
         
-        
+        /* 選中門市顯示區域 */
         .selected-store-info {
             background: rgba(0, 200, 83, 0.1);
             border: 2px solid #00c853;
@@ -2035,7 +1738,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        
+        /* 🆕 自取付款方式區塊 */
         .pickup-payment-method {
             display: none;
             margin-top: 20px;
@@ -2050,7 +1753,7 @@
             display: block;
         }
 
-        
+        /* 🆕 匯款資訊卡片 */
         .bank-info {
             display: none;
             margin-top: 15px;
@@ -2124,6 +1827,7 @@
             font-weight: bold;
         }
 
+
         /* ==========================================
            🆕 商品圖片輪播樣式
         ========================================== */
@@ -2160,7 +1864,7 @@
             opacity: 1;
         }
 
-        
+        /* 圖片滑動區域：用 grid 疊層，不用絕對定位 */
         .carousel-track-wrap {
             position: relative;
             width: 100%;
@@ -2189,7 +1893,7 @@
             background: #000;
         }
 
-        
+        /* 左右箭頭：疊在 track-wrap 上 */
         .carousel-btn {
             position: absolute;
             top: 50%;
@@ -2217,7 +1921,7 @@
         .carousel-prev { left: 8px; }
         .carousel-next { right: 8px; }
 
-        
+        /* 角標：疊在圖片右上 */
         .carousel-counter {
             position: absolute;
             top: 8px;
@@ -2232,7 +1936,7 @@
             pointer-events: none;
         }
 
-        
+        /* 圓點：放在 track-wrap 外面，不疊在圖片上 */
         .carousel-dots {
             display: flex;
             justify-content: center;
@@ -2255,7 +1959,7 @@
             transform: scale(1.35);
         }
 
-        
+        /* 🆕 動畫效果 */
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -2266,68 +1970,9 @@
                 max-height: 500px;
             }
         }
-
-        /* LINE 瀏覽器內嵌地圖 Modal */
-        #ecpayIframeModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 10000;
-            background: rgba(0,0,0,0.85);
-            flex-direction: column;
-            align-items: stretch;
-        }
-        #ecpayIframeModal.active { display: flex; }
-        #ecpayIframeModal .iframe-modal-header {
-            background: #1a1a1a;
-            border-bottom: 2px solid var(--primary);
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-        #ecpayIframeModal .iframe-modal-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        #ecpayIframeModal .iframe-modal-close {
-            background: none;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #ecpayIframe {
-            flex: 1;
-            width: 100%;
-            border: none;
-            background: #fff;
-        }
     </style>
 </head>
 <body>
-
-<!-- ========== 電腦封鎖畫面（手機才能看） ========== -->
-<div id="desktop-block">
-    <div class="db-icon">📱</div>
-    <div class="db-title">請用手機開啟</div>
-    <div class="db-sub">
-        本商城僅支援手機瀏覽<br>
-        請用手機掃描 QR Code 或直接輸入網址
-    </div>
-    <div class="db-qr-hint">
-        <span>💡</span>
-        用手機相機掃描頁面上的 QR Code 即可進入
-    </div>
-</div>
 
 <!-- ========== 維護中畫面 ========== -->
 <!-- 透明攔截層：蓋住所有內容，點任何地方都會 show 維護畫面 -->
@@ -2348,15 +1993,6 @@
 <style>
 @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
-    <!-- LINE 瀏覽器內嵌門市地圖 Modal -->
-    <div id="ecpayIframeModal">
-        <div class="iframe-modal-header">
-            <span class="iframe-modal-title">📍 選擇 7-11 門市</span>
-            <button class="iframe-modal-close" onclick="closeEcpayIframeModal()">×</button>
-        </div>
-        <iframe id="ecpayIframe" src="about:blank"></iframe>
-    </div>
-
     <!-- 🆕 隱藏的綠界表單（ClientReplyURL + ServerReplyURL） -->
     <form id="ecpayMapForm" method="POST" action="https://logistics.ecpay.com.tw/Express/map" style="display: none;" target="ecpayWindow">
         <input type="text" name="MerchantID" id="ecpay_MerchantID">
@@ -2372,9 +2008,11 @@
     </form>
     <!-- 導航列 -->
     <nav class="navbar">
-        <div style="display:flex; align-items:center; gap:4px;">
-            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;">
-            <div class="logo">REX LAB</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="logo">R E X</div>
+            <a class="cs-btn" href="https://line.me/ti/p/~rex52077" target="_blank">
+                💬 客服
+            </a>
         </div>
         <div class="nav-buttons" id="navButtons" style="display:none;">
             <button class="nav-btn" id="lineLoginBtn" onclick="lineLogin()" style="display:none;">
@@ -2386,7 +2024,6 @@
                 <button class="nav-btn" onclick="logout()">登出</button>
             </div>
             <button class="nav-btn" onclick="openOrderSearch()">📦 查詢訂單</button>
-            <button class="nav-btn" onclick="window.open('https://line.me/ti/p/~rex52077', '_blank')">💬 客服</button>
         </div>
     </nav>
 
@@ -2398,29 +2035,13 @@
         </div>
     </div>
 
-    <!-- 📋 布告欄 -->
-    <div class="bulletin-board" id="bulletinBoard">
-        <div class="bulletin-inner">
-            <!-- 左側人物圖 -->
-            <div class="bulletin-egg-wrap" id="bulletinEggWrap">
-                <div class="bulletin-egg-placeholder" id="bulletinEggPlaceholder">🥚</div>
-                <img class="bulletin-egg" id="bulletinEggImg" src="" alt="" style="display:none;">
-            </div>
-            <!-- 右側遊戲對話框 -->
-            <div class="bulletin-speech">
-                <div class="bulletin-name-tag" id="bulletinNameTag">REX LAB</div>
-                <div class="bulletin-items" id="bulletinItems"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- 主要內容 -->
     <div class="container">
         <!-- 登入牆 -->
         <div id="loginWall" class="login-wall" style="display:none;">
             <div class="login-wall-content">
                 <div class="login-wall-icon">🔐</div>
-                <h2>歡迎來到 REX LAB</h2>
+                <h2>歡迎來到 CANDY BOSS</h2>
                 <p>請先登入以繼續購物</p>
                 <button class="login-wall-btn" onclick="lineLogin()">
                     <span class="line-icon">L</span>
@@ -2468,11 +2089,6 @@
         </section>
     </div>
 
-    <!-- 客服浮動按鈕（已移至 navbar） -->
-    <div class="service-float" style="display:none!important;">
-        <img id="serviceFloatImg" src="" alt="" style="display:none;">
-    </div>
-
     <!-- 購物車浮動按鈕 -->
     <div class="cart-float" onclick="toggleCart()">
         🛒
@@ -2486,10 +2102,9 @@
             <button class="close-cart" onclick="toggleCart()">×</button>
         </div>
         <div class="cart-items" id="cartItems"></div>
-        <!-- 購物車優惠區塊 -->
+        <!-- 🆕 購物車優惠提示 -->
         <div id="cartPromotionHints"></div>
         <div class="cart-footer">
-            <div id="cartPriceSummary"></div>
             <div class="cart-total">總計:$<span id="cartTotal">0</span></div>
             <button class="checkout-btn" onclick="openCheckout()">前往結帳</button>
         </div>
@@ -2666,7 +2281,7 @@
         <!-- 導覽列 -->
         <nav class="navbar" style="position:sticky; top:0; z-index:100;">
             <div style="display:flex; align-items:center; gap:10px;">
-                <div style="display:flex; align-items:center; gap:8px;"><div class="logo">REX LAB</div></div>
+                <div class="logo">R E X</div>
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
                 <span style="color:#FFD700; font-weight:700; font-size:15px;">📦 我的訂單</span>
@@ -2687,6 +2302,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- 會員資料查看彈窗 -->
     <div class="modal" id="memberProfileModal">
@@ -2757,6 +2373,13 @@
     <div class="toast" id="toast"></div>
 
     <script>
+// ==========================================
+// 全域變數設定
+// ==========================================
+// ✅ 金鑰已移至 Vercel 環境變數，前端不再暴露任何 API Key
+// 所有請求統一走 /api/sheets 和 /api/script
+
+// LINE Login 設定
 const LINE_CHANNEL_ID = '2009217612';
 const LINE_REDIRECT_URI = 'https://rexshop-delta.vercel.app/callback.html';
 const LINE_STATE = 'random_state_' + Math.random().toString(36).substr(2, 9);
@@ -2774,19 +2397,31 @@ let categories = [];     // 🆕 儲存分類設定（含圖片）
 let currentCategory = 'all';  // 當前選擇的分類
 let cart = [];
 let selectedStore = null;
+
+// 🆕 系統設定（匯款資訊）
 let systemSettings = {
     bankName: '',
     bankAccount: '',
     bankHolder: ''
 };
+
+// 會員相關
 let currentMember = null;
 let currentProduct = null;
 let selectedSpec = null;
 let quantity = 1;
+
+// ==========================================
+// 🆕 綠界物流設定（正式環境）
+// ==========================================
 const ECPAY_CONFIG = {
     MerchantID: '3490304',  // ✅ MerchantID 為公開商家識別碼，可留前端
     MapURL: 'https://logistics.ecpay.com.tw/Express/map'
 };
+
+// ==========================================
+// 🆕 綠界加密函數
+// ==========================================
 
 /**
  * URL Encode（綠界專用）
@@ -2797,6 +2432,8 @@ const ECPAY_CONFIG = {
  */
 function ecpayUrlEncode(str) {
     let encoded = encodeURIComponent(str);
+    
+    // 將特定字元還原（綠界要求這些字元不要編碼）
     encoded = encoded.replace(/%2D/g, '-');  // -
     encoded = encoded.replace(/%5F/g, '_');  // _
     encoded = encoded.replace(/%2E/g, '.');  // .
@@ -2812,6 +2449,7 @@ function ecpayUrlEncode(str) {
 /**
  * 產生 CheckMacValue
  */
+// generateCheckMacValue 已移至後端 /api/ecpay-map
 
 /**
  * 產生訂單編號
@@ -2828,22 +2466,52 @@ function generateMerchantTradeNo() {
 function getDeviceType() {
     return '0'; // 永遠使用手機版
 }
+
+// ==========================================
+// 🆕 開啟綠界地圖選擇門市
+// ==========================================
 async function openECPayMap() {
     if (checkMaintenance()) return;
+    console.log('========================================');
+    console.log('🚀 開始執行 openECPayMap');
+    console.log('========================================');
+    
+    // 產生唯一訂單編號
     const merchantTradeNo = generateMerchantTradeNo();
+    
+    // ServerReplyURL 和 ClientReplyURL 都指向 Vercel API
+    // Vercel API 接收 POST → 回傳 HTML 給彈窗 → 彈窗關閉
+    // GAS 另外用 fetch 通知（記錄訂單用）
     const serverReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
     const clientReplyURL = 'https://rexshop-delta.vercel.app/api/ecpay-callback';
+
+    console.log('ServerReplyURL:', serverReplyURL);
+    console.log('ClientReplyURL:', clientReplyURL);
+    
+    // 準備參數
     const params = {
         MerchantID: ECPAY_CONFIG.MerchantID,
         MerchantTradeNo: merchantTradeNo,
         LogisticsType: 'CVS',
-        LogisticsSubType: 'UNIMARTC2C',
+        LogisticsSubType: 'UNIMARTC2C', // 🔥 7-11 店到店（C2C）
         IsCollection: 'N',
-        ServerReplyURL: serverReplyURL,
-        ClientReplyURL: clientReplyURL,
+        ServerReplyURL: serverReplyURL,  // Apps Script 接收 POST（後端通知）
+        ClientReplyURL: clientReplyURL,  // ecpay-callback.html 接收 GET（前端彈窗）
         ExtraData: '',
         Device: getDeviceType()
     };
+    
+    // 🔥 除錯：記錄參數
+    console.log('📦 綠界地圖參數：');
+    console.log('MerchantID:', params.MerchantID);
+    console.log('MerchantTradeNo:', params.MerchantTradeNo);
+    console.log('LogisticsType:', params.LogisticsType);
+    console.log('LogisticsSubType:', params.LogisticsSubType);
+    console.log('ServerReplyURL:', params.ServerReplyURL);
+    console.log('ClientReplyURL:', params.ClientReplyURL);
+    console.log('Device:', params.Device);
+    
+    // 由後端計算 CheckMacValue（保護 HashKey/HashIV）
     let apiResult;
     try {
         const apiRes = await fetch('/api/ecpay-map', {
@@ -2860,10 +2528,14 @@ async function openECPayMap() {
         if (!apiResult.success) throw new Error(apiResult.error);
     } catch (err) {
         showToast('門市選擇初始化失敗，請稍後再試', 'error');
+        console.error('ecpay-map API 錯誤:', err);
         return;
     }
 
     const p = apiResult.params;
+    console.log('CheckMacValue 由後端產生 ✅');
+
+    // 填入表單
     document.getElementById('ecpay_MerchantID').value = p.MerchantID;
     document.getElementById('ecpay_MerchantTradeNo').value = p.MerchantTradeNo;
     document.getElementById('ecpay_LogisticsSubType').value = p.LogisticsSubType;
@@ -2872,73 +2544,82 @@ async function openECPayMap() {
     document.getElementById('ecpay_ExtraData').value = p.ExtraData;
     document.getElementById('ecpay_Device').value = p.Device;
     document.getElementById('ecpay_CheckMacValue').value = p.CheckMacValue;
+    
+    // 儲存訂單編號，供回傳時驗證
     localStorage.setItem('ecpay_merchant_trade_no', merchantTradeNo);
-
-    // 偵測 LINE 瀏覽器
-    const isLineBrowser = /Line\//i.test(navigator.userAgent);
-
-    if (isLineBrowser) {
-        // LINE 瀏覽器：用內嵌 iframe modal，避免 window.open 被封鎖
-        const form = document.getElementById('ecpayMapForm');
-        form.target = 'ecpayIframe';
-        document.getElementById('ecpayIframeModal').classList.add('active');
-        document.getElementById('ecpayIframe').name = 'ecpayIframe';
-        form.submit();
-        showToast('請選擇門市', 'success');
-        startListeningForStoreData();
+    console.log('✅ 已儲存訂單編號到 localStorage:', merchantTradeNo);
+    
+    // 🔥 開啟彈窗（800x600）
+    const ecpayWindow = window.open('', 'ecpayWindow', 'width=800,height=600,scrollbars=yes');
+    
+    if (ecpayWindow) {
+        console.log('✅ 彈窗已開啟');
+        // 提交表單到彈窗
+        document.getElementById('ecpayMapForm').submit();
+        showToast('開啟門市選擇視窗...', 'success');
     } else {
-        // 一般瀏覽器：開新視窗
-        const form = document.getElementById('ecpayMapForm');
-        form.target = 'ecpayWindow';
-        const ecpayWindow = window.open('', 'ecpayWindow', 'width=800,height=600,scrollbars=yes');
-        if (ecpayWindow) {
-            form.submit();
-            showToast('開啟門市選擇視窗...', 'success');
-            startListeningForStoreData();
-        } else {
-            // window.open 被擋住，fallback 到 iframe
-            form.target = 'ecpayIframe';
-            document.getElementById('ecpayIframeModal').classList.add('active');
-            document.getElementById('ecpayIframe').name = 'ecpayIframe';
-            form.submit();
-            showToast('請選擇門市', 'success');
-            startListeningForStoreData();
-        }
+        console.error('❌ 彈窗被阻擋！');
+        showToast('請允許彈出視窗！', 'error');
     }
+    
+    console.log('========================================');
 }
 
-function closeEcpayIframeModal() {
-    document.getElementById('ecpayIframeModal').classList.remove('active');
-    document.getElementById('ecpayIframe').src = 'about:blank';
-}
+// ==========================================
+// 🆕 接收彈窗傳來的門市資料
+// ==========================================
+// ==========================================
+// 🆕 處理綠界回傳的門市資料（使用 localStorage）
+// ==========================================
+
+// 🔥 輪詢檢查 localStorage 中的門市資料
 let storeDataCheckInterval = null;
 
 /**
  * 🆕 開始監聽 localStorage 中的門市資料
  */
 function startListeningForStoreData() {
+    console.log('========================================');
+    console.log('🎧 開始監聽門市資料...');
+    console.log('========================================');
+    
+    // 清除舊的監聽器
     if (storeDataCheckInterval) {
         clearInterval(storeDataCheckInterval);
     }
+    
+    // 每 500ms 檢查一次 localStorage
     storeDataCheckInterval = setInterval(() => {
         const storeDataJson = localStorage.getItem('ecpay_store_data');
         
         if (storeDataJson) {
+            console.log('✅ 偵測到門市資料！');
             
             try {
                 const storeData = JSON.parse(storeDataJson);
+                console.log('收到的門市資料：', storeData);
+                
+                // 停止監聽
                 clearInterval(storeDataCheckInterval);
                 storeDataCheckInterval = null;
+                
+                // 處理門市資料
                 processStoreData(storeData);
+                
+                // 清除 localStorage 中的門市資料
                 localStorage.removeItem('ecpay_store_data');
                 
             } catch (error) {
+                console.error('❌ 解析門市資料失敗：', error);
                 localStorage.removeItem('ecpay_store_data');
             }
         }
     }, 500);
+    
+    // 30秒後自動停止監聽
     setTimeout(() => {
         if (storeDataCheckInterval) {
+            console.log('⏱️ 監聽逾時，停止監聽');
             clearInterval(storeDataCheckInterval);
             storeDataCheckInterval = null;
         }
@@ -2949,34 +2630,59 @@ function startListeningForStoreData() {
  * 🆕 處理門市資料
  */
 function processStoreData(storeData) {
+    console.log('========================================');
+    console.log('📦 開始處理門市資料');
+    console.log('========================================');
     
     if (!storeData) {
+        console.error('❌ 門市資料為空');
         showToast('門市資料為空', 'error');
         return;
     }
+    
+    // 驗證訂單編號
     const savedTradeNo = localStorage.getItem('ecpay_merchant_trade_no');
+    console.log('儲存的訂單編號：', savedTradeNo);
+    console.log('回傳的訂單編號：', storeData.MerchantTradeNo);
     
     if (storeData.MerchantTradeNo !== savedTradeNo) {
+        console.error('❌ 訂單編號不符！');
         showToast('門市資料驗證失敗', 'error');
         return;
     }
+    
+    // 儲存門市資料
     selectedStore = {
         id: storeData.CVSStoreID,
         name: storeData.CVSStoreName,
         address: storeData.CVSAddress,
         phone: storeData.CVSTelephone
     };
-    // 自動關閉 iframe modal（LINE 瀏覽器用）
-    closeEcpayIframeModal();
+    
+    console.log('✅ 已儲存門市：', selectedStore);
+    
+    // 顯示門市資訊
     displaySelectedStore();
+    
+    // 清除訂單編號
     localStorage.removeItem('ecpay_merchant_trade_no');
+    
+    // 顯示成功訊息
     showToast('✅ 門市選擇成功！', 'success');
+    
+    console.log('========================================');
 }
+
+// window.opener 直接呼叫（同域時）
 window.receiveStoreData = function(storeData) {
+    console.log('✅ receiveStoreData 被呼叫（window.opener 方式）');
     processStoreData(storeData);
 };
+
+// ✅ postMessage 監聽（跨域時，GAS 回傳的彈窗用這個）
 window.addEventListener('message', function(event) {
     if (!event.data || event.data.type !== 'ecpay_store') return;
+    console.log('✅ 收到 postMessage 門市資料:', event.data.data);
     processStoreData(event.data.data);
 });
 
@@ -2984,21 +2690,28 @@ window.addEventListener('message', function(event) {
  * 🆕 顯示已選擇的門市資訊
  */
 function displaySelectedStore() {
+    console.log('displaySelectedStore 被呼叫，selectedStore：', selectedStore);
     
     if (!selectedStore) {
+        // 沒有選擇門市，隱藏門市資訊區塊
         const infoElement = document.getElementById('selectedStoreInfo');
         if (infoElement) {
             infoElement.classList.remove('active');
         }
         return;
     }
+    
+    // 有選擇門市，顯示門市資訊
     const infoElement = document.getElementById('selectedStoreInfo');
     if (infoElement) {
         infoElement.classList.add('active');
         document.getElementById('storeName').textContent = selectedStore.name || '';
         document.getElementById('storeAddress').textContent = selectedStore.address || '';
+        console.log('✅ 門市資訊已顯示在頁面上');
+        // 顯示付款方式選擇
         showStorePaymentMethod();
     } else {
+        console.error('❌ 找不到 selectedStoreInfo 元素');
     }
 }
 
@@ -3010,226 +2723,139 @@ function clearSelectedStore() {
     displaySelectedStore();
     showToast('已清除門市選擇', 'success');
 }
+
+// ==========================================
+// 載入商品資料
+// ==========================================
 async function loadProductsData() {
     try {
         showToast('載入商品資料中...', 'success');
-
-        // ✅ 合併請求：同時發出所有需要的 fetch，減少 Function Invocations
-        const [
-            productsRes, specsRes, categoryImgRes,
-            categoriesRes, announcementRes, promotionRes
-        ] = await Promise.all([
-            fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`)
-        ]);
-
-        // --- 商品 ---
-        if (!productsRes.ok) throw new Error('無法載入商品資料');
-        const productsData = await productsRes.json();
-        if (!productsData.values || productsData.values.length < 2) throw new Error('商品資料為空');
+        
+        // 載入商品列表
+        const productsUrl = `/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`;
+        const productsResponse = await fetch(productsUrl);
+        
+        if (!productsResponse.ok) throw new Error('無法載入商品資料');
+        
+        const productsData = await productsResponse.json();
+        
+        if (!productsData.values || productsData.values.length < 2) {
+            throw new Error('商品資料為空');
+        }
 
         products = productsData.values.slice(1).map(row => ({
             id: row[0] || '',
             name: row[1] || '',
             image: row[2] || '',
-            isFeatured: (row[3] || '').trim() === '是',
-            category: row[4] || '',
-            tags: (row[5] || '').split(',').map(t => t.trim()).filter(t => t),
-            customBlock: (row[6] || '').trim(),
+            isFeatured: (row[3] || '').trim() === '是',  // D欄：主打，填「是」表示主打
+            category: row[4] || '',  // E欄：商品類別（口味分類，如 PLOOM蛋、GLO蛋）
+            tags: (row[5] || '').split(',').map(t => t.trim()).filter(t => t),  // F欄：大分類標籤
+            customBlock: (row[6] || '').trim(),  // 🆕 G欄：自定義區塊名稱（填區塊名稱即加入該區塊）
             price: 0,
             stock: 0
         })).filter(p => p.id);
 
-        // --- 規格 ---
-        if (specsRes.ok) {
-            const specsData = await specsRes.json();
-            if (specsData.values && specsData.values.length > 1) {
-                specsData.values.slice(1).forEach(row => {
-                    const productId = row[0];
-                    const _salePrice = parseInt(row[3]) || 0;
-                    const _normalPrice = parseInt(row[5]) || 0;
-                    const spec = {
-                        productId: row[0] || '',
-                        productName: row[1] || '',
-                        specName: row[2] || '',
-                        price: _salePrice > 0 ? _salePrice : _normalPrice,
-                        originalPrice: _salePrice > 0 ? _normalPrice : 0,
-                        stock: parseInt(row[4]) || 0,
-                        image: '',
-                        quantityMultiplier: parseInt(row[6]) || 1
-                    };
-                    if (!productSpecs[productId]) productSpecs[productId] = [];
-                    productSpecs[productId].push(spec);
-                });
-                products.forEach(product => {
-                    const specs = productSpecs[product.id];
-                    if (specs && specs.length > 0) {
-                        product.price = Math.min(...specs.map(s => s.price));
-                        product.stock = specs.reduce((sum, spec) => sum + spec.stock, 0);
-                    }
-                });
-            }
+        // 載入商品規格表
+        const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`;
+        const specsResponse = await fetch(specsUrl);
+        
+        if (!specsResponse.ok) throw new Error('無法載入規格資料');
+        
+        const specsData = await specsResponse.json();
+        
+        if (specsData.values && specsData.values.length > 1) {
+            specsData.values.slice(1).forEach(row => {
+                const productId = row[0];
+                const _salePrice = parseInt(row[3]) || 0;
+                const _normalPrice = parseInt(row[5]) || 0;
+                const spec = {
+                    productId: row[0] || '',
+                    productName: row[1] || '',
+                    specName: row[2] || '',
+                    price: _salePrice > 0 ? _salePrice : _normalPrice,  // D有特價用特價，否則用F原價
+                    originalPrice: _salePrice > 0 ? _normalPrice : 0,   // 有特價才顯示劃線原價
+                    stock: parseInt(row[4]) || 0,
+                    image: '',                                  // 無圖片欄
+                    quantityMultiplier: parseInt(row[6]) || 1   // G欄：倍數
+                };
+                
+                if (!productSpecs[productId]) {
+                    productSpecs[productId] = [];
+                }
+                productSpecs[productId].push(spec);
+            });
+            
+            // 更新商品的價格和庫存
+            products.forEach(product => {
+                const specs = productSpecs[product.id];
+                if (specs && specs.length > 0) {
+                    product.price = Math.min(...specs.map(s => s.price));
+                    product.stock = specs.reduce((sum, spec) => sum + spec.stock, 0);
+                }
+            });
         }
 
-        // --- 分類照片 ---
-        if (categoryImgRes.ok) {
-            const data = await categoryImgRes.json();
-            if (data.values && data.values.length > 1) {
-                categoryImages = {}; categoryCarouselImages = {}; categorySubtitles = {};
-                data.values.slice(1).forEach(row => {
-                    const categoryName = row[0] || '';
-                    if (!categoryName) return;
-                    const bVal = (row[1] || '').trim();
-                    let subtitle = '', cardImage = '', carouselStartIdx = 2;
-                    if (bVal && !bVal.startsWith('http')) {
-                        subtitle = bVal; cardImage = (row[2] || '').trim(); carouselStartIdx = 3;
-                    } else {
-                        cardImage = bVal; carouselStartIdx = 2;
-                    }
-                    if (subtitle) categorySubtitles[categoryName] = subtitle;
-                    if (cardImage) categoryImages[categoryName] = cardImage;
-                    const carouselImgs = [];
-                    for (let i = carouselStartIdx; i < row.length; i++) {
-                        if (row[i] && row[i].trim()) carouselImgs.push(row[i].trim());
-                    }
-                    if (carouselImgs.length > 0) categoryCarouselImages[categoryName] = carouselImgs;
-                });
-            }
-        }
-
-        // --- 分類設定 ---
-        categories = [];
-        if (categoriesRes.ok) {
-            const data = await categoriesRes.json();
-            if (data.values && data.values.length > 1) {
-                categories = data.values.slice(1).map(row => ({
-                    name: row[0] || '',
-                    order: parseInt(row[1]) || 999,
-                    enabled: (row[2] || '').toString().toUpperCase() === 'TRUE'
-                }))
-                .filter(c => c.name && c.enabled)
-                .filter(c => c.name !== '全部')
-                .sort((a, b) => a.order - b.order);
-            }
-        }
-        if (categories.length === 0) {
-            const allTags = new Set();
-            products.forEach(p => { if (p.tags) p.tags.forEach(tag => allTags.add(tag)); });
-            categories = [...allTags].map((name, i) => ({ name, order: i + 1, enabled: true }));
-        }
-        const categoryTabs = document.getElementById('categoryTabs');
-        categoryTabs.innerHTML = '<button class="category-tab active" onclick="filterCategory(\'all\')">全部</button>';
-        categories.forEach(category => {
-            const button = document.createElement('button');
-            button.className = 'category-tab';
-            button.onclick = () => filterCategory(category.name);
-            button.textContent = formatCategoryName(category.name);
-            categoryTabs.appendChild(button);
-        });
-
-        // --- 公告 ---
-        if (announcementRes.ok) {
-            const data = await announcementRes.json();
-            if (data.values && data.values.length > 1) {
-                const allAnnouncements = data.values.slice(1)
-                    .filter(row => row[0] && (row[1] || '').trim() === '是')
-                    .map(row => ({ text: row[0] || '', link: row[2] || '', location: (row[3] || '').trim() || '兩者' }));
-                announcements = allAnnouncements.filter(a => a.location === '跑馬燈' || a.location === '兩者');
-                window._bulletinAnnouncements = allAnnouncements.filter(a => a.location === '布告欄' || a.location === '兩者');
-                if (announcements.length > 0) displayAnnouncements();
-                displayBulletinBoard();
-            }
-        }
-
-        // --- 優惠 ---
-        if (promotionRes.ok) {
-            const data = await promotionRes.json();
-            if (data.values && data.values.length > 1) {
-                promotions = data.values.slice(1)
-                    .filter(row => row[0] && (row[5] || '').trim() === '是')
-                    .map(row => ({
-                        name: row[0] || '',
-                        type: row[1] || '',
-                        unit: row[2] || '',
-                        threshold: parseFloat(row[3]) || 0,
-                        discount: parseFloat(row[4]) || 0,
-                        description: row[6] || '',
-                        allowedCategories: row[7] ? row[7].split(',').map(c => c.trim()).filter(c => c) : [],
-                        allowedSpecs: row[8] ? row[8].split(',').map(s => s.trim()).filter(s => s) : []
-                    }));
-            }
-        }
-
-        displayFeaturedProducts();
-        displayProducts();
+        // 🔥 先載入分類照片設定，再顯示商品
+        await loadCategoryImages();   // 等待載入完成
+        
+        displayFeaturedProducts();  // 顯示主打商品
+        displayProducts();          // 顯示所有商品
+        loadCategories();           // 🆕 載入並生成分類按鈕
+        loadAnnouncements();        // 🆕 載入公告
+        loadPromotions();           // 🆕 載入優惠設定
         showToast('商品載入完成!', 'success');
-
+        
     } catch (error) {
+        console.error('載入商品失敗:', error);
         showToast('載入商品失敗：' + error.message, 'error');
     }
 }
+
+// ==========================================
+// 🆕 公告列功能
+// ==========================================
 
 /**
  * 載入公告資料
  */
 async function loadAnnouncements() {
-    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
+    try {
+        const announcementUrl = `/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`;
+        const response = await fetch(announcementUrl);
+        
+        if (!response.ok) {
+            console.log('找不到公告設定工作表，跳過公告載入');
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.values || data.values.length < 2) {
+            console.log('公告資料為空');
+            return;
+        }
+        
+        // 解析公告資料
+        // 格式：A欄=公告內容, B欄=啟用狀態（是/否）, C欄=連結(可選)
+        announcements = data.values.slice(1)
+            .filter(row => row[0] && (row[1] || '').trim() === '是')  // 只取啟用的公告
+            .map(row => ({
+                text: row[0] || '',
+                link: row[2] || ''
+            }));
+        
+        if (announcements.length > 0) {
+            displayAnnouncements();
+        }
+        
+    } catch (error) {
+        console.error('載入公告失敗:', error);
+    }
 }
-
 
 /**
  * 顯示公告
  */
-function displayBulletinBoard() {
-    const board = document.getElementById('bulletinBoard');
-    const itemsEl = document.getElementById('bulletinItems');
-    const eggImg = document.getElementById('bulletinEggImg');
-    const eggPlaceholder = document.getElementById('bulletinEggPlaceholder');
-    if (systemSettings.bulletinImage) {
-        eggImg.src = systemSettings.bulletinImage;
-        eggImg.style.display = 'block';
-        if (eggPlaceholder) eggPlaceholder.style.display = 'none';
-    } else {
-        eggImg.style.display = 'none';
-        if (eggPlaceholder) eggPlaceholder.style.display = 'flex';
-    }
-
-    const bulletinList = window._bulletinAnnouncements || [];
-    if (bulletinList.length === 0) {
-        board.classList.remove('active');
-        return;
-    }
-
-    board.classList.add('active');
-    let currentIdx = 0;
-    function showBulletin() {
-        const ann = bulletinList[currentIdx];
-        itemsEl.style.opacity = '0';
-        setTimeout(() => {
-            itemsEl.innerHTML = `<span class="bulletin-item-text">${ann.text}</span>`;
-            itemsEl.style.opacity = '1';
-            if (ann.link) {
-                itemsEl.style.cursor = 'pointer';
-                itemsEl.onclick = () => window.open(ann.link, '_blank');
-            } else {
-                itemsEl.style.cursor = 'default';
-                itemsEl.onclick = null;
-            }
-            currentIdx = (currentIdx + 1) % bulletinList.length;
-        }, 300);
-    }
-    itemsEl.style.transition = 'opacity 0.3s ease';
-    showBulletin();
-    if (bulletinList.length > 1) {
-        if (window._bulletinInterval) clearInterval(window._bulletinInterval);
-        window._bulletinInterval = setInterval(showBulletin, 5000);
-    }
-}
-
 function displayAnnouncements() {
     const announcementBar = document.getElementById('announcementBar');
     const announcementText = document.getElementById('announcementText');
@@ -3242,10 +2868,13 @@ function displayAnnouncements() {
     announcementBar.classList.add('active');
     
     if (announcements.length === 1) {
+        // 單則公告：使用跑馬燈效果
         const announcement = announcements[0];
         announcementText.textContent = announcement.text;
         announcementText.classList.add('marquee');
         announcementText.classList.remove('fade');
+        
+        // 如果有連結，設定點擊事件
         if (announcement.link) {
             announcementBar.style.cursor = 'pointer';
             announcementBar.onclick = () => {
@@ -3253,16 +2882,21 @@ function displayAnnouncements() {
             };
         }
     } else {
+        // 多則公告：使用輪播效果
         let currentIndex = 0;
         announcementText.classList.remove('marquee');
         announcementText.classList.add('fade');
         
         function rotateAnnouncement() {
             const announcement = announcements[currentIndex];
+            
+            // 先淡出
             announcementText.style.opacity = '0';
             
             setTimeout(() => {
                 announcementText.textContent = announcement.text;
+                
+                // 更新連結
                 if (announcement.link) {
                     announcementBar.style.cursor = 'pointer';
                     announcementBar.onclick = () => {
@@ -3272,30 +2906,85 @@ function displayAnnouncements() {
                     announcementBar.style.cursor = 'default';
                     announcementBar.onclick = null;
                 }
+                
+                // 淡入
                 announcementText.style.opacity = '1';
                 
                 currentIndex = (currentIndex + 1) % announcements.length;
             }, 300);
         }
+        
+        // 初始顯示第一則
         rotateAnnouncement();
-        if (window._announcementInterval) clearInterval(window._announcementInterval);
-        window._announcementInterval = setInterval(rotateAnnouncement, 5000);
+        
+        // 每 5 秒切換一次
+        setInterval(rotateAnnouncement, 5000);
     }
 }
+
+// ==========================================
+// 🆕 優惠系統
+// ==========================================
 
 /**
  * 載入優惠設定
  */
 async function loadPromotions() {
-    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
+    try {
+        const promotionUrl = `/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`;
+        const response = await fetch(promotionUrl);
+        
+        if (!response.ok) {
+            console.log('找不到優惠設定工作表，跳過優惠載入');
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.values || data.values.length < 2) {
+            console.log('優惠資料為空');
+            return;
+        }
+        
+        // 解析優惠資料
+        // 🆕 新增 H、I 欄：適用類別、適用規格
+        // 格式：
+        // A欄=優惠名稱
+        // B欄=優惠類型（滿件折扣/滿額折扣/滿額免運）
+        // C欄=單位（條/包/元）
+        // D欄=條件數量/金額
+        // E欄=折扣金額
+        // F欄=啟用狀態（是/否）
+        // G欄=說明文字
+        // H欄=適用類別（空白=全部，或填寫類別，多個用逗號分隔）🆕
+        // I欄=適用規格（空白=全部，或填寫：單包/條）🆕
+        promotions = data.values.slice(1)
+            .filter(row => row[0] && (row[5] || '').trim() === '是')  // F欄：啟用
+            .map(row => ({
+                name: row[0] || '',
+                type: row[1] || '',
+                unit: row[2] || '',
+                threshold: parseFloat(row[3]) || 0,
+                discount: parseFloat(row[4]) || 0,
+                description: row[6] || '',
+                allowedCategories: row[7] ? row[7].split(',').map(c => c.trim()).filter(c => c) : [],  // 🆕 適用類別
+                allowedSpecs: row[8] ? row[8].split(',').map(s => s.trim()).filter(s => s) : []        // 🆕 適用規格
+            }));
+        
+        console.log('已載入優惠:', promotions);
+        
+    } catch (error) {
+        console.error('載入優惠失敗:', error);
+    }
 }
-
 
 /**
  * 計算優惠折扣
  * @param {Array} cartItems - 購物車商品
  * @returns {Object} 優惠詳情
  */
+
+// 顯示價格（含原價劃線）
 function renderSpecPrice(spec) {
     const el = document.getElementById('specInfoPrice');
     if (!el) return;
@@ -3318,14 +3007,21 @@ function calculatePromotions(cartItems) {
     if (promotions.length === 0 || cartItems.length === 0) {
         return result;
     }
+    
+    // 逐一檢查每個優惠
     promotions.forEach(promo => {
+        // 🆕 過濾符合條件的商品
         const eligibleItems = cartItems.filter(item => {
+            // 檢查類別限制
             if (promo.allowedCategories.length > 0) {
+                // 找出該商品的類別
                 const product = products.find(p => p.id === item.productId);
                 if (!product || !promo.allowedCategories.includes(product.category)) {
                     return false;  // 不符合類別限制
                 }
             }
+            
+            // 檢查規格限制
             if (promo.allowedSpecs.length > 0) {
                 if (!promo.allowedSpecs.includes(item.specName)) {
                     return false;  // 不符合規格限制
@@ -3338,6 +3034,8 @@ function calculatePromotions(cartItems) {
         if (eligibleItems.length === 0) {
             return;  // 沒有符合的商品，跳過此優惠
         }
+        
+        // 🆕 計算符合條件的商品統計
         const stats = {
             totalAmount: eligibleItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             totalBoxes: 0,
@@ -3380,6 +3078,7 @@ function calculatePromotions(cartItems) {
                 break;
                 
             case '滿額免運':
+                // 🆕 免運優惠改用全部商品金額（不限制類別）
                 const allAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 if (allAmount >= promo.threshold) {
                     result.freeShipping = true;
@@ -3399,6 +3098,8 @@ function calculatePromotions(cartItems) {
             if (discount > 0) {
                 result.totalDiscount += discount;
             }
+            
+            // 生成優惠訊息
             if (promo.type === '滿額免運') {
                 result.messages.push(`✅ ${promo.name}：免運費`);
             } else if (discount > 0) {
@@ -3419,6 +3120,7 @@ function displayPromotionHints(cartItems) {
     const hints = [];
     
     promotions.forEach(promo => {
+        // ✅ 先過濾符合此優惠條件的商品（跟 calculatePromotions 邏輯一致）
         const eligibleItems = cartItems.filter(item => {
             if (promo.allowedCategories.length > 0) {
                 const product = products.find(p => p.id === item.productId);
@@ -3429,6 +3131,8 @@ function displayPromotionHints(cartItems) {
             }
             return true;
         });
+
+        // 計算符合條件商品的統計
         const stats = {
             totalAmount: eligibleItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             totalBoxes: 0,
@@ -3443,6 +3147,8 @@ function displayPromotionHints(cartItems) {
                 stats.totalPacks += item.quantity;
             }
         });
+
+        // ✅ 組成類別括號文字
         const categoryLabel = promo.allowedCategories.length > 0
             ? `（${promo.allowedCategories.join('、')}）`
             : '';
@@ -3464,6 +3170,7 @@ function displayPromotionHints(cartItems) {
                 break;
             case '滿額折扣':
             case '滿額免運': {
+                // 免運用全部金額，其他用符合條件金額
                 const checkAmount = promo.type === '滿額免運'
                     ? cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
                     : stats.totalAmount;
@@ -3480,8 +3187,13 @@ function displayPromotionHints(cartItems) {
     
     return hints.join('<br>');
 }
+
+// ==========================================
+// 🔥 只更新已購買商品的庫存（輕量級更新）
+// ==========================================
 async function updatePurchasedProductsStock(purchasedItems) {
     try {
+        // 載入最新的商品規格表
         const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`;
         const specsResponse = await fetch(specsUrl);
         
@@ -3490,16 +3202,20 @@ async function updatePurchasedProductsStock(purchasedItems) {
         const specsData = await specsResponse.json();
         
         if (specsData.values && specsData.values.length > 1) {
+            // 只更新已購買商品的規格
             const updatedProductIds = new Set();
             
             specsData.values.slice(1).forEach(row => {
                 const productId = row[0];
                 const specName = row[2] || '';
+                
+                // 檢查這個規格是否在購買清單中
                 const isPurchased = purchasedItems.some(item => 
                     item.productId === productId && item.specName === specName
                 );
                 
                 if (isPurchased) {
+                    // 更新這個規格的庫存
                     if (productSpecs[productId]) {
                         const spec = productSpecs[productId].find(s => s.specName === specName);
                         if (spec) {
@@ -3509,23 +3225,36 @@ async function updatePurchasedProductsStock(purchasedItems) {
                     }
                 }
             });
+            
+            // 重新計算受影響商品的總庫存
             updatedProductIds.forEach(productId => {
                 const product = products.find(p => p.id === productId);
                 if (product && productSpecs[productId]) {
                     product.stock = productSpecs[productId].reduce((sum, spec) => sum + spec.stock, 0);
                 }
             });
+            
+            // 只重新渲染商品顯示（不重新載入分類）
             displayFeaturedProducts();
             displayProducts();
+            
+            console.log('✅ 已更新', updatedProductIds.size, '個商品的庫存');
         }
         
     } catch (error) {
+        console.error('更新庫存失敗:', error);
+        // 如果輕量更新失敗，靜默失敗（用戶下次重整頁面時會看到最新庫存）
     }
 }
+
+// ==========================================
+// 🔥 定期自動刷新所有商品庫存（解決多人同時下單問題）
+// ==========================================
 let autoRefreshInterval = null;
 
 async function refreshAllStock() {
     try {
+        // 靜默更新，不顯示提示訊息
         const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`;
         const specsResponse = await fetch(specsUrl);
         
@@ -3534,6 +3263,7 @@ async function refreshAllStock() {
         const specsData = await specsResponse.json();
         
         if (specsData.values && specsData.values.length > 1) {
+            // 清空並重建規格數據
             productSpecs = {};
             
             specsData.values.slice(1).forEach(row => {
@@ -3556,38 +3286,57 @@ async function refreshAllStock() {
                 }
                 productSpecs[productId].push(spec);
             });
+            
+            // 更新所有商品的庫存
             products.forEach(product => {
                 const specs = productSpecs[product.id];
                 if (specs && specs.length > 0) {
                     product.stock = specs.reduce((sum, spec) => sum + spec.stock, 0);
                 }
             });
+            
+            // 重新渲染商品顯示
             displayFeaturedProducts();
             displayProducts();
+            
+            console.log('🔄 自動刷新庫存完成 -', new Date().toLocaleTimeString());
         }
         
     } catch (error) {
+        console.error('自動刷新庫存失敗:', error);
     }
 }
 
-function startAutoRefresh(intervalSeconds = 120) {
+function startAutoRefresh(intervalSeconds = 30) {
+    // 清除舊的定時器
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
     }
+    
+    // 設置新的定時器（預設30秒刷新一次）
     autoRefreshInterval = setInterval(() => {
         refreshAllStock();
     }, intervalSeconds * 1000);
+    
+    console.log(`✅ 已啟動自動刷新，每 ${intervalSeconds} 秒更新一次庫存`);
 }
 
 function stopAutoRefresh() {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
         autoRefreshInterval = null;
+        console.log('⏹️ 已停止自動刷新');
     }
 }
+
+// ==========================================
+// 🆕 載入分類照片設定（從「分類照片設定」工作表）
+// ==========================================
 let categoryImages = {};        // 儲存分類照片設定（C欄，最外層卡片圖）
 let categoryCarouselImages = {}; // 儲存分類輪播圖（D欄起，點進去的多張圖）
 let categorySubtitles = {};     // 🆕 儲存副標題文字（B欄）
+
+// 將分類名稱中的國家代碼轉成旗幟 emoji（例如「Ploom蛋 JP」→「Ploom蛋 🇯🇵」）
 function formatCategoryName(name) {
     if (!name) return '';
     const flags = { 'JP': '🇯🇵', 'KR': '🇰🇷', 'US': '🇺🇸', 'TW': '🇹🇼', 'CN': '🇨🇳', 'UK': '🇬🇧' };
@@ -3595,10 +3344,133 @@ function formatCategoryName(name) {
 }
 
 async function loadCategoryImages() {
-    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
+    try {
+        const sheetName = '分類照片設定';
+        const url = `/api/sheets?sheet=${encodeURIComponent(sheetName)}`;
+        
+        const response = await fetch(url);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.values && data.values.length > 1) {
+                categoryImages = {};
+                categoryCarouselImages = {};
+                categorySubtitles = {};   // 🆕 副標題
+                data.values.slice(1).forEach(row => {
+                    const categoryName = row[0] || '';   // A欄：分類名稱
+                    if (!categoryName) return;
+
+                    // 判斷 B 欄是副標題還是圖片網址
+                    // 若 B 欄不含 http，視為副標題文字；否則為舊格式封面圖
+                    const bVal = (row[1] || '').trim();
+                    let subtitle = '';
+                    let cardImage = '';
+                    let carouselStartIdx = 2;
+
+                    if (bVal && !bVal.startsWith('http')) {
+                        // 新格式：B=副標題, C=封面圖, D起=輪播
+                        subtitle   = bVal;
+                        cardImage  = (row[2] || '').trim();
+                        carouselStartIdx = 3;
+                    } else {
+                        // 舊格式：B=封面圖, C起=輪播（向下相容）
+                        cardImage  = bVal;
+                        carouselStartIdx = 2;
+                    }
+
+                    if (subtitle)   categorySubtitles[categoryName] = subtitle;
+                    if (cardImage)  categoryImages[categoryName]    = cardImage;
+
+                    // 輪播圖
+                    const carouselImgs = [];
+                    for (let i = carouselStartIdx; i < row.length; i++) {
+                        if (row[i] && row[i].trim()) carouselImgs.push(row[i].trim());
+                    }
+                    if (carouselImgs.length > 0) {
+                        categoryCarouselImages[categoryName] = carouselImgs;
+                    }
+                });
+                
+                console.log('✅ 已載入分類照片設定：', categoryImages);
+                console.log('✅ 已載入輪播圖設定：', categoryCarouselImages);
+                console.log('✅ 已載入副標題設定：', categorySubtitles);
+            }
+        }
+    } catch (error) {
+        console.log('⚠️ 沒有找到「分類照片設定」工作表，將使用商品圖片');
+    }
 }
+
+// ==========================================
+// 🆕 載入並生成分類按鈕（從「分類設定」工作表）
+// ==========================================
 async function loadCategories() {
-    // 已整合至 loadProductsData 的 Promise.all，此函數保留相容性
+    try {
+        // 從 Google Sheets 讀取「分類設定」工作表
+        const categoriesSheetName = '分類設定';
+        const categoriesUrl = `/api/sheets?sheet=${encodeURIComponent(categoriesSheetName)}`;
+        
+        categories = [];  // 🔥 使用全域變數
+        
+        try {
+            const response = await fetch(categoriesUrl);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.values && data.values.length > 1) {
+                    // 從工作表讀取分類
+                    categories = data.values.slice(1).map(row => ({
+                        name: row[0] || '',                    // A欄：分類名稱
+                        order: parseInt(row[1]) || 999,        // B欄：排序順序
+                        enabled: (row[2] || '').toString().toUpperCase() === 'TRUE'  // C欄：是否啟用（TRUE/FALSE）
+                    }))
+                    .filter(c => c.name && c.enabled)  // 🔥 只保留已啟用的分類
+                    .filter(c => c.name !== '全部')    // 🔥 排除「全部」分類（因為會自動生成）
+                    .sort((a, b) => a.order - b.order);  // 依照順序排序
+                    
+                    console.log('✅ 從「分類設定」工作表載入分類：', categories);
+                }
+            }
+        } catch (err) {
+            console.log('⚠️ 沒有找到「分類設定」工作表，將從商品資料自動生成分類');
+        }
+        
+        // 方法2：如果沒有分類表，就從商品資料的 F欄（tags）提取唯一分類
+        if (categories.length === 0) {
+            const allTags = new Set();
+            products.forEach(p => {
+                if (p.tags && p.tags.length > 0) {
+                    p.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+            
+            categories = [...allTags].map((name, index) => ({
+                name: name,
+                order: index + 1,
+                enabled: true
+            }));
+            
+            console.log('✅ 從商品資料自動生成分類：', categories);
+        }
+        
+        // 生成分類按鈕
+        const categoryTabs = document.getElementById('categoryTabs');
+        
+        // 保留「全部」按鈕，清除其他按鈕
+        categoryTabs.innerHTML = '<button class="category-tab active" onclick="filterCategory(\'all\')">全部</button>';
+        
+        // 生成其他分類按鈕
+        categories.forEach(category => {
+            const button = document.createElement('button');
+            button.className = 'category-tab';
+            button.onclick = () => filterCategory(category.name);
+            button.textContent = formatCategoryName(category.name);
+            categoryTabs.appendChild(button);
+        });
+        
+        console.log(`✅ 已載入 ${categories.length} 個啟用的分類按鈕`);
+        
+    } catch (error) {
+        console.error('❌ 載入分類時發生錯誤：', error);
+    }
 }
 
 /**
@@ -3619,14 +3491,22 @@ function getCategoryIcon(categoryName) {
     
     return iconMap[categoryName] || '';
 }
+
+// ==========================================
+// 主打商品顯示 + 自定義區塊卡片
+// ==========================================
 function displayFeaturedProducts() {
     const featuredGrid = document.getElementById('featuredGrid');
     const featuredSection = document.getElementById('featuredSection');
     
     const featuredProducts = products.filter(p => p.isFeatured);
+    
+    // 取得所有自定義區塊名稱（去重）
     const customBlockNames = [...new Set(
         products.filter(p => p.customBlock).map(p => p.customBlock)
     )];
+    
+    // 主打和自定義都沒有 → 隱藏整個區塊
     if (featuredProducts.length === 0 && customBlockNames.length === 0) {
         featuredSection.style.display = 'none';
         return;
@@ -3634,6 +3514,8 @@ function displayFeaturedProducts() {
     
     featuredSection.style.display = 'block';
     featuredGrid.innerHTML = '';
+    
+    // ── 主打商品卡片 ──
     if (featuredProducts.length > 0) {
         let totalStock = 0, minPrice = Infinity, maxPrice = 0;
         featuredProducts.forEach(product => {
@@ -3645,7 +3527,7 @@ function displayFeaturedProducts() {
             });
         });
         
-        let imageUrl = categoryImages['本月激推🔥'] || featuredProducts[0]?.image || '';
+        let imageUrl = categoryImages['主打商品'] || featuredProducts[0]?.image || '';
         if (imageUrl && !imageUrl.startsWith('http')) imageUrl = 'https://' + imageUrl;
         if (!imageUrl) imageUrl = '';
         
@@ -3659,13 +3541,15 @@ function displayFeaturedProducts() {
             <div class="product-image">
                 <img src="${imageUrl}" alt="主打商品" onerror="this.style.display='none'">
             </div>
-            <div class="product-name">本月激推🔥</div>
+            <div class="product-name">主打商品</div>
             <div class="product-price">$${minPrice}${minPrice !== maxPrice ? ` - $${maxPrice}` : ''}</div>
 
             <button class="add-to-cart-btn" onclick="event.stopPropagation(); openFeaturedCategoryModal()">選擇規格</button>
         `;
         featuredGrid.appendChild(card);
     }
+    
+    // ── 自定義區塊卡片（每個區塊名稱一張卡）──
     customBlockNames.forEach(blockName => {
         const blockProducts = products.filter(p => p.customBlock === blockName);
         
@@ -3679,6 +3563,8 @@ function displayFeaturedProducts() {
             });
         });
         if (minPrice === Infinity) minPrice = 0;
+        
+        // 圖片優先用「分類照片設定」，否則用第一個商品的圖片
         let imageUrl = categoryImages[blockName] || blockProducts[0]?.image || '';
         if (imageUrl && !imageUrl.startsWith('http')) imageUrl = 'https://' + imageUrl;
         if (!imageUrl) imageUrl = '';
@@ -3703,6 +3589,11 @@ function displayFeaturedProducts() {
         featuredGrid.appendChild(card);
     });
 }
+
+// ==========================================
+// 🆕 自定義區塊：開啟彈窗（第一層 - 選口味）
+// 邏輯與主打商品完全一致
+// ==========================================
 function openCustomBlockModal(blockName) {
     if (checkMaintenance()) return;
     currentCategoryProducts = products.filter(p => p.customBlock === blockName);
@@ -3713,6 +3604,7 @@ function openCustomBlockModal(blockName) {
     }
     
     document.getElementById('specModalTitle').textContent = formatCategoryName(blockName);
+    // 🆕 設定副標題
     const _sub1 = document.getElementById('specModalSubtitle');
     const _st1 = categorySubtitles[blockName] || '';
     if (_sub1) { _sub1.textContent = _st1; _sub1.style.display = _st1 ? 'inline' : 'none'; }
@@ -3720,9 +3612,13 @@ function openCustomBlockModal(blockName) {
     setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
     history.pushState({ modal: 'spec' }, '');
     isModalOpen = true;
+    
+    // 🆕 初始化輪播圖
     window._currentModalCategoryName = blockName;
     window._isRegularCategoryModal = false;
     initCarousel(blockName);
+    
+    // 計算統計
     let totalStock = 0, minPrice = Infinity, maxPrice = 0;
     currentCategoryProducts.forEach(product => {
         const specs = productSpecs[product.id];
@@ -3733,31 +3629,37 @@ function openCustomBlockModal(blockName) {
         });
     });
     if (minPrice === Infinity) minPrice = 0;
+    
+    // 小圖已移除
     document.getElementById('specInfoPrice').textContent = minPrice === maxPrice ? `售價: $${minPrice}` : `售價: $${minPrice} - $${maxPrice}`;
     document.getElementById('specInfoStock').textContent = `庫存：${totalStock} 件`;
     document.getElementById('specInfoStock').style.color = 'var(--accent-green)';
+    
+    // 渲染商品口味選項（與主打商品完全相同格式）
     const optionsContainer = document.getElementById('specOptions');
     const flavorTitle = `<div class="spec-section-title" style="grid-column:1/-1;">🎯 選擇商品 (${currentCategoryProducts.length} 種選項)</div>`;
+    const flavorOptions = currentCategoryProducts.map((product, index) => {
+        const specs = productSpecs[product.id];
+        const hasStock = specs && specs.some(s => s.stock > 0);
+        const hasSale = specs && specs.some(s => s.originalPrice > 0);
+        return `
+            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''}"
+                 onclick="selectFlavor(${index})" id="flavor-${index}"
+                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+            </div>`;
+    }).join('');
+
+    // 🆕 預設顯示「選擇項目」
     const firstCustomProduct = currentCategoryProducts.find(p => {
         const s = productSpecs[p.id];
         return s && s.some(x => x.stock > 0);
     }) || currentCategoryProducts[0];
     const defaultCustomSpecs = firstCustomProduct ? (productSpecs[firstCustomProduct.id] || []) : [];
     window.currentQuantitySpecs = defaultCustomSpecs;
-    selectedFlavor = firstCustomProduct || null;
 
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
-        return `
-            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                 onclick="selectFlavor(${index})" id="flavor-${index}"
-                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
-            </div>`;
-    }).join('');
+    // 預先設定 selectedFlavor 為第一個有庫存的口味
+    selectedFlavor = firstCustomProduct || null;
     selectedSpec = null;
     quantity = 1;
     updateQuantityDisplay();
@@ -3783,26 +3685,47 @@ function openCustomBlockModal(blockName) {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
+
+// ==========================================
+// 主打商品：第一層 - 選擇商品（口味）
+// ==========================================
 function openFeaturedCategoryModal() {
     if (checkMaintenance()) return;
+    // 取得所有主打商品
     currentCategoryProducts = products.filter(p => p.isFeatured);
     
     if (currentCategoryProducts.length === 0) {
-        showToast('目前沒有本月激推商品', 'error');
+        showToast('目前沒有主打商品', 'error');
         return;
     }
-    document.getElementById('specModalTitle').textContent = '本月激推🔥';
+    
+    // 設置彈窗標題為「主打商品」
+    document.getElementById('specModalTitle').textContent = '主打商品';
+    // 🆕 設定副標題
     const _sub2 = document.getElementById('specModalSubtitle');
-    const _st2 = categorySubtitles['本月激推🔥'] || '';
+    const _st2 = categorySubtitles['主打商品'] || '';
     if (_sub2) { _sub2.textContent = _st2; _sub2.style.display = _st2 ? 'inline' : 'none'; }
     document.getElementById('specModal').classList.add('active');
     setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
+    
+    // 🔥 添加歷史記錄，讓返回鍵可以關閉彈窗
     history.pushState({ modal: 'spec' }, '');
     isModalOpen = true;
-    window._currentModalCategoryName = '本月激推🔥';
+    
+    // 🆕 初始化輪播圖（主打商品使用「主打商品」這個分類名稱）
+    window._currentModalCategoryName = '主打商品';
     window._isRegularCategoryModal = false;
-    initCarousel('本月激推🔥');
+    initCarousel('主打商品');
+    
+    // 渲染主打商品選項
     renderFeaturedFlavorOptions();
+    
+    // 重置選擇狀態
+    selectedFlavor = null;
+    selectedSpec = null;
+    quantity = 1;
+    updateQuantityDisplay();
+    updateAddToCartButton();
 }
 
 function renderFeaturedFlavorOptions() {
@@ -3810,6 +3733,8 @@ function renderFeaturedFlavorOptions() {
     const imageContainer = null; // 小圖已移除
     const priceDisplay = document.getElementById('specInfoPrice');
     const stockDisplay = document.getElementById('specInfoStock');
+    
+    // 計算總體信息
     let totalStock = 0;
     let minPrice = Infinity;
     let maxPrice = 0;
@@ -3824,6 +3749,8 @@ function renderFeaturedFlavorOptions() {
             });
         }
     });
+    
+    // 更新圖片（使用第一個商品的圖片）
     let imageUrl = currentCategoryProducts[0].image || '';
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
         imageUrl = 'https://' + imageUrl;
@@ -3831,31 +3758,24 @@ function renderFeaturedFlavorOptions() {
     if (!imageUrl) {
         imageUrl = '';
     }
+    // 小圖已移除
+    
+    // 更新價格和庫存
     priceDisplay.textContent = minPrice === maxPrice ? `售價: $${minPrice}` : `售價: $${minPrice} - $${maxPrice}`;
     stockDisplay.textContent = `庫存：${totalStock} 件`;
     stockDisplay.style.color = 'var(--accent-green)';
+    
+    // 生成商品選項（2列網格布局）
     const flavorTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">🎯 選擇商品 (${currentCategoryProducts.length} 種選項)</div>`;
-    const firstFeaturedProduct = currentCategoryProducts.find(p => {
-        const s = productSpecs[p.id];
-        return s && s.some(x => x.stock > 0);
-    }) || currentCategoryProducts[0];
-    const defaultFeaturedSpecs = firstFeaturedProduct ? (productSpecs[firstFeaturedProduct.id] || []) : [];
-    window.currentQuantitySpecs = defaultFeaturedSpecs;
-    selectedFlavor = firstFeaturedProduct || null;
-    selectedSpec = null;
-    quantity = 1;
-    updateQuantityDisplay();
-    updateAddToCartButton();
-
+    
     const flavorOptions = currentCategoryProducts.map((product, index) => {
         const specs = productSpecs[product.id];
         const hasStock = specs && specs.some(s => s.stock > 0);
         const isOutOfStock = !hasStock;
         const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
         
         return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}" 
                  onclick="selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
@@ -3863,6 +3783,21 @@ function renderFeaturedFlavorOptions() {
             </div>
         `;
     }).join('');
+    
+    // 🆕 預設顯示「選擇項目」
+    const firstFeaturedProduct = currentCategoryProducts.find(p => {
+        const s = productSpecs[p.id];
+        return s && s.some(x => x.stock > 0);
+    }) || currentCategoryProducts[0];
+    const defaultFeaturedSpecs = firstFeaturedProduct ? (productSpecs[firstFeaturedProduct.id] || []) : [];
+    window.currentQuantitySpecs = defaultFeaturedSpecs;
+
+    // 預先設定 selectedFlavor
+    selectedFlavor = firstFeaturedProduct || null;
+    selectedSpec = null;
+    quantity = 1;
+    updateQuantityDisplay();
+    updateAddToCartButton();
 
     if (defaultFeaturedSpecs.length > 0) {
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
@@ -3884,6 +3819,10 @@ function renderFeaturedFlavorOptions() {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
+
+// ==========================================
+// 商品顯示 - 顯示類別卡片
+// ==========================================
 function displayProducts() {
     const grid = document.getElementById('productsGrid');
     
@@ -3891,6 +3830,8 @@ function displayProducts() {
         grid.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">暫無商品</p>';
         return;
     }
+    
+    // 🔥 根據當前分類過濾商品（使用 F欄的 tags）
     const filteredProducts = currentCategory === 'all' 
         ? products 
         : products.filter(p => p.tags && p.tags.includes(currentCategory));
@@ -3899,6 +3840,8 @@ function displayProducts() {
         grid.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">此分類暫無商品</p>';
         return;
     }
+    
+    // 按類別分組統計（使用 E欄的 category 作為口味分類）
     const categoriesMap = {};
     filteredProducts.forEach(product => {
         const category = product.category || '其他';
@@ -3916,6 +3859,8 @@ function displayProducts() {
         const specs = productSpecs[product.id];
         if (specs && specs.length > 0) {
             categoriesMap[category].products.push(product);
+            
+            // 計算總庫存和價格範圍
             const totalStock = specs.reduce((sum, s) => sum + s.stock, 0);
             categoriesMap[category].totalStock += totalStock;
             
@@ -3928,7 +3873,10 @@ function displayProducts() {
             if (maxPrice > categoriesMap[category].maxPrice) {
                 categoriesMap[category].maxPrice = maxPrice;
             }
+            
+            // 🔥 優先使用「分類照片設定」的圖片，其次使用第一個商品的圖片
             if (!categoriesMap[category].image) {
+                // 從 categoryImages 物件中找到對應的分類照片
                 if (categoryImages[category]) {
                     categoriesMap[category].image = categoryImages[category];
                 } else if (product.image) {
@@ -3937,9 +3885,12 @@ function displayProducts() {
             }
         }
     });
+    
+    // 生成類別卡片
     const categories = Object.values(categoriesMap);
     
     grid.innerHTML = categories.map(category => {
+        // 修正圖片網址
         let imageUrl = category.image || '';
         if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
             imageUrl = 'https://' + imageUrl;
@@ -3962,37 +3913,63 @@ function displayProducts() {
         `;
     }).join('');
 }
+
+// ==========================================
+// 商品分類過濾
+// ==========================================
 function filterCategory(category) {
     currentCategory = category;
+    
+    // 更新標籤狀態
     document.querySelectorAll('.category-tab').forEach(tab => {
         tab.classList.remove('active');
     });
     event.target.classList.add('active');
+    
+    // 重新渲染商品
     displayProducts();
+    
+    // 滾動到商品區域
     document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ==========================================
+// 第一層：類別選擇彈窗
+// ==========================================
 let currentCategoryProducts = []; // 當前類別的所有商品
 let selectedFlavor = null; // 選中的口味（商品）
 
 function openCategoryModal(categoryName) {
     if (checkMaintenance()) return;
+    // 獲取該類別下的所有商品（口味）
     currentCategoryProducts = products.filter(p => p.category === categoryName);
     
     if (currentCategoryProducts.length === 0) {
         showToast('此類別暫無商品', 'error');
         return;
     }
+    
+    // 設置彈窗標題
     document.getElementById('specModalTitle').textContent = formatCategoryName(categoryName);
+    // 🆕 設定副標題
     const _sub3 = document.getElementById('specModalSubtitle');
     const _st3 = categorySubtitles[categoryName] || '';
     if (_sub3) { _sub3.textContent = _st3; _sub3.style.display = _st3 ? 'inline' : 'none'; }
+    // 🔥 必須在 updateModalPromoHint() 之前先設定分類名稱
     window._currentModalCategoryName = categoryName;
+    // 🔥 標記為一般類別（非主打/精選），點口味不更新輪播圖
     window._isRegularCategoryModal = true;
     document.getElementById('specModal').classList.add('active');
     setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
+    
+    // 🔥 添加歷史記錄，讓返回鍵可以關閉彈窗
     history.pushState({ modal: 'spec' }, '');
     isModalOpen = true;
+    
+    // 🆕 初始化輪播圖（從分類照片設定的 C 欄起）
     initCarousel(categoryName);
+    
+    // 渲染該類別下的所有口味選項（內部會設定 selectedFlavor）
     renderFlavorOptions(categoryName);
 }
 
@@ -4001,6 +3978,8 @@ function renderFlavorOptions(categoryName) {
     const imageContainer = null; // 小圖已移除
     const priceDisplay = document.getElementById('specInfoPrice');
     const stockDisplay = document.getElementById('specInfoStock');
+    
+    // 計算該類別的總體信息
     let totalStock = 0;
     let minPrice = Infinity;
     let maxPrice = 0;
@@ -4015,6 +3994,8 @@ function renderFlavorOptions(categoryName) {
             });
         }
     });
+    
+    // 更新圖片（使用第一個商品的圖片）
     let imageUrl = currentCategoryProducts[0].image || '';
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
         imageUrl = 'https://' + imageUrl;
@@ -4022,31 +4003,24 @@ function renderFlavorOptions(categoryName) {
     if (!imageUrl) {
         imageUrl = '';
     }
+    // 小圖已移除
+    
+    // 更新價格和庫存
     priceDisplay.textContent = minPrice === maxPrice ? `售價: $${minPrice}` : `售價: $${minPrice} - $${maxPrice}`;
     stockDisplay.textContent = `庫存：${totalStock} 件`;
     stockDisplay.style.color = 'var(--accent-green)';
+    
+    // 生成口味選項（2列網格布局）
     const flavorTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">🎯 選擇口味 (${currentCategoryProducts.length} 種選項)</div>`;
-    const firstProduct = currentCategoryProducts.find(p => {
-        const s = productSpecs[p.id];
-        return s && s.some(x => x.stock > 0);
-    }) || currentCategoryProducts[0];
-    const defaultSpecs = firstProduct ? (productSpecs[firstProduct.id] || []) : [];
-    window.currentQuantitySpecs = defaultSpecs;
-    selectedFlavor = firstProduct || null;
-    selectedSpec = null;
-    quantity = 1;
-    updateQuantityDisplay();
-    updateAddToCartButton();
-
+    
     const flavorOptions = currentCategoryProducts.map((product, index) => {
         const specs = productSpecs[product.id];
         const hasStock = specs && specs.some(s => s.stock > 0);
         const isOutOfStock = !hasStock;
         const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstProduct && product.id === firstProduct.id;
         
         return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}" 
                  onclick="selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
@@ -4054,6 +4028,21 @@ function renderFlavorOptions(categoryName) {
             </div>
         `;
     }).join('');
+    
+    // 🆕 預設顯示「選擇項目」：抓第一個有庫存口味的規格
+    const firstProduct = currentCategoryProducts.find(p => {
+        const s = productSpecs[p.id];
+        return s && s.some(x => x.stock > 0);
+    }) || currentCategoryProducts[0];
+    const defaultSpecs = firstProduct ? (productSpecs[firstProduct.id] || []) : [];
+    window.currentQuantitySpecs = defaultSpecs;
+
+    // 預先設定 selectedFlavor，讓 selectQuantitySpec 可以正常執行
+    selectedFlavor = firstProduct || null;
+    selectedSpec = null;
+    quantity = 1;
+    updateQuantityDisplay();
+    updateAddToCartButton();
 
     if (defaultSpecs.length > 0) {
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
@@ -4067,6 +4056,8 @@ function renderFlavorOptions(categoryName) {
                     </div>`;
         }).join('');
         optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
+
+        // 自動預選第一個有庫存的規格
         let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) setTimeout(() => selectQuantitySpec(autoIdx), 100);
@@ -4074,6 +4065,10 @@ function renderFlavorOptions(categoryName) {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
+
+// ==========================================
+// 第二層：選擇口味後顯示數量規格選項
+// ==========================================
 function selectFlavor(index) {
     const product = currentCategoryProducts[index];
     const specs = productSpecs[product.id];
@@ -4082,6 +4077,8 @@ function selectFlavor(index) {
         showToast('此口味暫無規格', 'error');
         return;
     }
+    
+    // 檢查是否有庫存
     const hasStock = specs.some(s => s.stock > 0);
     if (!hasStock) {
         showToast('此口味已售完', 'error');
@@ -4090,18 +4087,29 @@ function selectFlavor(index) {
     
     selectedFlavor = product;
     updateSpecThumbFromProduct(product);
-    document.querySelectorAll('[id^="flavor-"]').forEach((el) => {
-        el.classList.toggle('selected', el.id === `flavor-${index}`);
+    
+    // 更新口味選項的選中狀態
+    document.querySelectorAll('[id^="flavor-"]').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
     });
+    
+    // 🆕 點選口味時：重新組合輪播（商品圖優先 + 分類輪播圖接後）
+    // 🔥 只有主打/精選才更新輪播圖，一般類別不更新
     if (!window._isRegularCategoryModal) {
         const categoryName = window._currentModalCategoryName || '';
         const carouselBase = categoryCarouselImages[categoryName] || [];
         const seen = new Set();
         const merged = [];
+
+        // 1. 先加這個口味的商品圖
         let productImg = product.image || '';
         if (productImg && !productImg.startsWith('http')) productImg = 'https://' + productImg;
         if (productImg && !seen.has(productImg)) { seen.add(productImg); merged.push(productImg); }
+
+        // 2. 再加 C 欄起的分類輪播圖
         carouselBase.forEach(u => { if (!seen.has(u)) { seen.add(u); merged.push(u); } });
+
+        // 3. 若完全沒圖，fallback 到 B 欄卡片圖
         if (merged.length === 0) {
             const coverImg = categoryImages[categoryName] || '';
             if (coverImg) merged.push(coverImg);
@@ -4109,14 +4117,25 @@ function selectFlavor(index) {
 
         if (merged.length > 0) initCarouselFromUrls(merged);
     }
+    
+    // 顯示該口味的數量規格選項（單包、10包組合等）
     renderQuantitySpecOptions(specs);
+    
+    // 🔥 自動預選「單包」規格
+    // 尋找規格名稱包含「單包」的選項，或者第一個有庫存的規格
     let autoSelectIndex = -1;
+    
+    // 優先尋找名稱包含「單包」的規格
     autoSelectIndex = specs.findIndex(s => 
         s.specName.includes('單包') && s.stock > 0
     );
+    
+    // 如果沒有找到，則選擇第一個有庫存的規格
     if (autoSelectIndex === -1) {
         autoSelectIndex = specs.findIndex(s => s.stock > 0);
     }
+    
+    // 自動選擇規格
     if (autoSelectIndex !== -1) {
         setTimeout(() => {
             selectQuantitySpec(autoSelectIndex);
@@ -4128,10 +4147,13 @@ function renderQuantitySpecOptions(specs) {
     const optionsContainer = document.getElementById('specOptions');
     
     const flavorTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">🎯 選擇口味 (${currentCategoryProducts.length} 種選項)</div>`;
+    
+    // 重新建立口味選項（不用 outerHTML，避免殘留 selected class）
     const currentFlavorOptions = currentCategoryProducts.map((product, index) => {
         const pSpecs = productSpecs[product.id];
         const hasStock = pSpecs && pSpecs.some(s => s.stock > 0);
         const hasSale = pSpecs && pSpecs.some(s => s.originalPrice > 0);
+        // 只有當前選中的口味才加 selected
         const isSelected = selectedFlavor && product.id === selectedFlavor.id;
         return `<div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
                      onclick="selectFlavor(${index})" id="flavor-${index}"
@@ -4153,8 +4175,14 @@ function renderQuantitySpecOptions(specs) {
     }).join('');
     
     optionsContainer.innerHTML = flavorTitle + currentFlavorOptions + quantityTitle + quantityOptions;
+    
+    // 儲存當前規格到全域變數
     window.currentQuantitySpecs = specs;
 }
+
+// ==========================================
+// 第三層：選擇數量規格（單包或10包組合）
+// ==========================================
 function selectQuantitySpec(index) {
     const specs = window.currentQuantitySpecs;
     const spec = specs[index];
@@ -4170,9 +4198,13 @@ function selectQuantitySpec(index) {
         productName: selectedFlavor.name,
         productImage: selectedFlavor.image
     };
-    document.querySelectorAll('[id^="qty-spec-"]').forEach((el) => {
-        el.classList.toggle('selected', el.id === `qty-spec-${index}`);
+    
+    // 更新選中狀態
+    document.querySelectorAll('[id^="qty-spec-"]').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
     });
+    
+    // 更新價格和庫存顯示
     renderSpecPrice(spec);
     
     const stockDisplay = document.getElementById('specInfoStock');
@@ -4194,17 +4226,29 @@ function selectQuantitySpec(index) {
     else if (isLowStock) stockSuffix = ' ⚠️ 即將售完';
     stockDisplay.textContent = stockText + stockSuffix;
     stockDisplay.style.color = isCriticalStock ? '#ff4444' : isLowStock ? '#ff9900' : 'var(--accent-green)';
+    
+    // 重置數量
     quantity = 1;
     updateQuantityDisplay();
     updateAddToCartButton();
 }
+
+// ==========================================
+// 🔥 瀏覽器返回鍵處理 - 關閉彈窗回到主頁
+// ==========================================
 let isModalOpen = false;
+
+// 監聽瀏覽器返回鍵
 window.addEventListener('popstate', function(event) {
+    // 檢查是否有任何彈窗開啟
     const specModal = document.getElementById('specModal');
     const cartSidebar = document.getElementById('cartSidebar');
     const checkoutModal = document.getElementById('checkoutModal');
     const orderSearchModal = document.getElementById('orderSearchModal');
     const profileUpdateModal = document.getElementById('profileUpdateModal');
+    
+    // 依序檢查並關閉開啟的彈窗
+    // 燈箱優先關閉
     const specLb = document.getElementById('specLightbox');
     if (specLb && specLb.style.display === 'flex') {
         closeSpecLightbox();
@@ -4212,6 +4256,7 @@ window.addEventListener('popstate', function(event) {
     }
     const orderDetailView = document.getElementById('orderDetailView');
     if (orderDetailView) {
+        // 優先關閉訂單詳情全螢幕頁
         closeOrderDetail();
         isModalOpen = false;
     } else if (specModal && specModal.classList.contains('active')) {
@@ -4230,12 +4275,19 @@ window.addEventListener('popstate', function(event) {
         closeProfileUpdateModal();
         isModalOpen = false;
     } else {
+        // 如果沒有彈窗開啟，阻止返回（停留在主頁）
         history.pushState(null, '', location.href);
     }
 });
+
+// 頁面載入時，設置初始狀態，防止返回跳出網站
 window.addEventListener('load', function() {
     history.pushState(null, '', location.href);
 });
+
+// ==========================================
+// 規格選擇彈窗（保留原有功能）
+// ==========================================
 function openSpecModal(productId) {
     if (checkMaintenance()) return;
     currentProduct = products.find(p => p.id === productId);
@@ -4248,9 +4300,12 @@ function openSpecModal(productId) {
     }
 
     document.getElementById('specModalTitle').textContent = currentProduct.name;
+    // 🔥 設定當前分類名稱，讓優惠提示可以正確比對
     window._currentModalCategoryName = currentProduct.category || '';
     document.getElementById('specModal').classList.add('active');
     setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
+    
+    // 🔥 添加歷史記錄，讓返回鍵可以關閉彈窗
     history.pushState({ modal: 'spec' }, '');
     isModalOpen = true;
     
@@ -4260,6 +4315,11 @@ function openSpecModal(productId) {
     updateQuantityDisplay();
     updateAddToCartButton();
 }
+
+
+// ==========================================
+// 🆕 商品圖片輪播功能
+// ==========================================
 let _carouselImgs = [];
 let _carouselIdx = 0;
 let _carouselTouchX = 0;
@@ -4270,12 +4330,18 @@ let _carouselTouchX = 0;
 function initCarousel(categoryName) {
     const seen = new Set();
     const imgs = [];
+
+    // 1. 永遠先放 B 欄封面圖（預設第一張）
     const coverImg = (categoryImages[categoryName] || '').trim();
     if (coverImg) { seen.add(coverImg); imgs.push(coverImg); }
+
+    // 2. 再接 C 欄起的輪播圖
     (categoryCarouselImages[categoryName] || []).forEach(u => {
         u = (u || '').trim();
         if (u && !seen.has(u)) { seen.add(u); imgs.push(u); }
     });
+
+    // 3. 若都沒有，fallback 到商品各自的圖片
     if (imgs.length === 0) {
         currentCategoryProducts.forEach(p => {
             if (p.image && !seen.has(p.image)) { seen.add(p.image); imgs.push(p.image); }
@@ -4294,6 +4360,8 @@ function initCarouselFromUrls(rawUrls) {
     const dots      = document.getElementById('carouselDots');
     const prev      = document.getElementById('carouselPrev');
     const next      = document.getElementById('carouselNext');
+
+    // 修正 URL（確保有 https://）
     _carouselImgs = rawUrls.map(u => {
         u = (u || '').trim();
         if (!u) return '';
@@ -4308,18 +4376,26 @@ function initCarouselFromUrls(rawUrls) {
 
     carousel.style.display = 'block';
     _carouselIdx = 0;
+
+    // 渲染幻燈片
     track.innerHTML = _carouselImgs.map((url, i) => `
         <div class="carousel-slide">
             <img src="${url}" alt="商品圖 ${i + 1}" onerror="this.style.opacity='0.15'">
         </div>
     `).join('');
+
+    // 渲染圓點
     dots.innerHTML = _carouselImgs.map((_, i) => `
         <div class="carousel-dot${i === 0 ? ' active' : ''}" onclick="carouselGoTo(${i})"></div>
     `).join('');
+
+    // 顯示 / 隱藏箭頭與圓點
     const multi = _carouselImgs.length > 1;
     prev.style.display  = multi ? 'flex' : 'none';
     next.style.display  = multi ? 'flex' : 'none';
     dots.style.display  = multi ? 'flex' : 'none';
+
+    // 更新角標（加在 wrap 裡，這樣 absolute 定位相對於 wrap）
     const wrap2 = carousel.querySelector('.carousel-track-wrap');
     let counter = carousel.querySelector('.carousel-counter');
     if (!counter) {
@@ -4329,6 +4405,8 @@ function initCarouselFromUrls(rawUrls) {
     }
     counter.style.display = multi ? 'block' : 'none';
     counter.textContent = `1 / ${_carouselImgs.length}`;
+
+    // 觸控滑動
     const wrap = carousel.querySelector('.carousel-track-wrap');
     wrap.ontouchstart = e => { _carouselTouchX = e.touches[0].clientX; };
     wrap.ontouchend   = e => {
@@ -4337,6 +4415,8 @@ function initCarouselFromUrls(rawUrls) {
     };
 
     _carouselRender();
+    // 同步縮圖列
+    console.log('🖼 縮圖列圖片數:', _carouselImgs.length, _carouselImgs);
     updateSpecThumbStrip(_carouselImgs);
 }
 
@@ -4356,6 +4436,7 @@ function _carouselRender() {
     const dots  = document.querySelectorAll('.carousel-dot');
     const counter = document.querySelector('.carousel-counter');
     if (track) {
+        // 用像素偏移確保精確（不依賴百分比繼承問題）
         const slideWidth = track.parentElement ? track.parentElement.offsetWidth : 0;
         if (slideWidth > 0) {
             track.style.transform = `translateX(-${_carouselIdx * slideWidth}px)`;
@@ -4365,6 +4446,7 @@ function _carouselRender() {
     }
     dots.forEach((d, i) => d.classList.toggle('active', i === _carouselIdx));
     if (counter) counter.textContent = `${_carouselIdx + 1} / ${_carouselImgs.length}`;
+    // 同步縮圖列 active
     const strip2 = document.getElementById('specThumbStrip');
     if (strip2) {
         const thumbs = strip2.querySelectorAll('img');
@@ -4372,6 +4454,10 @@ function _carouselRender() {
         if (thumbs[_carouselIdx]) thumbs[_carouselIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
 }
+
+
+// 🆕 縮圖列 & 燈箱
+// 更新縮圖列（從輪播圖陣列生成）
 function updateSpecThumbStrip(urls) {
     const strip = document.getElementById('specThumbStrip');
     if (!strip) return;
@@ -4388,7 +4474,9 @@ function updateSpecThumbStrip(urls) {
             + 'onerror="this.style.background=\'#333\';this.style.opacity=\'0.4\';this.removeAttribute(\'src\')" '
             + 'onclick="specThumbClick(this,' + i + ')">';
     }).join('');
+    console.log('✅ 縮圖列已渲染，共', urls.length, '張');
 }
+// 點縮圖：切換大圖
 function specThumbClick(el, idx) {
     carouselGoTo(idx);
     const strip = document.getElementById('specThumbStrip');
@@ -4398,6 +4486,7 @@ function specThumbClick(el, idx) {
         el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
 }
+// 大圖點擊放大
 function openCarouselLightbox(e) {
     if (e && e.target.tagName === 'BUTTON') return;
     const lb = document.getElementById('specLightbox');
@@ -4412,8 +4501,10 @@ function closeSpecLightbox() {
     if (lb) lb.style.display = 'none';
 }
 function updateSpecThumb(categoryName) {
+    // 用輪播圖更新縮圖列
     const imgs = (categoryCarouselImages[categoryName] || [])
         .map(u => (u||'').trim()).filter(u => u);
+    // fallback 到 B 欄封面
     if (imgs.length === 0) {
         const cover = categoryImages[categoryName] || '';
         if (cover) imgs.push(cover);
@@ -4421,16 +4512,19 @@ function updateSpecThumb(categoryName) {
     updateSpecThumbStrip(imgs);
 }
 function updateSpecThumbFromProduct(product) {
+    // 選口味後：把商品圖插到縮圖列最前面
     if (!product || !product.image) return;
     const strip = document.getElementById('specThumbStrip');
     if (!strip) return;
     const src = product.image.startsWith('http') ? product.image : 'https://' + product.image;
+    // 更新第一張縮圖
     const first = strip.querySelector('img[data-idx="0"]');
     if (first) first.src = src;
 }
 
 function closeSpecModal() {
     document.getElementById('specModal').classList.remove('active');
+    // 清除副標題
     const sub = document.getElementById('specModalSubtitle');
     if (sub) { sub.textContent = ''; sub.style.display = 'none'; }
     currentProduct = null;
@@ -4438,17 +4532,6 @@ function closeSpecModal() {
     selectedFlavor = null;
     currentCategoryProducts = [];
     quantity = 1;
-    // 釋放輪播圖記憶體
-    _carouselImgs = [];
-    _carouselIdx = 0;
-    const track = document.getElementById('carouselTrack');
-    const dots = document.getElementById('carouselDots');
-    const thumbStrip = document.getElementById('specThumbStrip');
-    if (track) track.innerHTML = '';
-    if (dots) dots.innerHTML = '';
-    if (thumbStrip) thumbStrip.innerHTML = '';
-    const opts = document.getElementById('specOptions');
-    if (opts) opts.innerHTML = '';
 }
 
 function renderSpecOptions() {
@@ -4483,22 +4566,34 @@ function selectSpec(index) {
     }
 
     selectedSpec = spec;
-    document.querySelectorAll('[id^="spec-"]').forEach((el) => {
-        el.classList.toggle('selected', el.id === `spec-${index}`);
+    
+    // 更新選中狀態
+    document.querySelectorAll('.spec-option').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
     });
+    
+    // 更新圖片
     const imageContainer = null; // 小圖已移除
     let imageUrl = spec.image || currentProduct.image || '';
+    
+    // 自動補上 https://
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
         imageUrl = 'https://' + imageUrl;
     }
     if (!imageUrl) {
         imageUrl = '';
     }
+    
+    // 小圖已移除
+    
+    // 更新價格和庫存顯示
     renderSpecPrice(spec);
     
     const stockDisplay = document.getElementById('specInfoStock');
     const multiplier = spec.quantityMultiplier || 1;
     const actualStock = spec.stock;
+    
+    // 如果有倍數，顯示實際數量
     let stockText = '';
     if (multiplier > 1) {
         const availableUnits = Math.floor(actualStock / multiplier);  // 可售組數
@@ -4514,6 +4609,8 @@ function selectSpec(index) {
     else if (isLowStock) stockSuffix = ' ⚠️ 即將售完';
     stockDisplay.textContent = stockText + stockSuffix;
     stockDisplay.style.color = isCriticalStock ? '#ff4444' : isLowStock ? '#ff9900' : 'var(--accent-green)';
+    
+    // 重置數量
     quantity = 1;
     updateQuantityDisplay();
     updateAddToCartButton();
@@ -4524,6 +4621,8 @@ function updateModalPromoHint() {
     if (!el) return;
     if (!promotions || promotions.length === 0) { el.innerHTML = ''; return; }
     const categoryName = window._currentModalCategoryName || '';
+    // 只顯示「有設定適用類別」且「精確包含當前分類名稱」的優惠
+    // 沒有填寫適用類別的優惠不顯示（避免亂跳）
     const matched = promotions.filter(p =>
         p.allowedCategories.length > 0 &&
         p.allowedCategories.includes(categoryName)
@@ -4571,8 +4670,12 @@ function confirmAddToCart() {
         showToast('請選擇規格', 'error');
         return;
     }
+
+    // 取得數量倍數
     const multiplier = selectedSpec.quantityMultiplier || 1;
     const actualStock = selectedSpec.stock;
+    
+    // 使用 selectedSpec 中的 productId 和 productName（從三層選擇中設置）
     const actualProductId = selectedSpec.productId || (currentProduct ? currentProduct.id : null);
     const actualProductName = selectedSpec.productName || (currentProduct ? currentProduct.name : '');
     
@@ -4580,11 +4683,14 @@ function confirmAddToCart() {
         showToast('商品資訊錯誤', 'error');
         return;
     }
+    
+    // 檢查購物車中是否已有相同商品+規格
     const existingIndex = cart.findIndex(item => 
         item.productId === actualProductId && item.specName === selectedSpec.specName
     );
 
     if (existingIndex !== -1) {
+        // 更新數量
         const newQty = cart[existingIndex].quantity + quantity;
         const totalUnits = newQty * multiplier;  // 實際佔用庫存
         
@@ -4594,11 +4700,14 @@ function confirmAddToCart() {
         }
         cart[existingIndex].quantity = newQty;
     } else {
+        // 檢查庫存
         const totalUnits = quantity * multiplier;
         if (totalUnits > actualStock) {
             showToast('庫存不足', 'error');
             return;
         }
+        
+        // 新增項目
         cart.push({
             productId: actualProductId,
             productName: actualProductName,
@@ -4611,15 +4720,21 @@ function confirmAddToCart() {
     }
     
     updateCart();
+    
+    // 顯示提示訊息（如果有倍數，顯示實際數量）
     const displayMsg = multiplier > 1 
         ? `✅ 已加入 ${quantity} 組「${actualProductName} - ${selectedSpec.specName}」(共 ${quantity * multiplier} 個)到購物車!`
         : `✅ 已加入 ${quantity} 件「${actualProductName} - ${selectedSpec.specName}」到購物車!`;
     showToast(displayMsg);
+    
+    // 重置選擇狀態,讓使用者可以繼續選購其他規格
     quantity = 1;
     selectedSpec = null;
     selectedFlavor = null;
     updateQuantityDisplay();
     updateAddToCartButton();
+    
+    // 移除所有規格的選中狀態
     document.querySelectorAll('.spec-option.selected').forEach(el => {
         el.classList.remove('selected');
     });
@@ -4630,6 +4745,10 @@ function confirmAddToCart() {
         setTimeout(() => cartIcon.classList.remove('animate-pulse'), 500);
     }
 }
+
+// ==========================================
+// 購物車功能
+// ==========================================
 function updateCart() {
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.getElementById('cartBadge');
@@ -4660,32 +4779,10 @@ function updateCart() {
         </div>
     `).join('');
 
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const promotionResult = calculatePromotions(cart);
-    const finalTotal = subtotal - promotionResult.totalDiscount;
-    cartTotal.textContent = finalTotal;
-    const priceSummary = document.getElementById('cartPriceSummary');
-    if (priceSummary) {
-        if (promotionResult.appliedPromotions.length > 0) {
-            let html = `<div style="font-size:14px; color:#aaa; display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span>商品小計</span><span>$${subtotal}</span>
-            </div>`;
-            promotionResult.appliedPromotions.forEach(promo => {
-                if (promo.type === '滿額免運') {
-                    html += `<div style="font-size:14px; color:#00FF00; display:flex; justify-content:space-between; margin-bottom:6px;">
-                        <span>🎁 ${promo.name}</span><span>免運費</span>
-                    </div>`;
-                } else if (promo.discount > 0) {
-                    html += `<div style="font-size:14px; color:#00FF00; display:flex; justify-content:space-between; margin-bottom:6px;">
-                        <span>🎁 ${promo.name}</span><span>-$${promo.discount}</span>
-                    </div>`;
-                }
-            });
-            priceSummary.innerHTML = `<div style="border-top:1px solid rgba(255,215,0,0.2); padding-top:10px; margin-bottom:8px;">${html}</div>`;
-        } else {
-            priceSummary.innerHTML = '';
-        }
-    }
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    cartTotal.textContent = total;
+
+    // 🆕 購物車優惠提示
     const cartHintContainer = document.getElementById('cartPromotionHints');
     if (cartHintContainer) {
         const hints = displayPromotionHints(cart);
@@ -4705,12 +4802,16 @@ function updateCartQuantity(index, change) {
         removeCartItem(index);
         return;
     }
+
+    // 查找規格（支持三層選擇結構）
     let spec = null;
     const specs = productSpecs[item.productId];
     
     if (specs) {
         spec = specs.find(s => s.specName === item.specName);
     }
+    
+    // 如果找不到規格，嘗試從所有規格中查找
     if (!spec) {
         for (let productId in productSpecs) {
             const foundSpec = productSpecs[productId].find(s => s.specName === item.specName);
@@ -4754,18 +4855,29 @@ function toggleCart() {
         isModalOpen = false;
     }
 }
+
+// ==========================================
+// 結帳流程
+// ==========================================
 function openCheckout() {
     if (checkMaintenance()) return;
     if (cart.length === 0) {
         showToast('購物車是空的', 'error');
         return;
     }
+    // 如果訂單詳情頁還開著，先關掉
     const existingDetail = document.getElementById('orderDetailView');
     if (existingDetail) existingDetail.remove();
+    
+    // 更新結帳頁面的訂單摘要
     updateCheckoutSummary();
+    
+    // 🆕 如果已選擇門市，顯示門市資訊
     displaySelectedStore();
     
     document.getElementById('checkoutModal').classList.add('active');
+    
+    // 🔥 添加歷史記錄
     history.pushState({ modal: 'checkout' }, '');
     isModalOpen = true;
 }
@@ -4773,25 +4885,39 @@ function openCheckout() {
 function updateCheckoutSummary() {
     const summaryItems = document.getElementById('checkoutSummary');
     const checkoutTotal = document.getElementById('checkoutTotal');
+    
+    // 計算商品小計
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // 🆕 計算優惠
     const promotionResult = calculatePromotions(cart);
+    
+    // 檢查是否選擇 7-11 配送
     const shipping = document.querySelector('input[name="shipping"]:checked');
     let shippingFee = (shipping && shipping.value === '711') ? 60 : 0;
+    
+    // 🆕 如果符合免運優惠，運費設為 0
     if (promotionResult.freeShipping) {
         shippingFee = 0;
     }
+    
+    // 生成商品列表
     let itemsHtml = cart.map(item => `
         <div class="summary-item">
             <span class="item-name">${item.productName} - ${item.specName} × ${item.quantity}</span>
             <span class="item-price">$${item.price * item.quantity}</span>
         </div>
     `).join('');
+    
+    // 顯示商品小計
     itemsHtml += `
         <div class="summary-item" style="border-top: 1px solid rgba(255,215,0,0.2); margin-top: 10px; padding-top: 10px;">
             <span class="item-name">商品小計</span>
             <span class="item-price">$${subtotal}</span>
         </div>
     `;
+    
+    // 🆕 顯示優惠折扣
     if (promotionResult.appliedPromotions.length > 0) {
         promotionResult.appliedPromotions.forEach(promo => {
             if (promo.type === '滿額免運') {
@@ -4811,6 +4937,8 @@ function updateCheckoutSummary() {
             }
         });
     }
+    
+    // 顯示運費
     if (shipping && shipping.value === '711') {
         const shippingText = promotionResult.freeShipping ? 
             `<span style="text-decoration: line-through; color: #666;">$60</span> <span style="color: #00FF00;">免運</span>` : 
@@ -4825,8 +4953,12 @@ function updateCheckoutSummary() {
     }
     
     summaryItems.innerHTML = itemsHtml;
+    
+    // 🆕 計算總金額（商品 - 優惠 + 運費）
     const total = subtotal - promotionResult.totalDiscount + shippingFee;
     checkoutTotal.textContent = `$${total}`;
+    
+    // 🆕 顯示優惠提示
     const hints = displayPromotionHints(cart);
     const hintContainer = document.getElementById('promotionHints');
     if (hintContainer) {
@@ -4842,6 +4974,8 @@ function closeCheckout() {
     document.getElementById('checkoutModal').classList.remove('active');
     isModalOpen = false;
 }
+
+// 🆕 切換取貨方式（7-11 / 自取）
 function toggleShippingMethod() {
     const shipping = document.querySelector('input[name="shipping"]:checked').value;
     const storeSelector = document.getElementById('storeSelector');
@@ -4867,6 +5001,8 @@ function toggleShippingMethod() {
     
     updateCheckoutSummary();
 }
+
+// 門市選完後顯示付款方式
 function showStorePaymentMethod() {
     const storePayment = document.getElementById('storePaymentMethod');
     if (storePayment) {
@@ -4875,6 +5011,8 @@ function showStorePaymentMethod() {
         toggleStorePayment();
     }
 }
+
+// 切換 7-11 付款方式
 function toggleStorePayment() {
     const method = document.querySelector('input[name="storePayment"]:checked')?.value;
     const bankInfo = document.getElementById('storeBankInfo');
@@ -4882,6 +5020,8 @@ function toggleStorePayment() {
     if (bankInfo) bankInfo.style.display = (method === 'linepay') ? 'none' : 'block';
     if (linePayInfo) linePayInfo.style.display = (method === 'linepay') ? 'block' : 'none';
 }
+
+// 更新 7-11 匯款資訊
 function updateStoreBankInfo() {
     const el1 = document.getElementById('storeBankName');
     const el2 = document.getElementById('storeBankAccount');
@@ -4892,6 +5032,8 @@ function updateStoreBankInfo() {
     if (el3) el3.textContent = systemSettings.bankHolder || 'CANDY BOSS';
     if (el4) el4.textContent = systemSettings.linePayAccount || '請聯繫客服';
 }
+
+// 🆕 切換匯款資訊顯示
 function toggleBankInfo() {
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
     const bankInfo = document.getElementById('bankInfo');
@@ -4902,6 +5044,8 @@ function toggleBankInfo() {
         bankInfo.classList.remove('active');
     }
 }
+
+// 🆕 載入系統設定（含維護模式）
 async function loadSystemSettings() {
     try {
         const url = `/api/sheets?sheet=${encodeURIComponent('系統設定')}`;
@@ -4909,41 +5053,25 @@ async function loadSystemSettings() {
         const data = await response.json();
         
         if (data.values && data.values.length > 0) {
+            // 解析設定資料（格式：設定項目 | 設定值）
             data.values.forEach(row => {
                 if (row[0] === '匯款銀行')     systemSettings.bankName       = row[1] || '';
                 if (row[0] === '匯款帳號')     systemSettings.bankAccount    = row[1] || '';
                 if (row[0] === '匯款戶名')     systemSettings.bankHolder     = row[1] || '';
                 if (row[0] === 'LINE Pay帳號') systemSettings.linePayAccount  = row[1] || '';
-                if (row[0] === 'LOGO圖片')     systemSettings.logoImage      = row[1] || '';
-                if (row[0] === '客服圖片')     systemSettings.csImage        = row[1] || '';
-                if (row[0] === '布告欄圖片')   systemSettings.bulletinImage  = row[1] || '';
-                if (row[0] === 'ADMIN白名單') {
-                    window._adminWhitelist = String(row[1] || '').split(',').map(s => s.trim()).filter(Boolean);
-                }
+                // 維護模式：值為 TRUE 時啟動
                 if (row[0] === '維護模式') {
-                    systemSettings._maintenanceRaw = String(row[1] || '').trim().toUpperCase();
+                    const isMaintenance = String(row[1] || '').trim().toUpperCase() === 'TRUE';
+                    if (isMaintenance) showMaintenanceScreen();
                 }
             });
-            if (systemSettings._maintenanceRaw === 'TRUE') {
-                const currentLineId = currentMember ? currentMember.lineId : '';
-                const isAdmin = Array.isArray(window._adminWhitelist) && currentLineId &&
-                    window._adminWhitelist.includes(currentLineId);
-                if (!isAdmin) showMaintenanceScreen();
-            }
+            
+            console.log('✅ 系統設定載入成功:', systemSettings);
             updateBankInfo();
-            const logoEl = document.getElementById('logoImage');
-            if (logoEl && systemSettings.logoImage) {
-                logoEl.src = systemSettings.logoImage;
-                logoEl.style.display = 'block';
-            } else if (logoEl) {
-                logoEl.style.display = 'none';
-            }
-            const csEl = document.getElementById('serviceFloatImg');
-            if (csEl && systemSettings.csImage) {
-                csEl.src = systemSettings.csImage;
-            }
         }
     } catch (error) {
+        console.error('❌ 載入系統設定失敗:', error);
+        // 使用預設值
         systemSettings = {
             bankName: '請聯繫客服',
             bankAccount: '請聯繫客服',
@@ -4952,19 +5080,29 @@ async function loadSystemSettings() {
         updateBankInfo();
     }
 }
+
+// 顯示維護中畫面
 function showMaintenanceScreen() {
     window.isMaintenanceMode = true;
+
+    // 把整個 body 的互動全部關掉（最底層封鎖）
     document.body.style.pointerEvents = 'none';
     document.body.style.overflow = 'hidden';
+
+    // 顯示維護畫面（它自己要能被看見，所以給它 pointer-events:auto）
     const el = document.getElementById('maintenanceScreen');
     if (el) {
         el.style.display = 'flex';
         el.style.pointerEvents = 'auto';
     }
+
+    // 關閉所有已開啟的 modal / 彈窗
     document.querySelectorAll('.modal-overlay, .modal').forEach(m => {
         m.style.display = 'none';
     });
 }
+
+// 維護模式守衛（保留，作為額外防線）
 function checkMaintenance() {
     if (window.isMaintenanceMode) {
         showMaintenanceScreen();
@@ -4972,27 +5110,25 @@ function checkMaintenance() {
     }
     return false;
 }
+
+// 定時輪詢維護狀態（每 10 秒檢查一次 Sheet）
 async function pollMaintenanceStatus() {
     try {
         const url = `/api/sheets?sheet=${encodeURIComponent('系統設定')}`;
-        const res = await fetch(url);
+        const res  = await fetch(url);
         const data = await res.json();
         const rows = data.values || [];
-        const adminRow = rows.find(r => String(r[0]).trim() === 'ADMIN白名單');
-        if (adminRow) {
-            window._adminWhitelist = String(adminRow[1] || '').split(',').map(s => s.trim()).filter(Boolean);
-        }
-        const row = rows.find(r => String(r[0]).trim() === '維護模式');
+        const row  = rows.find(r => String(r[0]).trim() === '維護模式');
         const isOn = row ? String(row[1]).trim().toUpperCase() === 'TRUE' : false;
         if (isOn && !window.isMaintenanceMode) {
-            const currentLineId = currentMember ? currentMember.lineId : '';
-            const whitelist = Array.isArray(window._adminWhitelist) ? window._adminWhitelist : [];
-            const isAdmin = currentLineId && whitelist.includes(currentLineId);
-            if (!isAdmin) showMaintenanceScreen();
+            showMaintenanceScreen();
         }
     } catch (e) {
+        // 網路問題時不影響，靜默忽略
     }
 }
+
+// 🆕 更新匯款資訊顯示
 function updateBankInfo() {
     const bankNameEl = document.getElementById('bankName');
     const bankAccountEl = document.getElementById('bankAccount');
@@ -5005,6 +5141,7 @@ function updateBankInfo() {
 
 async function submitOrder() {
     if (checkMaintenance()) return;
+    // 🔥 防重複點擊：檢查是否正在提交
     if (window.isSubmittingOrder) {
         showToast('訂單處理中，請稍候...', 'error');
         return;
@@ -5014,10 +5151,14 @@ async function submitOrder() {
     const name = document.getElementById('customerName').value.trim();
     const phone = document.getElementById('customerPhone').value.trim();
     let paymentMethod = '';
+
+    // 基本資料驗證
     if (!name || !phone) {
         showToast('請填寫姓名和電話', 'error');
         return;
     }
+
+    // 自取付款方式
     if (shipping === 'pickup') {
         paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || '';
     } else if (shipping === '711') {
@@ -5034,20 +5175,34 @@ async function submitOrder() {
             window._linePayName = '';
         }
     }
+
+    // 🔥 設定提交中標記，防止重複點擊
     window.isSubmittingOrder = true;
+    
+    // 🔥 禁用提交按鈕並顯示載入狀態
     const submitBtn = document.querySelector('.submit-order-btn');
     const originalBtnText = submitBtn.innerHTML;
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.6';
     submitBtn.style.cursor = 'not-allowed';
     submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
+
+    // 🆕 計算優惠
     const promotionResult = calculatePromotions(cart);
+    
+    // 🔥 計算運費和總金額
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     let shippingFee = shipping === '711' ? 60 : 0;
+    
+    // 🆕 如果符合免運優惠，運費設為 0
     if (promotionResult.freeShipping) {
         shippingFee = 0;
     }
+    
+    // 🆕 計算優惠後的總金額
     const totalAmount = subtotal - promotionResult.totalDiscount + shippingFee;
+    
+    // 🆕 組合優惠明細文字
     const promotionText = promotionResult.appliedPromotions.length > 0 
         ? promotionResult.appliedPromotions.map(p => {
             if (p.type === '滿額免運') {
@@ -5090,6 +5245,8 @@ async function submitOrder() {
             quantity: (item.quantity * (item.quantityMultiplier || 1))  // 傳送實際扣庫存數量
         }))
     };
+
+    // 🔥 保存購買清單，用於後續更新庫存
     const purchasedItems = cart.map(item => ({
         productId: item.productId,
         specName: item.specName
@@ -5104,74 +5261,121 @@ async function submitOrder() {
         });
         
         showToast('✅ 訂單已送出！', 'success');
+        
+        // 清空購物車
         cart = [];
         updateCart();
+        
+        // 🔥 重置提交狀態
         window.isSubmittingOrder = false;
         submitBtn.disabled = false;
         submitBtn.style.opacity = '';
         submitBtn.style.cursor = '';
         submitBtn.innerHTML = originalBtnText;
+        
+        // 關閉結帳模態框，同時關閉購物車
         closeCheckout();
+        // 強制關閉購物車，確保返回鍵不會回到購物車狀態
         document.getElementById('cartSidebar').classList.remove('active');
+        // 用 replaceState 清掉 cart/checkout 的 history，讓詳情頁返回直接回首頁
         history.replaceState(null, '', location.href);
+        
+        // 🆕 直接在當前頁面顯示訂單詳情（使用新訂單資料）
         setTimeout(() => {
             showNewOrderDetail(orderData);
         }, 500);
         
     } catch (error) {
+        console.log('訂單已送出(no-cors 模式)');
         showToast('✅ 訂單已送出！', 'success');
+        
+        // 清空購物車
         cart = [];
         updateCart();
+        
+        // 🔥 重置提交狀態
         window.isSubmittingOrder = false;
         submitBtn.disabled = false;
         submitBtn.style.opacity = '';
         submitBtn.style.cursor = '';
         submitBtn.innerHTML = originalBtnText;
+        
+        // 關閉結帳模態框，同時關閉購物車
         closeCheckout();
+        // 強制關閉購物車，確保返回鍵不會回到購物車狀態
         document.getElementById('cartSidebar').classList.remove('active');
+        // 用 replaceState 清掉 cart/checkout 的 history，讓詳情頁返回直接回首頁
         history.replaceState(null, '', location.href);
+        
+        // 顯示訂單詳情
         setTimeout(() => {
             showNewOrderDetail(orderData);
         }, 500);
+        
+        // 🔥 輕量級更新：只更新已購買商品的庫存
         setTimeout(() => {
             updatePurchasedProductsStock(purchasedItems);
         }, 1000);
     }
 }
+
+// ==========================================
+// 訂單查詢
+// ==========================================
 async function openOrderSearch() {
     if (checkMaintenance()) return;
+    // 檢查是否已登入
     if (!currentMember || !currentMember.lineId) {
         showToast('請先登入 LINE 帳號', 'error');
         return;
     }
+    
+    // 顯示全頁面
     const osm = document.getElementById('orderSearchModal');
     osm.style.display = 'block';
     window._orderDetailFromSearch = false;
+    
+    // 同步公告文字
     const mainAnn = document.getElementById('announcementText');
     const orderAnn = document.getElementById('ordersAnnouncementText');
     if (mainAnn && orderAnn) orderAnn.textContent = mainAnn.textContent;
+    
+    // 🔥 添加歷史記錄
     history.pushState({ modal: 'orderSearch' }, '');
     isModalOpen = true;
+    // 捲到頂部
     osm.scrollTop = 0;
+    
+    // 顯示載入中
     document.getElementById('ordersList').innerHTML = `
         <div style="text-align:center; padding:40px; color:#999;">
             <div style="font-size:40px; margin-bottom:20px;">⏳</div>
             <div>載入中...</div>
         </div>
     `;
+    
+    // 查詢訂單
     await loadMemberOrders();
 }
+
 
 function closeOrderSearch() {
     const osm = document.getElementById('orderSearchModal');
     osm.style.display = 'none';
     isModalOpen = false;
     window._orderDetailFromSearch = false;
+    // 返回首頁（捲到頂部）
     window.scrollTo(0, 0);
 }
+
+// ==========================================
+// 🆕 顯示新訂單詳情（訂單送出後）→ 統一走查詢訂單 modal
+// ==========================================
 function showNewOrderDetail(orderData) {
+    // 先清除舊的詳情頁（避免疊加）
     const existingDetail = document.getElementById('orderDetailView');
     if (existingDetail) existingDetail.remove();
+    // 直接顯示全螢幕訂單詳情
     const order = {
         訂單編號: orderData.訂單編號,
         訂購時間: orderData.訂購時間,
@@ -5190,13 +5394,20 @@ function showNewOrderDetail(orderData) {
     };
     showOrderDetailByData(order);
 }
+
+// ==========================================
+// 🆕 顯示訂單詳情
+// ==========================================
 function showOrderDetail(orderIndex) {
+    // 🔥 防呆：確保 memberOrders 存在且 index 有效
     if (!window.memberOrders) {
         showToast('訂單資料尚未載入，請稍候再試', 'error');
         return;
     }
     
     let order = window.memberOrders[orderIndex];
+    
+    // index 取不到時，嘗試從點擊元素的 data-order-index 取
     if (!order && typeof event !== 'undefined' && event && event.currentTarget) {
         const idx = parseInt(event.currentTarget.dataset.orderIndex);
         if (!isNaN(idx)) order = window.memberOrders[idx];
@@ -5206,21 +5417,30 @@ function showOrderDetail(orderIndex) {
         showToast('找不到訂單資料，請重新開啟訂單列表', 'error');
         return;
     }
+    
+    // 🔥 不關閉 orderSearchModal，只是暫時隱藏（返回時還能回去）
     document.getElementById('orderSearchModal').style.display = 'none';
+    // 標記是從 orderSearch 進來的
     window._orderDetailFromSearch = true;
     
     showOrderDetailByData(order);
 }
+
+// 統一的訂單詳情顯示函數
 function showOrderDetailByData(order) {
+    // 🔥 防呆：確保 order 是有效物件
     if (!order || typeof order !== 'object') {
         showToast('訂單資料格式錯誤', 'error');
+        // 恢復 orderSearch modal
         const osm = document.getElementById('orderSearchModal');
         if (osm) { osm.style.display = 'block'; }
         return;
     }
+    // 確保關鍵欄位有值（避免 .replace 在 undefined 上爆炸）
     order.訂單編號 = order.訂單編號 || ('ORD' + Date.now());
     order.訂購時間 = order.訂購時間 || new Date().toISOString();
     order.商品明細 = order.商品明細 || '';
+    // 🔥 匯款末五碼：強制轉字串（GAS 可能回傳數字），null/undefined 補 '-'
     order.匯款末五碼 = (order.匯款末五碼 !== undefined && order.匯款末五碼 !== null) ? String(order.匯款末五碼) : '-';
     order.付款方式 = order.付款方式 || '';
     order.取貨方式 = order.取貨方式 || '';
@@ -5235,10 +5455,16 @@ function showOrderDetailByData(order) {
     const transferFilled = !isLinePayOrder && order.匯款末五碼 && order.匯款末五碼 !== '-' && order.匯款末五碼 !== '' && !order.匯款末五碼.startsWith('LINE:');
     const linePayFilled  = isLinePayOrder  && order.匯款末五碼 && order.匯款末五碼.startsWith('LINE:') && order.匯款末五碼.replace('LINE:','').trim() !== '';
     const hasPaid = order.訂單狀態 === '已付款待出貨' || transferFilled || linePayFilled;
+    
+    // 已取消 → 顯示逾期
     if (cancelledStatuses.includes(order.訂單狀態)) {
         isExpired = true;
         shouldShowPaymentButton = false;
     }
+    // 🔥 已付款 → 不顯示輸入框，但還是要顯示已填的末五碼（showPaymentButton=true 讓區塊顯示）
+    // shouldShowPaymentButton 保持 true，讓 IIFE 裡的邏輯自行判斷顯示已填內容或輸入框
+    
+    // 倒數計時：只有 7-11、未付款、未取消才顯示
     let countdownHTML = '';
     const orderIdHash = (order.訂單編號 || '').replace(/[^a-zA-Z0-9]/g, '') || 'order';
     
@@ -5262,8 +5488,11 @@ function showOrderDetailByData(order) {
                     + '</div>';
             }
         } catch (e) {
+            console.error('倒數計時錯誤:', e);
         }
     }
+    
+    // 建立訂單詳情 HTML（手機單頁可視）
     const statusColor = order.訂單狀態 === '已完成' ? '#00FF00' : order.訂單狀態 === '待處理' ? '#ffa500' : order.訂單狀態 === '取消訂單' || order.訂單狀態 === '訂單取消' || order.訂單狀態 === '已取消' ? '#ff4444' : order.訂單狀態 === '已付款待出貨' ? '#00bfff' : '#FFD700';
     const detailHTML = `
         <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:#0d0d0d;z-index:10000;overflow-y:auto;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;">
@@ -5353,17 +5582,26 @@ function showOrderDetailByData(order) {
             </div>
         </div>
     `;
+    
+    // 建立並顯示詳情頁面
     const detailDiv = document.createElement('div');
     detailDiv.id = 'orderDetailView';
     detailDiv.innerHTML = detailHTML;
     document.body.appendChild(detailDiv);
+    // 🔥 把訂單編號存到 window，讓 submitPaymentCode 不需要依賴 onclick 字串
     window._currentOrderId = order.訂單編號;
+    
+    // 加入 history，讓返回鍵可以關掉詳情頁而不是跳回首頁
     history.pushState({ modal: 'orderDetail' }, '');
     isModalOpen = true;
+    
+    // 啟動倒數計時
     if (order.取貨方式 === '7-11店到店') {
         if (!hasPaid) startCountdown(order.訂單編號, order.訂購時間);
     }
 }
+
+// 倒數計時函數
 function startCountdown(orderId, orderTime) {
     const orderIdHash = (orderId || '').replace(/[^a-zA-Z0-9]/g, '') || 'order';
     const countdownEl = document.getElementById(`countdown-${orderIdHash}`);
@@ -5378,10 +5616,16 @@ function startCountdown(orderId, orderTime) {
             
             if (remaining <= 0) {
                 clearInterval(timer);
+                
+                // 已付款（payment-code-section 顯示 ✅）就不取消也不顯示逾期
                 const paidSection = document.getElementById('payment-code-section');
                 const alreadyPaid = paidSection && paidSection.textContent.includes('✅');
                 if (alreadyPaid) return;
+                
+                // 自動取消訂單
                 cancelExpiredOrder(orderId);
+                
+                // 更新倒數顯示為逾期訊息
                 const countdownContainer = document.getElementById(`countdown-container-${orderIdHash}`);
                 if (countdownContainer) {
                     countdownContainer.innerHTML = `
@@ -5390,6 +5634,8 @@ function startCountdown(orderId, orderTime) {
                     countdownContainer.style.background = 'rgba(255,0,0,0.15)';
                     countdownContainer.style.border = '1.5px solid #ff4444';
                 }
+                
+                // 隱藏付款輸入區
                 const paymentSection = document.getElementById('payment-code-section');
                 if (paymentSection) {
                     paymentSection.innerHTML = `
@@ -5409,11 +5655,18 @@ function startCountdown(orderId, orderTime) {
             clearInterval(timer);
         }
     }, 1000);
+    
+    // 儲存timer以便清理
     if (!window.orderTimers) window.orderTimers = {};
     window.orderTimers[orderIdHash] = timer;
 }
+
+// ==========================================
+// 🔥 自動取消逾時訂單
+// ==========================================
 async function cancelExpiredOrder(orderId) {
     try {
+        console.log('🔥 自動取消逾時訂單:', orderId);
         await fetch('/api/script', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5422,16 +5675,24 @@ async function cancelExpiredOrder(orderId) {
                 orderId: orderId
             })
         });
+        console.log('✅ 取消請求已送出');
     } catch (error) {
+        console.error('❌ 取消訂單失敗:', error);
     }
 }
+
+// ==========================================
+// 🆕 提交匯款末五碼 / LINE Pay 名稱
+// ==========================================
 async function submitPaymentCode(orderId) {
+    // 🔥 優先用傳入的 orderId，若無則從 window._currentOrderId 取
     if (!orderId) orderId = window._currentOrderId;
     if (!orderId) { showToast('找不到訂單編號', 'error'); return; }
     const input = document.getElementById('payment-code-input');
     if (!input) { showToast('找不到輸入欄位', 'error'); return; }
     
     const paymentCode = input.value.trim();
+    // 🔥 改用 data-payment-type 判斷，比 placeholder 更可靠
     const isLinePay = input.dataset.paymentType === 'linepay';
     let finalCode = paymentCode;
     
@@ -5445,12 +5706,15 @@ async function submitPaymentCode(orderId) {
         finalCode = 'LINE:' + paymentCode;
         if (!confirm(`確認 LINE 顯示名稱為：${paymentCode}？\n\n送出後將更新訂單狀態為「已付款」`)) return;
     }
+    
+    // btn 在 try 外，catch 才能用
     const btn = event.target;
     const originalText = btn.innerHTML;
     btn.innerHTML = '⏳ 處理中...';
     btn.disabled = true;
     
     try {
+        // 送出付款碼
         await fetch('/api/script', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5460,11 +5724,15 @@ async function submitPaymentCode(orderId) {
                 paymentCode: finalCode
             })
         });
+        
+        // 停止倒數計時器
         const orderIdHash = orderId.replace(/[^a-zA-Z0-9]/g, '');
         if (window.orderTimers && window.orderTimers[orderIdHash]) {
             clearInterval(window.orderTimers[orderIdHash]);
             delete window.orderTimers[orderIdHash];
         }
+        
+        // 隱藏倒數區塊
         const countdownEl = document.getElementById('countdown-' + orderIdHash);
         if (countdownEl) {
             let box = countdownEl.parentElement;
@@ -5473,6 +5741,8 @@ async function submitPaymentCode(orderId) {
                 box = box.parentElement;
             }
         }
+        
+        // 更新付款欄位顯示
         const section = document.getElementById('payment-code-section');
         if (section) {
             const label = isLinePay ? 'LINE 顯示名稱' : '匯款末五碼';
@@ -5481,6 +5751,8 @@ async function submitPaymentCode(orderId) {
                 <div style="color:#00FF00;font-weight:700;font-size:14px;">✅ ${paymentCode}</div>
             `;
         }
+        
+        // 把送出按鈕換成成功訊息，保持在原頁面
         btn.parentElement.innerHTML = `
             <div style="background:rgba(0,255,0,0.2);border:2px solid #00c800;padding:20px;
                 border-radius:15px;color:#00FF00;font-weight:700;text-align:center;font-size:16px;">
@@ -5491,6 +5763,7 @@ async function submitPaymentCode(orderId) {
         showToast('✅ 付款確認成功！', 'success');
         
     } catch (error) {
+        console.error('提交付款碼失敗:', error);
         showToast('❌ 提交失敗，請稍後再試', 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -5505,11 +5778,14 @@ function closeOrderDetail() {
     const detailView = document.getElementById('orderDetailView');
     if (detailView) detailView.remove();
     isModalOpen = false;
+    
+    // 🔥 若是從查詢訂單進來的，返回時重新顯示訂單列表
     if (window._orderDetailFromSearch) {
         window._orderDetailFromSearch = false;
         const orderSearchModal = document.getElementById('orderSearchModal');
         orderSearchModal.style.display = 'block';  // 恢復顯示
         isModalOpen = true;
+        // 補一筆 history state，讓再按返回可以關掉 orderSearch
         history.pushState({ modal: 'orderSearch' }, '');
     }
 }
@@ -5532,7 +5808,10 @@ async function loadMemberOrders() {
         const ordersList = document.getElementById('ordersList');
         
         if (result.success && result.orders && result.orders.length > 0) {
+            // 🔥 先儲存訂單資料，再渲染 HTML（避免 onclick 時資料還沒準備好）
             window.memberOrders = result.orders;
+            
+            // 顯示訂單列表 + 總筆數，一次寫入避免 innerHTML+= 破壞事件
             ordersList.innerHTML = result.orders.map((order, index) => `
                 <div class="order-card" data-order-index="${index}" style="
                     background: rgba(255, 255, 255, 0.05);
@@ -5583,6 +5862,7 @@ async function loadMemberOrders() {
                     共 ${result.orders.length} 筆訂單
                 </div>
             `;
+            // 🔥 用事件委派綁定點擊（避免特殊字元破壞 onclick 字串）
             ordersList.onclick = function(e) {
                 const card = e.target.closest('.order-card');
                 if (!card) return;
@@ -5591,6 +5871,7 @@ async function loadMemberOrders() {
             };
             
         } else {
+            // 沒有訂單
             ordersList.innerHTML = `
                 <div style="text-align:center; padding:60px 20px; color:#999;">
                     <div style="font-size:60px; margin-bottom:20px;">📦</div>
@@ -5600,6 +5881,7 @@ async function loadMemberOrders() {
             `;
         }
     } catch (error) {
+        console.error('查詢訂單失敗:', error);
         document.getElementById('ordersList').innerHTML = `
             <div style="text-align:center; padding:40px; color:#ff4444;">
                 <div style="font-size:40px; margin-bottom:20px;">❌</div>
@@ -5608,6 +5890,10 @@ async function loadMemberOrders() {
         `;
     }
 }
+
+// ==========================================
+// 🔥 背景自動掃描逾時訂單（不需開詳情頁就會自動取消）
+// ==========================================
 async function autoCheckExpiredOrders() {
     if (!currentMember || !currentMember.lineId) return;
     try {
@@ -5617,8 +5903,11 @@ async function autoCheckExpiredOrders() {
 
         const now = new Date();
         result.orders.forEach(order => {
+            // 只處理 7-11、待處理、未付款的訂單
             if (order.取貨方式 !== '7-11店到店') return;
             if (['取消訂單','訂單取消','已取消','已付款待出貨','已完成'].includes(order.訂單狀態)) return;
+
+            // 未付款判斷：LINE Pay 看訂單狀態，匯款看末五碼
             const isLinePay = order.付款方式 === 'LINE Pay';
             const hasPaid = isLinePay
                 ? order.訂單狀態 === '已付款待出貨'
@@ -5629,12 +5918,15 @@ async function autoCheckExpiredOrders() {
             if (isNaN(orderTime)) return;
             const deadline = new Date(orderTime.getTime() + 30 * 60 * 1000); // 30分鐘
             if (now >= deadline) {
+                console.log('🔥 背景掃描：發現逾時訂單，自動取消', order.訂單編號);
                 cancelExpiredOrder(order.訂單編號);
             }
         });
     } catch (e) {
+        // 背景掃描失敗不影響使用
     }
 }
+
 
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
@@ -5643,6 +5935,10 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+// ==========================================
+// LINE 登入功能
+// ==========================================
+
 function lineLogin() {
     const url = `https://access.line.me/oauth2/v2.1/authorize?` +
         `response_type=code` +
@@ -5650,7 +5946,7 @@ function lineLogin() {
         `&redirect_uri=${encodeURIComponent(LINE_REDIRECT_URI)}` +
         `&state=${LINE_STATE}` +
         `&scope=profile%20openid`;
-
+    
     window.location.href = url;
 }
 
@@ -5660,17 +5956,24 @@ async function checkMemberStatus() {
         try {
             currentMember = JSON.parse(memberData);
         } catch (e) {
+            console.error('會員資料解析錯誤:', e);
             localStorage.removeItem('candyboss_member');
             currentMember = null;
             showLoginWall();
             return;
         }
+        
+        // 如果 localStorage 已有「已通過」狀態，直接顯示商品頁，不閃審核頁
         if (currentMember.approvalStatus === '已通過') {
             updateMemberUI();
+            // 背景靜默同步，不重新渲染 UI（避免閃爍）
             fetchMemberApprovalStatus().catch(e => {
+                console.warn('審核狀態同步失敗（不影響登入）:', e);
             });
         } else {
+            // 待審核或未知狀態：先查 API 再顯示
             await fetchMemberApprovalStatus().catch(e => {
+                console.warn('審核狀態同步失敗（將使用本地快取）:', e);
             });
             updateMemberUI();
         }
@@ -5683,6 +5986,7 @@ async function fetchMemberApprovalStatus() {
     if (!currentMember || !currentMember.lineId) return;
     
     try {
+        // 加上 5 秒 timeout，避免 Apps Script 慢回應讓頁面卡住
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         
@@ -5695,12 +5999,15 @@ async function fetchMemberApprovalStatus() {
         const result = await response.json();
         
         if (result.success && result.member) {
+            // 更新審核狀態到 localStorage
             currentMember.approvalStatus = result.member.approvalStatus || '待審核';
             if (result.member.phone) currentMember.phone = result.member.phone;
             if (result.member.email) currentMember.email = result.member.email;
             localStorage.setItem('candyboss_member', JSON.stringify(currentMember));
         }
     } catch (error) {
+        console.warn('取得審核狀態失敗（將使用本地快取）:', error.name === 'AbortError' ? 'Timeout' : error.message);
+        // 如果取得失敗，維持 localStorage 裡已有的狀態（不清空）
         currentMember.approvalStatus = currentMember.approvalStatus || '待審核';
     }
 }
@@ -5710,32 +6017,33 @@ function showLoginWall() {
     document.getElementById('pendingApproval').style.display = 'none';
     document.getElementById('rejectedApproval').style.display = 'none';
     document.getElementById('productsSection').style.display = 'none';
-    document.getElementById('announcementBar').style.display = 'none';
-    document.getElementById('bulletinBoard').style.display = 'none';
-    const cartFloat = document.querySelector('.cart-float');
-    if (cartFloat) cartFloat.style.display = 'none';
-    document.getElementById('navButtons').style.display = 'none';
-    document.getElementById('lineLoginBtn').style.display = 'none';
+    
+    // 🔥 修正：顯示導航按鈕區域，並顯示 LINE 登入按鈕
+    document.getElementById('navButtons').style.display = 'flex';
+    document.getElementById('lineLoginBtn').style.display = 'block';
     document.getElementById('memberInfo').style.display = 'none';
 }
 
 function updateMemberUI() {
     if (currentMember) {
+        // 顯示導航按鈕區
         document.getElementById('navButtons').style.display = 'flex';
         document.getElementById('lineLoginBtn').style.display = 'none';
         document.getElementById('memberInfo').style.display = 'flex';
         document.getElementById('memberAvatar').src = currentMember.pictureUrl || '';
-        document.getElementById('announcementBar').style.display = '';
-        document.getElementById('bulletinBoard').style.display = '';
-        const cartFloat = document.querySelector('.cart-float');
-        if (cartFloat) cartFloat.style.display = '';
+        // 不顯示名稱
+        
+        // 根據審核狀態顯示不同內容
         const approvalStatus = currentMember.approvalStatus || '待審核';
         
         if (approvalStatus === '已通過') {
+            // 審核通過：顯示商品
             document.getElementById('loginWall').style.display = 'none';
             document.getElementById('pendingApproval').style.display = 'none';
             document.getElementById('rejectedApproval').style.display = 'none';
             document.getElementById('productsSection').style.display = 'block';
+            
+            // 自動填入會員資料到結帳表單
             if (currentMember.phone) {
                 const phoneInput = document.getElementById('customerPhone');
                 if (phoneInput && phoneInput.value === '') {
@@ -5749,19 +6057,20 @@ function updateMemberUI() {
                 }
             }
         } else if (approvalStatus === '已拒絕') {
+            // 審核拒絕
             document.getElementById('loginWall').style.display = 'none';
             document.getElementById('pendingApproval').style.display = 'none';
             document.getElementById('rejectedApproval').style.display = 'flex';
             document.getElementById('productsSection').style.display = 'none';
         } else {
+            // 待審核
             document.getElementById('loginWall').style.display = 'none';
             document.getElementById('pendingApproval').style.display = 'flex';
             document.getElementById('rejectedApproval').style.display = 'none';
             document.getElementById('productsSection').style.display = 'none';
         }
     } else {
-        document.getElementById('navButtons').style.display = 'none';
-        document.getElementById('lineLoginBtn').style.display = 'none';
+        document.getElementById('lineLoginBtn').style.display = 'block';
         document.getElementById('memberInfo').style.display = 'none';
         showLoginWall();
     }
@@ -5783,36 +6092,52 @@ async function checkApprovalStatus() {
 
 function logout() {
     if (confirm('確定要登出嗎？')) {
+        // 清除會員資料
         currentMember = null;
         localStorage.removeItem('candyboss_member');
-        document.getElementById('navButtons').style.display = 'none';
-        document.getElementById('lineLoginBtn').style.display = 'none';
+        
+        // 重置 UI
+        document.getElementById('lineLoginBtn').style.display = 'block';
         document.getElementById('memberInfo').style.display = 'none';
+        
+        // 顯示登入牆，隱藏其他所有內容
         document.getElementById('loginWall').style.display = 'flex';
         document.getElementById('pendingApproval').style.display = 'none';
         document.getElementById('rejectedApproval').style.display = 'none';
         document.getElementById('productsSection').style.display = 'none';
         
         showToast('已登出');
+        
+        // 為了確保，3秒後重新整理頁面
         setTimeout(() => {
             window.location.reload();
         }, 1500);
     }
 }
 
+// ==========================================
+// 會員資料查看與編輯
+// ==========================================
+
 function openMemberProfileModal() {
     if (!currentMember) {
         showToast('請先登入', 'error');
         return;
     }
+    
+    // 填入會員資料
     document.getElementById('profileAvatar').src = currentMember.pictureUrl || '';
     document.getElementById('profileDisplayName').textContent = currentMember.displayName || '未設定';
     document.getElementById('profilePhone').textContent = currentMember.phone || '未設定';
     document.getElementById('profileEmail').textContent = currentMember.email || '未設定';
     document.getElementById('profileLineId').textContent = currentMember.lineId || '';
+    
+    // 顯示審核狀態
     const approvalStatus = currentMember.approvalStatus || '待審核';
     const statusElement = document.getElementById('profileApprovalStatus');
     statusElement.textContent = approvalStatus;
+    
+    // 根據狀態改變顏色
     if (approvalStatus === '已通過') {
         statusElement.style.color = 'var(--accent-green)';
     } else if (approvalStatus === '已拒絕') {
@@ -5820,6 +6145,8 @@ function openMemberProfileModal() {
     } else {
         statusElement.style.color = '#ffa500';
     }
+    
+    // 顯示彈窗
     document.getElementById('memberProfileModal').classList.add('active');
 }
 
@@ -5828,9 +6155,14 @@ function closeMemberProfileModal() {
 }
 
 function openEditProfileModal() {
+    // 關閉查看彈窗
     closeMemberProfileModal();
+    
+    // 填入現有資料
     document.getElementById('updatePhone').value = currentMember.phone || '';
     document.getElementById('updateEmail').value = currentMember.email || '';
+    
+    // 顯示編輯彈窗
     document.getElementById('profileUpdateModal').classList.add('active');
 }
 
@@ -5841,10 +6173,14 @@ function closeProfileUpdateModal() {
 async function submitProfileUpdate() {
     const phone = document.getElementById('updatePhone').value.trim();
     const email = document.getElementById('updateEmail').value.trim();
+    
+    // 驗證電話
     if (!phone) {
         showToast('請輸入電話號碼', 'error');
         return;
     }
+    
+    // 驗證電話格式（台灣手機號碼）
     const phonePattern = /^09\d{8}$/;
     if (!phonePattern.test(phone)) {
         showToast('請輸入正確的手機號碼格式（例：0912345678）', 'error');
@@ -5858,6 +6194,8 @@ async function submitProfileUpdate() {
     
     try {
         showToast('更新中...', 'success');
+        
+        // 更新到 Google Sheets
         await fetch('/api/script', {
             method: 'POST',
             headers: {
@@ -5872,17 +6210,29 @@ async function submitProfileUpdate() {
                 email: email
             })
         });
+        
+        // 更新本地資料
         currentMember.phone = phone;
         currentMember.email = email;
         localStorage.setItem('candyboss_member', JSON.stringify(currentMember));
+        
+        // 關閉彈窗
         closeProfileUpdateModal();
         showToast('資料更新成功！');
         
     } catch (error) {
+        console.error('更新失敗:', error);
         showToast('更新失敗，請稍後再試', 'error');
     }
 }
+
+// ==========================================
+// 初始化
+// ==========================================
 window.addEventListener('load', () => {
+    console.log('🚀 頁面載入完成');
+    
+    // 🔥 防止雙擊放大（徹底解決方案）
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (event) => {
         const now = Date.now();
@@ -5891,43 +6241,29 @@ window.addEventListener('load', () => {
         }
         lastTouchEnd = now;
     }, false);
+    
+    // 正常初始化
     loadProductsData();
     loadSystemSettings();
     updateCart();
     checkMemberStatus();
-    startAutoRefresh(120);
+    
+    // 🔥 啟動自動刷新庫存功能
+    startAutoRefresh(30);
 
-    // 維護模式輪詢
-    window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
+    // 🔒 定時輪詢維護模式（每 10 秒）
+    setInterval(pollMaintenanceStatus, 10000);
 
-    // 逾時訂單背景掃描
+    // 🔥 背景掃描逾時訂單（登入後30秒開始，之後每60秒掃一次）
     setTimeout(() => {
         autoCheckExpiredOrders();
         setInterval(autoCheckExpiredOrders, 60 * 1000);
     }, 30000);
-
-    // ✅ Tab 不活躍時暫停所有輪詢，恢復時重啟
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            stopAutoRefresh();
-            if (window._maintenanceInterval) {
-                clearInterval(window._maintenanceInterval);
-                window._maintenanceInterval = null;
-            }
-        } else {
-            startAutoRefresh(120);
-            refreshAllStock();
-            if (!window._maintenanceInterval) {
-                window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
-            }
-        }
-    });
 });
+
+// 當用戶離開頁面時，停止自動刷新以節省資源
 window.addEventListener('beforeunload', () => {
     stopAutoRefresh();
-    if (window._maintenanceInterval) clearInterval(window._maintenanceInterval);
-    if (window._bulletinInterval) clearInterval(window._bulletinInterval);
-    if (window._announcementInterval) clearInterval(window._announcementInterval);
 });
     </script>
 </body>
