@@ -2331,7 +2331,7 @@
         <div id="loginWall" class="login-wall" style="display:none;">
             <div class="login-wall-content">
                 <div class="login-wall-icon">🔐</div>
-                <h2>歡迎來到 CANDY BOSS</h2>
+                <h2>歡迎來到 REX LAB</h2>
                 <p>請先登入以繼續購物</p>
                 <button class="login-wall-btn" onclick="lineLogin()">
                     <span class="line-icon">L</span>
@@ -6430,9 +6430,9 @@ function showLoginWall() {
     const cartFloat = document.querySelector('.cart-float');
     if (cartFloat) cartFloat.style.display = 'none';
 
-    // 顯示導航按鈕區域，並顯示 LINE 登入按鈕
-    document.getElementById('navButtons').style.display = 'flex';
-    document.getElementById('lineLoginBtn').style.display = 'block';
+    // 登入前：整個 navButtons 隱藏（只留 REX LAB 標題）
+    document.getElementById('navButtons').style.display = 'none';
+    document.getElementById('lineLoginBtn').style.display = 'none';
     document.getElementById('memberInfo').style.display = 'none';
 }
 
@@ -6488,7 +6488,8 @@ function updateMemberUI() {
             document.getElementById('productsSection').style.display = 'none';
         }
     } else {
-        document.getElementById('lineLoginBtn').style.display = 'block';
+        document.getElementById('navButtons').style.display = 'none';
+        document.getElementById('lineLoginBtn').style.display = 'none';
         document.getElementById('memberInfo').style.display = 'none';
         showLoginWall();
     }
@@ -6514,8 +6515,9 @@ function logout() {
         currentMember = null;
         localStorage.removeItem('candyboss_member');
         
-        // 重置 UI
-        document.getElementById('lineLoginBtn').style.display = 'block';
+        // 重置 UI：登出後隱藏所有導覽按鈕
+        document.getElementById('navButtons').style.display = 'none';
+        document.getElementById('lineLoginBtn').style.display = 'none';
         document.getElementById('memberInfo').style.display = 'none';
         
         // 顯示登入牆，隱藏其他所有內容
