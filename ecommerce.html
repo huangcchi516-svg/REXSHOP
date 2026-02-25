@@ -906,17 +906,23 @@
         }
 
         .remove-item {
-            background: none;
-            color: #ff5555;
+            background: #ff4444;
+            color: white;
             border: none;
-            font-size: 18px;
+            font-size: 14px;
+            font-weight: 900;
             cursor: pointer;
             padding: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             line-height: 1;
             flex-shrink: 0;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            margin-right: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .cart-footer {
@@ -4667,7 +4673,7 @@ function updateCart() {
             <div class="cart-item-bottom">
                 <div class="cart-item-price">$${item.price} × ${item.quantity} = $${item.price * item.quantity}</div>
                 <div class="cart-item-controls">
-                    <button class="remove-item" onclick="removeCartItem(${index})" title="移除">🗑️</button>
+                    <button class="remove-item" onclick="removeCartItem(${index})" title="移除">✖</button>
                     <button class="qty-btn" onclick="updateCartQuantity(${index}, -1)">−</button>
                     <span style="font-size:14px; min-width:18px; text-align:center;">${item.quantity}</span>
                     <button class="qty-btn" onclick="updateCartQuantity(${index}, 1)">+</button>
