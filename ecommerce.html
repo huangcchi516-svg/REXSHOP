@@ -4109,7 +4109,9 @@ function openCustomBlockModal(blockName) {
     updateAddToCartButton();
 
     if (defaultCustomSpecs.length > 0) {
-        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4226,7 +4228,9 @@ function renderFeaturedFlavorOptions() {
     }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
-        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4444,7 +4448,9 @@ function renderFlavorOptions(categoryName) {
 
     if (defaultSpecs.length > 0) {
         // 預先決定自動選哪個規格
-        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
         // 直接在渲染時設好 selected，不再呼叫 selectQuantitySpec（避免觸發兩次）
         if (autoIdx !== -1) {
@@ -4534,7 +4540,9 @@ function _renderQtySpecs(specs) {
     }).join('');
 
     // 預選規格
-    let autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+    let autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.stock > 0);
 
     if (autoIdx !== -1) {
