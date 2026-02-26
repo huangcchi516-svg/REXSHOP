@@ -194,10 +194,25 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.3);
             z-index: 500;
+            transition: opacity 0.28s ease;
+            opacity: 0;
         }
-        .drawer-overlay.open { display: block; }
+        .drawer-overlay.open { display: block; opacity: 1; }
+
+        /* 主頁面推移容器 */
+        .page-push-wrap {
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+            transform-origin: center center;
+            min-height: 100vh;
+        }
+        .page-push-wrap.drawer-open {
+            transform: translateX(-20vw) scale(0.92);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+        }
 
         /* 側滑選單本體 */
         .drawer {
@@ -207,8 +222,7 @@
             width: 82vw;
             max-width: 340px;
             height: 100%;
-            background: #0e0e0e;
-            border-left: 1px solid rgba(255,255,255,0.08);
+            background: #111;
             z-index: 501;
             transform: translateX(100%);
             transition: transform 0.28s cubic-bezier(.4,0,.2,1);
@@ -218,42 +232,41 @@
         }
         .drawer.open { transform: translateX(0); }
 
-        /* 頂部：✕ + 名稱 */
+        /* 頂部 */
         .drawer-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 22px 16px;
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
             flex-shrink: 0;
         }
-        .drawer-header-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
         .drawer-avatar {
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 1.5px solid var(--primary);
             object-fit: cover;
             display: none;
         }
         .drawer-username {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 0.5px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #666;
         }
         .drawer-close {
             background: none;
             border: none;
-            color: #999;
-            font-size: 18px;
+            color: #aaa;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
             cursor: pointer;
-            padding: 6px;
+            padding: 4px 0;
             line-height: 1;
             -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
         }
 
         /* 滾動主體 */
@@ -2680,11 +2693,11 @@
     <!-- 側滑選單 -->
     <div class="drawer" id="drawer">
         <div class="drawer-header">
-            <div class="drawer-header-info">
-                <img class="drawer-avatar" id="drawerAvatar" src="" alt="">
-                <div class="drawer-username" id="drawerUsername">REX LAB</div>
-            </div>
-            <button class="drawer-close" onclick="closeDrawer()">✕</button>
+            <button class="drawer-close" onclick="closeDrawer()">
+                <span style="font-size:16px; margin-right:6px;">×</span>關掉選單
+            </button>
+            <div class="drawer-username" id="drawerUsername" style="font-size:13px; color:#666; font-weight:400;"></div>
+            <img class="drawer-avatar" id="drawerAvatar" src="" alt="">
         </div>
         <div class="drawer-body" id="drawerBody">
             <!-- 會員區 -->
@@ -2710,6 +2723,7 @@
         </div>
     </div>
 
+    <div class="page-push-wrap" id="pagePushWrap">
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:4px;">
             <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;">
@@ -6307,11 +6321,13 @@ function openDrawer() {
     updateDrawerCategories();
     document.getElementById('drawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('pagePushWrap').classList.add('drawer-open');
     document.body.style.overflow = 'hidden';
 }
 function closeDrawer() {
     document.getElementById('drawer').classList.remove('open');
     document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('pagePushWrap').classList.remove('drawer-open');
     document.body.style.overflow = '';
 }
 
@@ -6554,5 +6570,6 @@ window.addEventListener('beforeunload', () => {
     if (window._announcementInterval) clearInterval(window._announcementInterval);
 });
     </script>
+    </div><!-- /page-push-wrap -->
 </body>
 </html>
