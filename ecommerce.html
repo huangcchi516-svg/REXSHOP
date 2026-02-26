@@ -764,7 +764,7 @@
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.1) 100%);
             border: 2px solid var(--primary);
             color: var(--primary);
-            padding: 14px 28px;
+            padding: 9px 20px;
             border-radius: 30px;
             font-weight: 700;
             cursor: pointer;
@@ -4110,21 +4110,40 @@ function openCustomBlockModal(blockName) {
     updateAddToCartButton();
 
     if (defaultCustomSpecs.length > 0) {
+        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
+        if (autoIdx !== -1) {
+            selectedSpec = {
+                ...defaultCustomSpecs[autoIdx],
+                productId: selectedFlavor ? selectedFlavor.id : null,
+                productName: selectedFlavor ? selectedFlavor.name : '',
+                productImage: selectedFlavor ? selectedFlavor.image : ''
+            };
+            renderSpecPrice(defaultCustomSpecs[autoIdx]);
+            const s = defaultCustomSpecs[autoIdx];
+            const multiplier = s.quantityMultiplier || 1;
+            const stockDisplay = document.getElementById('specInfoStock');
+            if (stockDisplay) {
+                const stockText = multiplier > 1 ? `庫存：${s.stock} 個 (可售 ${Math.floor(s.stock/multiplier)} 組)` : `庫存：${s.stock} 件`;
+                const isCritical = s.stock > 0 && s.stock <= 3;
+                const isLow = s.stock > 0 && s.stock <= 10;
+                stockDisplay.textContent = stockText + (isCritical ? ' 🔥 庫存緊張！' : isLow ? ' ⚠️ 即將售完' : '');
+                stockDisplay.style.color = isCritical ? '#ff4444' : isLow ? '#ff9900' : 'var(--accent-green)';
+            }
+        }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
-            return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}"
-                         ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
+            const isPreSelected = index === autoIdx;
+            return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isPreSelected ? 'selected' : ''}"
+                         ontouchstart="event.stopPropagation();event.preventDefault();selectQuantitySpec(${index})" onclick="selectQuantitySpec(${index})"
                          id="qty-spec-${index}"
                          title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
         optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
-
-        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
-        if (autoIdx !== -1) selectQuantitySpec(autoIdx);
+        updateAddToCartButton();
     } else {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
@@ -4207,21 +4226,40 @@ function renderFeaturedFlavorOptions() {
     }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
+        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.stock > 0);
+        if (autoIdx !== -1) {
+            selectedSpec = {
+                ...defaultFeaturedSpecs[autoIdx],
+                productId: selectedFlavor ? selectedFlavor.id : null,
+                productName: selectedFlavor ? selectedFlavor.name : '',
+                productImage: selectedFlavor ? selectedFlavor.image : ''
+            };
+            renderSpecPrice(defaultFeaturedSpecs[autoIdx]);
+            const s = defaultFeaturedSpecs[autoIdx];
+            const multiplier = s.quantityMultiplier || 1;
+            const stockDisplay = document.getElementById('specInfoStock');
+            if (stockDisplay) {
+                const stockText = multiplier > 1 ? `庫存：${s.stock} 個 (可售 ${Math.floor(s.stock/multiplier)} 組)` : `庫存：${s.stock} 件`;
+                const isCritical = s.stock > 0 && s.stock <= 3;
+                const isLow = s.stock > 0 && s.stock <= 10;
+                stockDisplay.textContent = stockText + (isCritical ? ' 🔥 庫存緊張！' : isLow ? ' ⚠️ 即將售完' : '');
+                stockDisplay.style.color = isCritical ? '#ff4444' : isLow ? '#ff9900' : 'var(--accent-green)';
+            }
+        }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
-            return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}"
-                         ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
+            const isPreSelected = index === autoIdx;
+            return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isPreSelected ? 'selected' : ''}"
+                         ontouchstart="event.stopPropagation();event.preventDefault();selectQuantitySpec(${index})" onclick="selectQuantitySpec(${index})"
                          id="qty-spec-${index}"
                          title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
         optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
-
-        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.stock > 0);
-        if (autoIdx !== -1) setTimeout(() => selectQuantitySpec(autoIdx), 100);
+        updateAddToCartButton();
     } else {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
@@ -4398,20 +4436,43 @@ function renderFlavorOptions(categoryName) {
     }).join('');
 
     if (defaultSpecs.length > 0) {
+        // 預先決定自動選哪個規格
+        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
+        // 直接在渲染時設好 selected，不再呼叫 selectQuantitySpec（避免觸發兩次）
+        if (autoIdx !== -1) {
+            selectedSpec = {
+                ...defaultSpecs[autoIdx],
+                productId: selectedFlavor ? selectedFlavor.id : null,
+                productName: selectedFlavor ? selectedFlavor.name : '',
+                productImage: selectedFlavor ? selectedFlavor.image : ''
+            };
+            renderSpecPrice(defaultSpecs[autoIdx]);
+            const s = defaultSpecs[autoIdx];
+            const multiplier = s.quantityMultiplier || 1;
+            const stockDisplay = document.getElementById('specInfoStock');
+            if (stockDisplay) {
+                const availableUnits = multiplier > 1 ? Math.floor(s.stock / multiplier) : s.stock;
+                const stockText = multiplier > 1 ? `庫存：${s.stock} 個 (可售 ${availableUnits} 組)` : `庫存：${s.stock} 件`;
+                const isCritical = s.stock > 0 && s.stock <= 3;
+                const isLow = s.stock > 0 && s.stock <= 10;
+                stockDisplay.textContent = stockText + (isCritical ? ' 🔥 庫存緊張！' : isLow ? ' ⚠️ 即將售完' : '');
+                stockDisplay.style.color = isCritical ? '#ff4444' : isLow ? '#ff9900' : 'var(--accent-green)';
+            }
+        }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
-            return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}"
-                         ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
+            const isPreSelected = index === autoIdx;
+            return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isPreSelected ? 'selected' : ''}"
+                         ontouchstart="event.stopPropagation();event.preventDefault();selectQuantitySpec(${index})" onclick="selectQuantitySpec(${index})"
                          id="qty-spec-${index}"
                          title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
         optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
-        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
-        if (autoIdx !== -1) setTimeout(() => selectQuantitySpec(autoIdx), 100);
+        updateAddToCartButton();
     } else {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
