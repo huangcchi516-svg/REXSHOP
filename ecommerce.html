@@ -2590,6 +2590,12 @@
             overflow: hidden;
         }
         #categoryPage.active { display: flex; }
+        #categoryPage, #categoryPage * {
+            touch-action: pan-x pan-y;
+        }
+        #categoryPage .catpage-body {
+            touch-action: pan-y;
+        }
 
         .catpage-header {
             display: flex;
@@ -4826,6 +4832,14 @@ function openCategoryPage(title, subtitle) {
         body.ontouchend = () => {
             setTimeout(() => { window._touchCancelled = false; }, 80);
         };
+        // 阻止雙指縮放
+        body.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+        body.addEventListener('touchstart', e => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+                window._touchCancelled = true; // 多指觸碰，取消選取
+            }
+        }, { passive: false });
     }
     history.pushState({ modal: 'spec' }, '');
     isModalOpen = true;
