@@ -1301,8 +1301,8 @@
             overflow: visible;
             padding-right: 5px;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             align-content: start;
         }
 
@@ -2629,6 +2629,8 @@
             -webkit-overflow-scrolling: touch;
             padding: 0 0 140px 0;
         }
+        /* 防止點擊中選到多個口味 */
+        .spec-option { touch-action: manipulation; }
 
         /* 底部固定：數量+加入購物車 */
         .catpage-footer {
@@ -4091,7 +4093,7 @@ function openCustomBlockModal(blockName) {
         const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
         return `
             <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                 onclick="selectFlavor(${index})" id="flavor-${index}"
+                 ontouchstart="event.stopPropagation();event.preventDefault();selectFlavor(${index})" onclick="selectFlavor(${index})" id="flavor-${index}"
                  title="${product.name}${!hasStock ? ' - 已售完' : ''}">
                 <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
             </div>`;
@@ -4106,7 +4108,7 @@ function openCustomBlockModal(blockName) {
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}"
-                         onclick="selectQuantitySpec(${index})"
+                         ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
                          id="qty-spec-${index}"
                          title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
@@ -4190,7 +4192,7 @@ function renderFeaturedFlavorOptions() {
         
         return `
             <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
-                 onclick="selectFlavor(${index})"
+                 ontouchstart="event.stopPropagation();event.preventDefault();selectFlavor(${index})" onclick="selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
                 <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
@@ -4203,7 +4205,7 @@ function renderFeaturedFlavorOptions() {
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}"
-                         onclick="selectQuantitySpec(${index})"
+                         ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
                          id="qty-spec-${index}"
                          title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
@@ -4381,7 +4383,7 @@ function renderFlavorOptions(categoryName) {
         
         return `
             <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
-                 onclick="selectFlavor(${index})"
+                 ontouchstart="event.stopPropagation();event.preventDefault();selectFlavor(${index})" onclick="selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
                 <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
@@ -4394,7 +4396,7 @@ function renderFlavorOptions(categoryName) {
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}"
-                         onclick="selectQuantitySpec(${index})"
+                         ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
                          id="qty-spec-${index}"
                          title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
@@ -4409,9 +4411,7 @@ function renderFlavorOptions(categoryName) {
     }
 }
 function selectFlavor(index) {
-    if (window._specSelectLock) return;
-    window._specSelectLock = true;
-    setTimeout(() => { window._specSelectLock = false; }, 350);
+    if (window._touchCancelled) return;
     const product = currentCategoryProducts[index];
     const specs = productSpecs[product.id];
     
@@ -4466,7 +4466,8 @@ function renderQuantitySpecOptions(specs) {
         const hasSale = pSpecs && pSpecs.some(s => s.originalPrice > 0);
         const isSelected = selectedFlavor && product.id === selectedFlavor.id;
         return `<div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                     onclick="selectFlavor(${index})" id="flavor-${index}"
+                     ontouchstart="handleSpecTouch(event,'flavor',${index})"
+                     onclick="handleSpecClick(event,'flavor',${index})" id="flavor-${index}"
                      title="${product.name}${!hasStock ? ' - 已售完' : ''}">
                     <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
                 </div>`;
@@ -4477,7 +4478,7 @@ function renderQuantitySpecOptions(specs) {
     const quantityOptions = specs.map((spec, index) => {
         const isOutOfStock = spec.stock === 0;
         return `<div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''}" 
-                     onclick="selectQuantitySpec(${index})"
+                     ontouchstart="event.stopPropagation();selectQuantitySpec(${index},event)" onclick="selectQuantitySpec(${index})"
                      id="qty-spec-${index}"
                      title="${spec.specName}${isOutOfStock ? ' - 已售完' : ''}">
                     <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
@@ -4488,9 +4489,7 @@ function renderQuantitySpecOptions(specs) {
     window.currentQuantitySpecs = specs;
 }
 function selectQuantitySpec(index) {
-    if (window._specSelectLock) return;
-    window._specSelectLock = true;
-    setTimeout(() => { window._specSelectLock = false; }, 350);
+    if (window._touchCancelled) return;
     const specs = window.currentQuantitySpecs;
     const spec = specs[index];
     
@@ -4797,6 +4796,10 @@ function updateSpecThumbFromProduct(product) {
 
 // ── 全頁分類內頁控制 ──
 function openCategoryPage(title, subtitle) {
+    // 滑動偵測：touchmove 超過 8px 就取消選取，防止滑動誤觸
+    window._touchCancelled = false;
+    window._touchStartY = 0;
+    window._touchStartX = 0;
     const page = document.getElementById('categoryPage');
     const titleEl = document.getElementById('catPageTitle');
     const subEl = document.getElementById('catPageSubtitle');
@@ -4807,9 +4810,23 @@ function openCategoryPage(title, subtitle) {
     }
     page.classList.add('active');
     document.body.style.overflow = 'hidden';
-    // 捲到頂
     const body = document.getElementById('catPageBody');
-    if (body) body.scrollTop = 0;
+    if (body) {
+        body.scrollTop = 0;
+        body.ontouchstart = e => {
+            window._touchCancelled = false;
+            window._touchStartX = e.touches[0].clientX;
+            window._touchStartY = e.touches[0].clientY;
+        };
+        body.ontouchmove = e => {
+            const dx = Math.abs(e.touches[0].clientX - window._touchStartX);
+            const dy = Math.abs(e.touches[0].clientY - window._touchStartY);
+            if (dx > 8 || dy > 8) window._touchCancelled = true;
+        };
+        body.ontouchend = () => {
+            setTimeout(() => { window._touchCancelled = false; }, 80);
+        };
+    }
     history.pushState({ modal: 'spec' }, '');
     isModalOpen = true;
 }
