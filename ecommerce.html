@@ -169,6 +169,170 @@
             color: var(--secondary);
         }
 
+        /* ── 漢堡選單 ── */
+        .hamburger-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hamburger-btn span {
+            display: block;
+            width: 24px;
+            height: 2.5px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* 遮罩 */
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 500;
+            backdrop-filter: blur(2px);
+        }
+        .drawer-overlay.open { display: block; }
+
+        /* 側滑選單本體 */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 78vw;
+            max-width: 320px;
+            height: 100%;
+            background: #111;
+            border-left: 2px solid var(--primary);
+            z-index: 501;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .drawer.open { transform: translateX(0); }
+
+        /* 選單頂部 */
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            flex-shrink: 0;
+        }
+        .drawer-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .drawer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+            display: none;
+        }
+        .drawer-username {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .drawer-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 選單項目 */
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .drawer-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #555;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px 20px 6px;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #eee;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s;
+        }
+        .drawer-item:active { background: rgba(255,215,0,0.07); }
+        .drawer-item .di-icon { font-size: 18px; width: 28px; }
+        .drawer-item .di-arrow { color: #555; font-size: 13px; }
+        .drawer-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            margin: 6px 0;
+        }
+        /* 分類選項（縮排） */
+        .drawer-category {
+            display: flex;
+            align-items: center;
+            padding: 11px 20px 11px 48px;
+            font-size: 14px;
+            color: #ccc;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s;
+        }
+        .drawer-category:active { background: rgba(255,215,0,0.07); }
+        .drawer-category.active { color: var(--primary); font-weight: 700; }
+
+        /* 登出按鈕 */
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,215,0,0.15);
+            flex-shrink: 0;
+        }
+        .drawer-logout-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,68,68,0.1);
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
         
         .announcement-bar {
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.1) 100%);
@@ -1064,16 +1228,21 @@
             margin-left: 6px;
         }
         .sale-badge {
-            display: inline-block;
-            background: #ff4444;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 4px;
-            margin-left: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #ff4444;
+            border: 1.5px solid #ff4444;
+            font-size: 10px;
+            font-weight: 900;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-left: 4px;
             vertical-align: middle;
-            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            line-height: 1;
         }
         .card-sale-badge {
             position: absolute;
@@ -1354,26 +1523,28 @@
         
         .toast {
             position: fixed;
-            bottom: -80px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 60px;
+            right: -300px;
+            left: auto;
+            transform: none;
             background: var(--accent-green);
             color: var(--secondary);
-            padding: 12px 20px;
-            border-radius: 25px;
+            padding: 8px 14px;
+            border-radius: 8px;
             font-weight: 700;
+            font-size: 13px;
             z-index: 99999;
             opacity: 0;
-            transition: bottom 0.3s ease, opacity 0.3s ease;
+            transition: right 0.3s ease, opacity 0.3s ease;
             white-space: nowrap;
-            max-width: 90vw;
+            max-width: 80vw;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
 
         .toast.show {
             opacity: 1;
-            bottom: 30px;
+            right: 12px;
         }
 
         .toast.error {
@@ -2368,7 +2539,86 @@
 </div>
 <style>
 @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-</style>
+
+        /* 客服按鈕（footer並排） */
+        .drawer-cs-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(0,200,100,0.12);
+            border: 1px solid #00c864;
+            color: #00e070;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .drawer-logout-btn { flex: 1; }
+
+        /* ── 全頁分類內頁 ── */
+        #categoryPage {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 1500;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #categoryPage.active { display: flex; }
+
+        .catpage-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--primary);
+            background: rgba(255,255,255,0.04);
+            flex-shrink: 0;
+        }
+        .catpage-back {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            -webkit-tap-highlight-color: transparent;
+            line-height: 1;
+        }
+        .catpage-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+            flex: 1;
+        }
+        .catpage-subtitle {
+            font-size: 11px;
+            color: #888;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .catpage-body {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 0 120px 0;
+        }
+
+        /* 底部固定：數量+加入購物車 */
+        .catpage-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 14px 14px;
+            border-top: 1px solid rgba(255,215,0,0.2);
+            background: var(--bg-dark);
+            z-index: 10;
+        }
+
+    </style>
     <!-- LINE 瀏覽器內嵌門市地圖 Modal -->
     <div id="ecpayIframeModal">
         <div class="iframe-modal-header">
@@ -2392,22 +2642,64 @@
         <input type="text" name="CheckMacValue" id="ecpay_CheckMacValue">
     </form>
     <!-- 導航列 -->
+    <!-- 側滑選單遮罩 -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+    <!-- 側滑選單 -->
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-header-info">
+                <img class="drawer-avatar" id="drawerAvatar" src="" alt="">
+                <div class="drawer-username" id="drawerUsername">REX LAB</div>
+            </div>
+            <button class="drawer-close" onclick="closeDrawer()">✕</button>
+        </div>
+        <div class="drawer-body" id="drawerBody">
+            <!-- 會員區 -->
+            <div id="drawerMemberSection" style="display:none;">
+                <div class="drawer-section-label">會員</div>
+                <button class="drawer-item" onclick="closeDrawer(); openMemberProfileModal()">
+                    <span><span class="di-icon">👤</span>會員資料</span>
+                    <span class="di-arrow">›</span>
+                </button>
+                <button class="drawer-item" onclick="closeDrawer(); openOrderSearch()">
+                    <span><span class="di-icon">📦</span>查詢訂單</span>
+                    <span class="di-arrow">›</span>
+                </button>
+
+                <div class="drawer-divider"></div>
+            </div>
+            <!-- 分類區（動態填入） -->
+            <div id="drawerCategorySection" style="display:none;">
+                <div class="drawer-section-label">商品分類</div>
+                <div id="drawerCategoryList"></div>
+            </div>
+        </div>
+        <div class="drawer-footer" id="drawerFooter" style="display:none;">
+            <div style="display:flex; gap:8px;">
+                <button class="drawer-cs-btn" onclick="closeDrawer(); window.open('https://line.me/ti/p/~rex52077', '_blank')">💬 客服</button>
+                <button class="drawer-logout-btn" onclick="closeDrawer(); logout()">登出</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:4px;">
             <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;">
             <div class="logo">REX LAB</div>
         </div>
-        <div class="nav-buttons" id="navButtons" style="display:none;">
-            <button class="nav-btn" id="lineLoginBtn" onclick="lineLogin()" style="display:none;">
-                <img src="https://developers.line.biz/media/line-login/btn_base.png" alt="LINE Login" style="height:40px;">
-            </button>
-            <div id="memberInfo" style="display:none; align-items:center; gap:10px;">
-                <img id="memberAvatar" src="" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--primary);">
-                <button class="nav-btn" onclick="openMemberProfileModal()">👤 會員資料</button>
-                <button class="nav-btn" onclick="logout()">登出</button>
-            </div>
-            <button class="nav-btn" onclick="openOrderSearch()">📦 查詢訂單</button>
-            <button class="nav-btn" onclick="window.open('https://line.me/ti/p/~rex52077', '_blank')">💬 客服</button>
+        <!-- LINE登入按鈕（未登入時） -->
+        <button class="nav-btn" id="lineLoginBtn" onclick="lineLogin()" style="display:none;">
+            <img src="https://developers.line.biz/media/line-login/btn_base.png" alt="LINE Login" style="height:36px;">
+        </button>
+        <!-- 漢堡選單按鈕 -->
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none;" aria-label="選單">
+            <span></span><span></span><span></span>
+        </button>
+        <!-- 保留隱藏的 id 供原本 JS 使用 -->
+        <div id="navButtons" style="display:none;"></div>
+        <div id="memberInfo" style="display:none;">
+            <img id="memberAvatar" src="" style="display:none;">
         </div>
     </nav>
 
@@ -2517,26 +2809,25 @@
     </div>
 
     <!-- 規格選擇彈窗 -->
-    <div class="modal" id="specModal">
-        <div class="modal-content">
-            <!-- 固定標題列 -->
-            <div class="modal-header" style="padding: 10px 14px 8px 14px; flex-shrink:0; border-bottom: 1px solid rgba(255,215,0,0.2);">
-                <div style="display:flex; align-items:baseline; gap:8px; flex:1; min-width:0;">
-                    <div class="modal-title" id="specModalTitle">選擇規格</div>
-                    <span id="specModalSubtitle" style="display:none; font-size:12px; color:#aaa; font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
-                </div>
-                <button class="close-modal" onclick="closeSpecModal()">×</button>
+    <!-- ✅ 全頁分類內頁（取代彈窗） -->
+    <div id="categoryPage">
+        <!-- 頂部返回列 -->
+        <div class="catpage-header">
+            <button class="catpage-back" onclick="closeCategoryPage()">‹</button>
+            <div style="flex:1; min-width:0;">
+                <div class="catpage-title" id="catPageTitle">分類</div>
+                <div class="catpage-subtitle" id="catPageSubtitle" style="display:none;"></div>
             </div>
-            <!-- 可捲動的內容區（圖片 + 口味選項） -->
-            <div id="specScrollArea" style="flex:1; overflow-y:auto; overflow-x:hidden; padding: 0 10px 10px 10px; -webkit-overflow-scrolling:touch;">
-                <!-- 🆕 多圖輪播 -->
-                <div class="product-carousel" id="productCarousel" style="display:none; margin: 0 -10px;">
-                    <div class="carousel-track-wrap" id="carouselWrap" onclick="openCarouselLightbox(event)" style="cursor:zoom-in;">
-                        <div class="carousel-track" id="carouselTrack"></div>
-                        <button class="carousel-btn carousel-prev" id="carouselPrev" onclick="event.stopPropagation();carouselMove(-1)">&#8249;</button>
-                        <button class="carousel-btn carousel-next" id="carouselNext" onclick="event.stopPropagation();carouselMove(1)">&#8250;</button>
-                    </div>
-                    <!-- 縮圖列 + 售價庫存同一列 -->
+        </div>
+        <!-- 可捲動主體 -->
+        <div class="catpage-body" id="catPageBody">
+            <!-- 輪播 -->
+            <div class="product-carousel" id="productCarousel" style="display:none; margin:0;">
+                <div class="carousel-track-wrap" id="carouselWrap" onclick="openCarouselLightbox(event)" style="cursor:zoom-in;">
+                    <div class="carousel-track" id="carouselTrack"></div>
+                    <button class="carousel-btn carousel-prev" id="carouselPrev" onclick="event.stopPropagation();carouselMove(-1)">&#8249;</button>
+                    <button class="carousel-btn carousel-next" id="carouselNext" onclick="event.stopPropagation();carouselMove(1)">&#8250;</button>
+                </div>
                 <div style="display:flex; align-items:center; background:rgba(0,0,0,0.7); padding: 4px 10px;">
                     <div id="specThumbStrip" style="display:flex; flex-wrap:nowrap; gap:5px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; flex:1; min-width:0;"></div>
                     <div style="flex:0 0 auto; text-align:right; padding-left:10px; max-width:50%;">
@@ -2545,28 +2836,34 @@
                     </div>
                 </div>
                 <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
-                </div>
-                <!-- 燈箱（點大圖觸發） -->
-                <div id="specLightbox" onclick="closeSpecLightbox()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
-                    <img id="specLightboxImg" src="" style="max-width:96vw;max-height:85vh;object-fit:contain;border-radius:10px;box-shadow:0 0 40px rgba(255,215,0,0.2);">
-                    <div style="color:#FFD700;font-size:14px;opacity:0.7;">點任意處關閉</div>
-                </div>
-                <div class="spec-options" id="specOptions"></div>
             </div>
-            <!-- 固定底部：數量選擇 + 加入購物車 -->
-            <div style="flex-shrink:0; padding: 10px 14px 14px 14px; border-top: 1px solid rgba(255,215,0,0.2); background: var(--bg-dark);">
-                <div class="quantity-selector" style="margin-bottom: 10px;">
-                    <div class="quantity-label" style="display: none;">選擇數量:</div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" ontouchstart="event.preventDefault();changeQuantity(-1)" onclick="changeQuantity(-1)">−</button>
-                        <div class="quantity-display" id="quantityDisplay">1</div>
-                        <button class="quantity-btn" ontouchstart="event.preventDefault();changeQuantity(1)" onclick="changeQuantity(1)">+</button>
-                    </div>
-                </div>
-                <button class="add-to-cart-modal-btn" id="addToCartModalBtn" onclick="confirmAddToCart()">加入購物車</button>
-                <div id="modalPromoHint" style="text-align:center; margin-top:10px; font-size:13px; min-height:18px;"></div>
+            <!-- 燈箱 -->
+            <div id="specLightbox" onclick="closeSpecLightbox()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+                <img id="specLightboxImg" src="" style="max-width:96vw;max-height:85vh;object-fit:contain;border-radius:10px;box-shadow:0 0 40px rgba(255,215,0,0.2);">
+                <div style="color:#FFD700;font-size:14px;opacity:0.7;">點任意處關閉</div>
             </div>
+            <!-- 規格選項 -->
+            <div class="spec-options" id="specOptions" style="padding: 10px;"></div>
         </div>
+        <!-- 固定底部 -->
+        <div class="catpage-footer">
+            <div class="quantity-selector" style="margin-bottom: 10px;">
+                <div class="quantity-controls">
+                    <button class="quantity-btn" ontouchstart="event.preventDefault();changeQuantity(-1)" onclick="changeQuantity(-1)">−</button>
+                    <div class="quantity-display" id="quantityDisplay">1</div>
+                    <button class="quantity-btn" ontouchstart="event.preventDefault();changeQuantity(1)" onclick="changeQuantity(1)">+</button>
+                </div>
+            </div>
+            <button class="add-to-cart-modal-btn" id="addToCartModalBtn" onclick="confirmAddToCart()">加入購物車</button>
+            <div id="modalPromoHint" style="text-align:center; margin-top:10px; font-size:13px; min-height:18px;"></div>
+        </div>
+    </div>
+
+    <!-- specModal 已整合至全頁 categoryPage，保留空殼供 JS 相容 -->
+    <div id="specModal" style="display:none;">
+        <div id="specModalTitle" style="display:none;"></div>
+        <div id="specModalSubtitle" style="display:none;"></div>
+        <div id="specScrollArea" style="display:none;"></div>
     </div>
 
     <!-- 結帳彈窗 -->
@@ -3145,14 +3442,17 @@ async function loadProductsData() {
             categories = [...allTags].map((name, i) => ({ name, order: i + 1, enabled: true }));
         }
         const categoryTabs = document.getElementById('categoryTabs');
-        categoryTabs.innerHTML = '<button class="category-tab active" onclick="filterCategory(\'all\')">全部</button>';
+        categoryTabs.innerHTML = '<button class="category-tab active" data-category="all" onclick="filterCategory(\'all\')">全部</button>';
         categories.forEach(category => {
             const button = document.createElement('button');
             button.className = 'category-tab';
+            button.dataset.category = category.name;
             button.onclick = () => filterCategory(category.name);
             button.textContent = formatCategoryName(category.name);
             categoryTabs.appendChild(button);
         });
+        // 分類載入完成後更新側滑選單
+        if (typeof updateDrawerCategories === 'function') updateDrawerCategories();
 
         // --- 公告 ---
         if (announcementRes.ok) {
@@ -3323,7 +3623,7 @@ function renderSpecPrice(spec) {
     const el = document.getElementById('specInfoPrice');
     if (!el) return;
     if (spec.originalPrice && spec.originalPrice > spec.price) {
-        el.innerHTML = `<span style="font-size:14px;">售價: $${spec.price}</span> <span class="spec-original-price">$${spec.originalPrice}</span><span class="sale-badge">特價中</span>`;
+        el.innerHTML = `<span style="font-size:14px;">售價: $${spec.price}</span> <span class="spec-original-price">$${spec.originalPrice}</span><span class="sale-badge">特</span>`;
     } else {
         el.textContent = `售價: $${spec.price}`;
         el.style.fontSize = '14px';
@@ -3735,16 +4035,11 @@ function openCustomBlockModal(blockName) {
         return;
     }
     
-    document.getElementById('specModalTitle').textContent = formatCategoryName(blockName);
-    const _sub1 = document.getElementById('specModalSubtitle');
-    const _st1 = categorySubtitles[blockName] || '';
-    if (_sub1) { _sub1.textContent = _st1; _sub1.style.display = _st1 ? 'inline' : 'none'; }
-    document.getElementById('specModal').classList.add('active');
-    setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
-    history.pushState({ modal: 'spec' }, '');
-    isModalOpen = true;
     window._currentModalCategoryName = blockName;
     window._isRegularCategoryModal = false;
+    const _st1 = categorySubtitles[blockName] || '';
+    openCategoryPage(formatCategoryName(blockName), _st1);
+    updateModalPromoHint();
     // 主打/自訂區塊：輪播來自各商品自己的 image，不混入分類照片設定
     initCarouselFromProductImages(currentCategoryProducts);
     let totalStock = 0, minPrice = Infinity, maxPrice = 0;
@@ -3779,7 +4074,7 @@ function openCustomBlockModal(blockName) {
             <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
                  onclick="selectFlavor(${index})" id="flavor-${index}"
                  title="${product.name}${!hasStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
             </div>`;
     }).join('');
     selectedSpec = null;
@@ -3815,16 +4110,11 @@ function openFeaturedCategoryModal() {
         showToast('目前沒有本月激推商品', 'error');
         return;
     }
-    document.getElementById('specModalTitle').textContent = '本月激推🔥';
-    const _sub2 = document.getElementById('specModalSubtitle');
-    const _st2 = categorySubtitles['本月激推🔥'] || '';
-    if (_sub2) { _sub2.textContent = _st2; _sub2.style.display = _st2 ? 'inline' : 'none'; }
-    document.getElementById('specModal').classList.add('active');
-    setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
-    history.pushState({ modal: 'spec' }, '');
-    isModalOpen = true;
     window._currentModalCategoryName = '本月激推🔥';
     window._isRegularCategoryModal = false;
+    const _st2 = categorySubtitles['本月激推🔥'] || '';
+    openCategoryPage('本月激推🔥', _st2);
+    updateModalPromoHint();
     // 主打/自訂區塊：輪播來自各商品自己的 image，不混入分類照片設定
     initCarouselFromProductImages(currentCategoryProducts);
     renderFeaturedFlavorOptions();
@@ -3884,7 +4174,7 @@ function renderFeaturedFlavorOptions() {
                  onclick="selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
             </div>
         `;
     }).join('');
@@ -3989,12 +4279,17 @@ function displayProducts() {
 }
 function filterCategory(category) {
     currentCategory = category;
+    window.currentCategory = category;
     document.querySelectorAll('.category-tab').forEach(tab => {
         tab.classList.remove('active');
+        if ((tab.dataset && tab.dataset.category === category) ||
+            (!tab.dataset.category && category === 'all')) {
+            tab.classList.add('active');
+        }
     });
-    event.target.classList.add('active');
     displayProducts();
-    document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const grid = document.getElementById('productsGrid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 let currentCategoryProducts = []; // 當前類別的所有商品
 let selectedFlavor = null; // 選中的口味（商品）
@@ -4007,16 +4302,11 @@ function openCategoryModal(categoryName) {
         showToast('此類別暫無商品', 'error');
         return;
     }
-    document.getElementById('specModalTitle').textContent = formatCategoryName(categoryName);
-    const _sub3 = document.getElementById('specModalSubtitle');
-    const _st3 = categorySubtitles[categoryName] || '';
-    if (_sub3) { _sub3.textContent = _st3; _sub3.style.display = _st3 ? 'inline' : 'none'; }
     window._currentModalCategoryName = categoryName;
     window._isRegularCategoryModal = true;
-    document.getElementById('specModal').classList.add('active');
-    setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
-    history.pushState({ modal: 'spec' }, '');
-    isModalOpen = true;
+    const _st3 = categorySubtitles[categoryName] || '';
+    openCategoryPage(formatCategoryName(categoryName), _st3);
+    updateModalPromoHint();
     initCarousel(categoryName);
     renderFlavorOptions(categoryName);
 }
@@ -4075,7 +4365,7 @@ function renderFlavorOptions(categoryName) {
                  onclick="selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
             </div>
         `;
     }).join('');
@@ -4114,22 +4404,21 @@ function selectFlavor(index) {
     }
     
     selectedFlavor = product;
-    updateSpecThumbFromProduct(product);
     document.querySelectorAll('[id^="flavor-"]').forEach((el) => {
         el.classList.toggle('selected', el.id === `flavor-${index}`);
     });
     if (!window._isRegularCategoryModal) {
-        // 切換口味時：只顯示該商品自己的圖，不混入分類照片設定
+        // 主打/自訂區塊：輪播圖不重建，直接跳到該商品對應的那張
         let productImg = product.image || '';
         if (productImg && !productImg.startsWith('http')) productImg = 'https://' + productImg;
         if (productImg) {
-            initCarouselFromUrls([productImg]);
-        } else {
-            // 商品沒有圖就隱藏輪播
-            const carousel = document.getElementById('productCarousel');
-            if (carousel) carousel.style.display = 'none';
+            const targetIdx = _carouselImgs.indexOf(productImg);
+            if (targetIdx !== -1) {
+                carouselGoTo(targetIdx);
+            }
         }
     }
+    // 分類模式(_isRegularCategoryModal=true)：不動輪播，維持原本照片設定
     renderQuantitySpecOptions(specs);
     let autoSelectIndex = -1;
     autoSelectIndex = specs.findIndex(s => 
@@ -4157,7 +4446,7 @@ function renderQuantitySpecOptions(specs) {
         return `<div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
                      onclick="selectFlavor(${index})" id="flavor-${index}"
                      title="${product.name}${!hasStock ? ' - 已售完' : ''}">
-                    <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特價中</span>' : ''}</div>
+                    <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
                 </div>`;
     }).join('');
     
@@ -4235,8 +4524,8 @@ window.addEventListener('popstate', function(event) {
     if (orderDetailView) {
         closeOrderDetail();
         isModalOpen = false;
-    } else if (specModal && specModal.classList.contains('active')) {
-        closeSpecModal();
+    } else if (document.getElementById('categoryPage') && document.getElementById('categoryPage').classList.contains('active')) {
+        closeCategoryPage();
         isModalOpen = false;
     } else if (cartSidebar && cartSidebar.classList.contains('active')) {
         toggleCart();
@@ -4268,12 +4557,9 @@ function openSpecModal(productId) {
         return;
     }
 
-    document.getElementById('specModalTitle').textContent = currentProduct.name;
     window._currentModalCategoryName = currentProduct.category || '';
-    document.getElementById('specModal').classList.add('active');
-    setTimeout(() => { const sa = document.getElementById('specScrollArea'); if(sa) sa.scrollTop = 0; }, 50); updateModalPromoHint();
-    history.pushState({ modal: 'spec' }, '');
-    isModalOpen = true;
+    openCategoryPage(currentProduct.name, '');
+    updateModalPromoHint();
     
     renderSpecOptions();
     quantity = 1;
@@ -4307,18 +4593,35 @@ function initCarousel(categoryName) {
 }
 
 /**
- * 主打/自訂區塊專用：用所有商品的 product.image 組成輪播
- * 每個商品一張，去重、過濾空值
+ * 主打/自訂區塊專用：
+ * 順序：1) 分類照片設定的圖（封面+輪播）2) 各商品自己的 product.image
+ * 照片設定永遠排前面，商品圖補在後面
+ * 切換口味時跳到對應商品圖的位置，照片設定的圖不動
  */
 function initCarouselFromProductImages(productList) {
+    const categoryName = window._currentModalCategoryName || '';
     const seen = new Set();
     const imgs = [];
+
+    // 1. 照片設定：封面圖
+    const coverImg = (categoryImages[categoryName] || '').trim();
+    if (coverImg) {
+        const u = coverImg.startsWith('http') ? coverImg : 'https://' + coverImg;
+        if (!seen.has(u)) { seen.add(u); imgs.push(u); }
+    }
+    // 2. 照片設定：輪播圖（D欄起）
+    (categoryCarouselImages[categoryName] || []).forEach(raw => {
+        const u = ((raw || '').trim().startsWith('http') ? raw.trim() : 'https://' + raw.trim());
+        if (u && !seen.has(u)) { seen.add(u); imgs.push(u); }
+    });
+    // 3. 各商品自己的圖（依照商品順序，口味切換靠 indexOf 定位）
     (productList || []).forEach(p => {
         let img = (p.image || '').trim();
         if (!img) return;
         if (!img.startsWith('http')) img = 'https://' + img;
         if (!seen.has(img)) { seen.add(img); imgs.push(img); }
     });
+
     initCarouselFromUrls(imgs);
 }
 
@@ -4466,16 +4769,36 @@ function updateSpecThumbFromProduct(product) {
     if (first) first.src = src;
 }
 
-function closeSpecModal() {
-    document.getElementById('specModal').classList.remove('active');
-    const sub = document.getElementById('specModalSubtitle');
-    if (sub) { sub.textContent = ''; sub.style.display = 'none'; }
+
+// ── 全頁分類內頁控制 ──
+function openCategoryPage(title, subtitle) {
+    const page = document.getElementById('categoryPage');
+    const titleEl = document.getElementById('catPageTitle');
+    const subEl = document.getElementById('catPageSubtitle');
+    if (titleEl) titleEl.textContent = title || '';
+    if (subEl) {
+        subEl.textContent = subtitle || '';
+        subEl.style.display = subtitle ? 'block' : 'none';
+    }
+    page.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    // 捲到頂
+    const body = document.getElementById('catPageBody');
+    if (body) body.scrollTop = 0;
+    history.pushState({ modal: 'spec' }, '');
+    isModalOpen = true;
+}
+
+function closeCategoryPage() {
+    const page = document.getElementById('categoryPage');
+    page.classList.remove('active');
+    document.body.style.overflow = '';
+    isModalOpen = false;
     currentProduct = null;
     selectedSpec = null;
     selectedFlavor = null;
     currentCategoryProducts = [];
     quantity = 1;
-    // 釋放輪播圖記憶體
     _carouselImgs = [];
     _carouselIdx = 0;
     const track = document.getElementById('carouselTrack');
@@ -4486,6 +4809,11 @@ function closeSpecModal() {
     if (thumbStrip) thumbStrip.innerHTML = '';
     const opts = document.getElementById('specOptions');
     if (opts) opts.innerHTML = '';
+    updateQuantityDisplay();
+}
+
+function closeSpecModal() {
+    closeCategoryPage();
 }
 
 function renderSpecOptions() {
@@ -5762,23 +6090,36 @@ function showLoginWall() {
     document.getElementById('bulletinBoard').style.display = 'none';
     const cartFloat = document.querySelector('.cart-float');
     if (cartFloat) cartFloat.style.display = 'none';
-    document.getElementById('navButtons').style.display = 'none';
-    document.getElementById('lineLoginBtn').style.display = 'none';
-    document.getElementById('memberInfo').style.display = 'none';
+    document.getElementById('hamburgerBtn').style.display = 'none';
+    document.getElementById('lineLoginBtn').style.display = 'block';
 }
 
 function updateMemberUI() {
     if (currentMember) {
-        document.getElementById('navButtons').style.display = 'flex';
+        // 顯示漢堡按鈕，隱藏 LINE 登入按鈕
+        document.getElementById('hamburgerBtn').style.display = 'flex';
         document.getElementById('lineLoginBtn').style.display = 'none';
-        document.getElementById('memberInfo').style.display = 'flex';
+        // 同步側滑選單頭像和名稱
+        const drawerAvatar = document.getElementById('drawerAvatar');
+        if (drawerAvatar) {
+            drawerAvatar.src = currentMember.pictureUrl || '';
+            drawerAvatar.style.display = currentMember.pictureUrl ? 'block' : 'none';
+        }
+        const drawerUsername = document.getElementById('drawerUsername');
+        if (drawerUsername) drawerUsername.textContent = currentMember.displayName || 'REX LAB';
+        // 顯示會員區塊和登出按鈕
+        const memberSec = document.getElementById('drawerMemberSection');
+        if (memberSec) memberSec.style.display = 'block';
+        const drawerFooter = document.getElementById('drawerFooter');
+        if (drawerFooter) drawerFooter.style.display = 'block';
+        // memberAvatar 同步（供舊程式碼相容）
         document.getElementById('memberAvatar').src = currentMember.pictureUrl || '';
         document.getElementById('announcementBar').style.display = '';
         document.getElementById('bulletinBoard').style.display = '';
         const cartFloat = document.querySelector('.cart-float');
         if (cartFloat) cartFloat.style.display = '';
         const approvalStatus = currentMember.approvalStatus || '待審核';
-        
+
         if (approvalStatus === '已通過') {
             document.getElementById('loginWall').style.display = 'none';
             document.getElementById('pendingApproval').style.display = 'none';
@@ -5786,16 +6127,14 @@ function updateMemberUI() {
             document.getElementById('productsSection').style.display = 'block';
             if (currentMember.phone) {
                 const phoneInput = document.getElementById('customerPhone');
-                if (phoneInput && phoneInput.value === '') {
-                    phoneInput.value = currentMember.phone;
-                }
+                if (phoneInput && phoneInput.value === '') phoneInput.value = currentMember.phone;
             }
             if (currentMember.displayName) {
                 const nameInput = document.getElementById('customerName');
-                if (nameInput && nameInput.value === '') {
-                    nameInput.value = currentMember.displayName;
-                }
+                if (nameInput && nameInput.value === '') nameInput.value = currentMember.displayName;
             }
+            // 分類填入選單
+            updateDrawerCategories();
         } else if (approvalStatus === '已拒絕') {
             document.getElementById('loginWall').style.display = 'none';
             document.getElementById('pendingApproval').style.display = 'none';
@@ -5808,11 +6147,37 @@ function updateMemberUI() {
             document.getElementById('productsSection').style.display = 'none';
         }
     } else {
-        document.getElementById('navButtons').style.display = 'none';
+        document.getElementById('hamburgerBtn').style.display = 'none';
         document.getElementById('lineLoginBtn').style.display = 'none';
-        document.getElementById('memberInfo').style.display = 'none';
         showLoginWall();
     }
+}
+
+// ── 側滑選單控制 ──
+function openDrawer() {
+    updateDrawerCategories();
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// 動態更新分類列表
+function updateDrawerCategories() {
+    const sec = document.getElementById('drawerCategorySection');
+    const list = document.getElementById('drawerCategoryList');
+    if (!sec || !list) return;
+    const allCategories = [{ name: 'all', label: '全部' }, ...categories.map(c => ({ name: c.name, label: c.name }))];
+    if (allCategories.length <= 1) { sec.style.display = 'none'; return; }
+    sec.style.display = 'block';
+    list.innerHTML = allCategories.map(c => {
+        const isActive = (window.currentCategory || 'all') === c.name;
+        return `<button class="drawer-category ${isActive ? 'active' : ''}" onclick="closeDrawer(); filterCategory('${c.name}')">${c.label}</button>`;
+    }).join('');
 }
 
 async function checkApprovalStatus() {
