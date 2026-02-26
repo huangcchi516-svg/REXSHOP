@@ -4353,9 +4353,14 @@ function filterCategory(category) {
         }
     });
     displayProducts();
-    // 捲到篩選列（category-tabs）頂部
+    // 捲到讓篩選列剛好在 navbar 下方可見
     const tabs = document.getElementById('categoryTabs');
-    if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (tabs) {
+        const navbar = document.querySelector('.navbar');
+        const navH = navbar ? navbar.getBoundingClientRect().height : 60;
+        const tabsTop = tabs.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: tabsTop - navH - 6, behavior: 'smooth' });
+    }
 }
 let currentCategoryProducts = []; // 當前類別的所有商品
 let selectedFlavor = null; // 選中的口味（商品）
