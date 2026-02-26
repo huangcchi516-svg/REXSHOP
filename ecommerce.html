@@ -2692,8 +2692,8 @@
         <button class="nav-btn" id="lineLoginBtn" onclick="lineLogin()" style="display:none;">
             <img src="https://developers.line.biz/media/line-login/btn_base.png" alt="LINE Login" style="height:36px;">
         </button>
-        <!-- 漢堡選單按鈕 -->
-        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none;" aria-label="選單">
+        <!-- 漢堡選單按鈕（fixed右上角） -->
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none; position:fixed; top:12px; right:14px; z-index:300; background:rgba(0,0,0,0.5); border-radius:8px; padding:8px;" aria-label="選單">
             <span></span><span></span><span></span>
         </button>
         <!-- 保留隱藏的 id 供原本 JS 使用 -->
