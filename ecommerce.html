@@ -4124,7 +4124,7 @@ function openCustomBlockModal(blockName) {
 
         let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
-        if (autoIdx !== -1) setTimeout(() => selectQuantitySpec(autoIdx), 100);
+        if (autoIdx !== -1) selectQuantitySpec(autoIdx);
     } else {
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
@@ -4456,9 +4456,7 @@ function selectFlavor(index) {
         autoSelectIndex = specs.findIndex(s => s.stock > 0);
     }
     if (autoSelectIndex !== -1) {
-        setTimeout(() => {
-            selectQuantitySpec(autoSelectIndex);
-        }, 100); // 延遲一點點，確保 DOM 已渲染
+        selectQuantitySpec(autoSelectIndex);
     }
 }
 
@@ -4497,6 +4495,7 @@ function renderQuantitySpecOptions(specs) {
 function selectQuantitySpec(index) {
     if (window._touchCancelled) return;
     const specs = window.currentQuantitySpecs;
+    if (!specs || !specs[index]) return;
     const spec = specs[index];
     
     if (spec.stock === 0) {
