@@ -4388,6 +4388,9 @@ function renderFlavorOptions(categoryName) {
     }
 }
 function selectFlavor(index) {
+    if (window._specSelectLock) return;
+    window._specSelectLock = true;
+    setTimeout(() => { window._specSelectLock = false; }, 350);
     const product = currentCategoryProducts[index];
     const specs = productSpecs[product.id];
     
@@ -4464,6 +4467,9 @@ function renderQuantitySpecOptions(specs) {
     window.currentQuantitySpecs = specs;
 }
 function selectQuantitySpec(index) {
+    if (window._specSelectLock) return;
+    window._specSelectLock = true;
+    setTimeout(() => { window._specSelectLock = false; }, 350);
     const specs = window.currentQuantitySpecs;
     const spec = specs[index];
     
@@ -5014,9 +5020,9 @@ function updateCart() {
                 <div class="cart-item-price" data-price="${item.price}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
                 <div class="cart-item-controls">
                     <button class="remove-item" onclick="removeCartItem(${index})" title="移除">✖</button>
-                    <button class="qty-btn" onclick="updateCartQuantity(${index}, -1)">−</button>
+                    <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},-1)" onclick="updateCartQuantity(${index}, -1)">−</button>
                     <span class="cart-qty-num" style="font-size:14px; min-width:18px; text-align:center;">${item.quantity}</span>
-                    <button class="qty-btn" onclick="updateCartQuantity(${index}, 1)">+</button>
+                    <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},1)" onclick="updateCartQuantity(${index}, 1)">+</button>
                 </div>
             </div>
         </div>
