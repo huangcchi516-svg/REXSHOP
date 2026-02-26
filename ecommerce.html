@@ -825,7 +825,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 80px;
+            margin-bottom: 50px;
         }
 
         @supports not (grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))) {
@@ -912,42 +912,26 @@
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
         }
 
-        /* ── 底部導覽列 ── */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: rgba(10, 10, 10, 0.97);
-            border-top: 1px solid rgba(255, 215, 0, 0.25);
-            display: flex;
-            align-items: stretch;
-            z-index: 999;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        /* 左側：客服按鈕 */
+        
         .service-float {
-            flex: 1;
+            position: fixed;
+            bottom: 115px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
             cursor: pointer;
-            background: transparent;
-            border: none;
-            border-right: 1px solid rgba(255,255,255,0.06);
-            transition: background 0.2s ease;
-            -webkit-tap-highlight-color: transparent;
-            text-decoration: none;
-        }
-
-        .service-float:active {
-            background: rgba(6, 199, 85, 0.08);
+            box-shadow: 0 8px 25px rgba(6, 199, 85, 0.5);
+            transition: all 0.3s ease;
+            z-index: 999;
+            overflow: hidden;
+            border: 3px solid rgba(6, 199, 85, 0.8);
+            background: #06C755;
+            gap: 2px;
         }
 
         .service-float img {
@@ -955,62 +939,60 @@
         }
 
         .service-float-icon {
-            font-size: 22px;
+            font-size: 26px;
             line-height: 1;
         }
 
         .service-float-label {
             font-size: 11px;
-            font-weight: 600;
-            color: #06C755;
+            font-weight: 700;
+            color: #fff;
             line-height: 1;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
-        /* 右側：購物車按鈕 */
+        .service-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(6, 199, 85, 0.7);
+        }
+
+        
         .cart-float {
-            flex: 1;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, #FFA500 100%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            transition: background 0.2s ease;
-            -webkit-tap-highlight-color: transparent;
-            position: relative;
             font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+            transition: all 0.3s ease;
+            z-index: 999;
         }
 
-        .cart-float:active {
-            background: rgba(255, 215, 0, 0.08);
-        }
-
-        .cart-float-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary);
-            line-height: 1;
-            letter-spacing: 0.5px;
+        .cart-float:hover {
+            transform: scale(1.1);
         }
 
         .cart-badge {
             position: absolute;
-            top: 6px;
-            right: calc(50% - 22px);
+            top: -5px;
+            right: -5px;
             background: #ff4444;
             color: white;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 9px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 700;
-            padding: 0 4px;
         }
 
         
@@ -1809,9 +1791,22 @@
                 aspect-ratio: 1 / 1;
             }
 
+            .service-float {
+                width: 50px;
+                height: 50px;
+                bottom: 80px;
+                right: 15px;
+            }
             .service-float-icon { font-size: 20px; }
             .service-float-label { font-size: 10px; }
-            .cart-float-label { font-size: 10px; }
+
+            .cart-float {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+                bottom: 15px;
+                right: 15px;
+            }
 
             
             .modal-content {
@@ -2009,7 +2004,26 @@
                 padding-bottom: 5px;
             }
 
-            .bottom-bar { height: 60px; }
+            .service-float {
+                width: 60px;
+                height: 60px;
+                bottom: 100px;
+                right: 20px;
+            }
+
+            .cart-float {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .cart-badge {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
         }
 
         @media (min-width: 481px) and (max-width: 768px) {
@@ -2553,27 +2567,15 @@
         .drawer-cs-btn {
             flex: 1;
             padding: 12px;
-            background: linear-gradient(135deg, rgba(6,199,85,0.15) 0%, rgba(6,199,85,0.08) 100%);
-            border: 1.5px solid rgba(6,199,85,0.5);
-            color: #06C755;
-            border-radius: 8px;
+            background: none;
+            border: 1px solid rgba(0,200,100,0.35);
+            color: #00c864;
+            border-radius: 4px;
             font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-        .drawer-cs-btn:active {
-            background: rgba(6,199,85,0.25);
-        }
-        .drawer-cs-btn::before {
-            content: "💬";
-            font-size: 16px;
         }
 
         /* ── 全頁分類內頁 ── */
@@ -2805,20 +2807,15 @@
         </section>
     </div>
 
-    <!-- 底部導覽列 -->
-    <div class="bottom-bar">
-        <!-- 左側：客服按鈕 -->
-        <div class="service-float" onclick="window.open('https://line.me/ti/p/~rex52077', '_blank')">
-            <img id="serviceFloatImg" src="" alt="" style="display:none;">
-            <div class="service-float-icon">💬</div>
-            <div class="service-float-label">客服</div>
-        </div>
-        <!-- 右側：購物車按鈕 -->
-        <div class="cart-float" onclick="toggleCart()">
-            🛒
-            <div class="cart-float-label">購物車</div>
-            <div class="cart-badge" id="cartBadge">0</div>
-        </div>
+    <!-- 客服浮動按鈕（已移至 navbar） -->
+    <div class="service-float" style="display:none!important;">
+        <img id="serviceFloatImg" src="" alt="" style="display:none;">
+    </div>
+
+    <!-- 購物車浮動按鈕 -->
+    <div class="cart-float" onclick="toggleCart()">
+        🛒
+        <div class="cart-badge" id="cartBadge">0</div>
     </div>
 
     <!-- 購物車側邊欄 -->
@@ -6251,7 +6248,7 @@ function showLoginWall() {
     document.getElementById('productsSection').style.display = 'none';
     document.getElementById('announcementBar').style.display = 'none';
     document.getElementById('bulletinBoard').style.display = 'none';
-    const cartFloat = document.querySelector('.bottom-bar');
+    const cartFloat = document.querySelector('.cart-float');
     if (cartFloat) cartFloat.style.display = 'none';
     document.getElementById('hamburgerBtn').style.display = 'none';
     document.getElementById('lineLoginBtn').style.display = 'block';
@@ -6281,7 +6278,7 @@ function updateMemberUI() {
         document.getElementById('memberAvatar').src = currentMember.pictureUrl || '';
         document.getElementById('announcementBar').style.display = '';
         document.getElementById('bulletinBoard').style.display = '';
-        const cartFloat = document.querySelector('.bottom-bar');
+        const cartFloat = document.querySelector('.cart-float');
         if (cartFloat) cartFloat.style.display = '';
         const approvalStatus = currentMember.approvalStatus || '待審核';
 
