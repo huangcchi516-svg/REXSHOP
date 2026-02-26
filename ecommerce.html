@@ -2320,26 +2320,23 @@
            🆕 商品圖片輪播樣式
         ========================================== */
         .product-carousel {
-            width: calc(100% + 20px);
-            margin-left: -10px;
-            margin-right: -10px;
-            margin-top: -10px;
-            margin-bottom: 8px;
-            border-radius: 13px 13px 0 0;
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
             overflow: hidden;
             background: #000;
             user-select: none;
         }
         #specThumbStrip::-webkit-scrollbar { display: none; }
         #specThumbStrip {
-            min-height: 70px;
+            min-height: 52px;
             align-items: center;
         }
         #specThumbStrip img {
-            width: 54px;
-            height: 54px;
+            width: 44px;
+            height: 44px;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: 5px;
             flex-shrink: 0;
             cursor: pointer;
             border: 2px solid transparent;
@@ -2376,6 +2373,7 @@
         .carousel-slide img {
             width: 100%;
             height: auto;
+            max-height: 40vh;
             display: block;
             object-fit: contain;
             background: #000;
@@ -2603,7 +2601,7 @@
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding: 0 0 120px 0;
+            padding: 0 0 140px 0;
         }
 
         /* 底部固定：數量+加入購物車 */
@@ -2612,7 +2610,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 10px 14px 14px;
+            padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
             border-top: 1px solid rgba(255,215,0,0.2);
             background: var(--bg-dark);
             z-index: 10;
@@ -2822,7 +2820,7 @@
         <!-- 可捲動主體 -->
         <div class="catpage-body" id="catPageBody">
             <!-- 輪播 -->
-            <div class="product-carousel" id="productCarousel" style="display:none; margin:0;">
+            <div class="product-carousel" id="productCarousel" style="display:none;">
                 <div class="carousel-track-wrap" id="carouselWrap" onclick="openCarouselLightbox(event)" style="cursor:zoom-in;">
                     <div class="carousel-track" id="carouselTrack"></div>
                     <button class="carousel-btn carousel-prev" id="carouselPrev" onclick="event.stopPropagation();carouselMove(-1)">&#8249;</button>
