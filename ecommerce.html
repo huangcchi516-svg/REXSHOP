@@ -194,9 +194,8 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.45);
             z-index: 500;
-            backdrop-filter: blur(2px);
         }
         .drawer-overlay.open { display: block; }
 
@@ -205,27 +204,26 @@
             position: fixed;
             top: 0;
             right: 0;
-            width: 78vw;
-            max-width: 320px;
+            width: 82vw;
+            max-width: 340px;
             height: 100%;
-            background: #111;
-            border-left: 2px solid var(--primary);
+            background: #0e0e0e;
+            border-left: 1px solid rgba(255,255,255,0.08);
             z-index: 501;
             transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
         .drawer.open { transform: translateX(0); }
 
-        /* 選單頂部 */
+        /* 頂部：✕ + 名稱 */
         .drawer-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 20px;
-            border-bottom: 1px solid rgba(255,215,0,0.2);
+            padding: 20px 22px 16px;
             flex-shrink: 0;
         }
         .drawer-header-info {
@@ -234,101 +232,129 @@
             gap: 10px;
         }
         .drawer-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 2px solid var(--primary);
+            border: 1.5px solid var(--primary);
             object-fit: cover;
             display: none;
         }
         .drawer-username {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--primary);
+            letter-spacing: 0.5px;
         }
         .drawer-close {
             background: none;
             border: none;
-            color: #aaa;
-            font-size: 22px;
+            color: #999;
+            font-size: 18px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 6px;
             line-height: 1;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 選單項目 */
+        /* 滾動主體 */
         .drawer-body {
             flex: 1;
             overflow-y: auto;
-            padding: 8px 0;
+            padding: 0;
         }
+        .drawer-body::-webkit-scrollbar { display: none; }
+
+        /* 分區標籤 */
         .drawer-section-label {
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 10px;
+            font-weight: 600;
             color: #555;
-            letter-spacing: 2px;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            padding: 14px 20px 6px;
+            padding: 18px 22px 8px;
         }
+
+        /* 主要列表項目 — Dior 風格：無 icon，細底線，箭頭 */
         .drawer-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 20px;
+            padding: 16px 22px;
             font-size: 15px;
-            font-weight: 600;
-            color: #eee;
+            font-weight: 400;
+            color: #e8e8e8;
             cursor: pointer;
             border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             background: none;
             width: 100%;
             text-align: left;
             -webkit-tap-highlight-color: transparent;
-            transition: background 0.15s;
+            letter-spacing: 0.2px;
         }
-        .drawer-item:active { background: rgba(255,215,0,0.07); }
-        .drawer-item .di-icon { font-size: 18px; width: 28px; }
-        .drawer-item .di-arrow { color: #555; font-size: 13px; }
+        .drawer-item:active { background: rgba(255,255,255,0.04); }
+        .drawer-item .di-icon { display: none; }
+        .drawer-item .di-arrow {
+            color: #666;
+            font-size: 16px;
+            font-weight: 300;
+            flex-shrink: 0;
+        }
         .drawer-divider {
-            height: 1px;
-            background: rgba(255,255,255,0.06);
-            margin: 6px 0;
+            height: 6px;
+            background: rgba(255,255,255,0.03);
+            margin: 0;
         }
-        /* 分類選項（縮排） */
+
+        /* 分類項目 — 同主項目同層，無縮排 */
         .drawer-category {
             display: flex;
             align-items: center;
-            padding: 11px 20px 11px 48px;
-            font-size: 14px;
+            justify-content: space-between;
+            padding: 15px 22px;
+            font-size: 15px;
+            font-weight: 400;
             color: #ccc;
             cursor: pointer;
             border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             background: none;
             width: 100%;
             text-align: left;
             -webkit-tap-highlight-color: transparent;
-            transition: background 0.15s;
         }
-        .drawer-category:active { background: rgba(255,215,0,0.07); }
-        .drawer-category.active { color: var(--primary); font-weight: 700; }
+        .drawer-category::after {
+            content: "›";
+            color: #555;
+            font-size: 18px;
+            font-weight: 300;
+        }
+        .drawer-category:active { background: rgba(255,255,255,0.04); }
+        .drawer-category.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .drawer-category.active::after { color: var(--primary); }
 
-        /* 登出按鈕 */
+        /* 底部：客服 + 登出 */
         .drawer-footer {
-            padding: 16px 20px;
-            border-top: 1px solid rgba(255,215,0,0.15);
+            padding: 14px 22px calc(14px + env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(255,255,255,0.08);
             flex-shrink: 0;
+            display: flex;
+            gap: 10px;
         }
         .drawer-logout-btn {
-            width: 100%;
+            flex: 1;
             padding: 12px;
-            background: rgba(255,68,68,0.1);
-            border: 1px solid #ff4444;
+            background: none;
+            border: 1px solid rgba(255,68,68,0.4);
             color: #ff6666;
-            border-radius: 8px;
+            border-radius: 4px;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 400;
             cursor: pointer;
+            letter-spacing: 0.3px;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -2542,16 +2568,16 @@
         .drawer-cs-btn {
             flex: 1;
             padding: 12px;
-            background: rgba(0,200,100,0.12);
-            border: 1px solid #00c864;
-            color: #00e070;
-            border-radius: 8px;
+            background: none;
+            border: 1px solid rgba(0,200,100,0.35);
+            color: #00c864;
+            border-radius: 4px;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 400;
+            letter-spacing: 0.3px;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
-        .drawer-logout-btn { flex: 1; }
 
         /* ── 全頁分類內頁 ── */
         #categoryPage {
@@ -2655,29 +2681,24 @@
         <div class="drawer-body" id="drawerBody">
             <!-- 會員區 -->
             <div id="drawerMemberSection" style="display:none;">
-                <div class="drawer-section-label">會員</div>
                 <button class="drawer-item" onclick="closeDrawer(); openMemberProfileModal()">
-                    <span><span class="di-icon">👤</span>會員資料</span>
+                    <span>會員資料</span>
                     <span class="di-arrow">›</span>
                 </button>
                 <button class="drawer-item" onclick="closeDrawer(); openOrderSearch()">
-                    <span><span class="di-icon">📦</span>查詢訂單</span>
+                    <span>查詢訂單</span>
                     <span class="di-arrow">›</span>
                 </button>
-
                 <div class="drawer-divider"></div>
             </div>
             <!-- 分類區（動態填入） -->
             <div id="drawerCategorySection" style="display:none;">
-                <div class="drawer-section-label">商品分類</div>
                 <div id="drawerCategoryList"></div>
             </div>
         </div>
         <div class="drawer-footer" id="drawerFooter" style="display:none;">
-            <div style="display:flex; gap:8px;">
-                <button class="drawer-cs-btn" onclick="closeDrawer(); window.open('https://line.me/ti/p/~rex52077', '_blank')">💬 客服</button>
-                <button class="drawer-logout-btn" onclick="closeDrawer(); logout()">登出</button>
-            </div>
+            <button class="drawer-cs-btn" onclick="closeDrawer(); window.open('https://line.me/ti/p/~rex52077', '_blank')">客服</button>
+            <button class="drawer-logout-btn" onclick="closeDrawer(); logout()">登出</button>
         </div>
     </div>
 
