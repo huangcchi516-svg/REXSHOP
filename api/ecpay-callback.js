@@ -49,28 +49,42 @@ export default async function handler(req, res) {
 
         // 傳資料回主視窗
         if (window.opener && !window.opener.closed) {
+            // ── 一般瀏覽器：開新視窗模式，傳資料給母視窗後關閉 ──
             try {
-                // 先試直接呼叫（同域）
                 if (typeof window.opener.receiveStoreData === 'function') {
                     window.opener.receiveStoreData(sd);
                 } else {
                     window.opener.postMessage({ type: 'ecpay_store', data: sd }, '*');
                 }
             } catch(e) {
-                // 跨域 fallback
                 try { window.opener.postMessage({ type: 'ecpay_store', data: sd }, '*'); } catch(e2) {}
             }
+            // 倒數關閉
+            var c = 2, el = document.getElementById('cd');
+            var t = setInterval(function() {
+                c--; el.textContent = c;
+                if (c <= 0) { clearInterval(t); window.close(); }
+            }, 1000);
         } else {
-            // 沒有 opener，存 localStorage（主頁面的輪詢會抓到）
-            try { localStorage.setItem('ecpay_store_data', JSON.stringify(sd)); } catch(e) {}
+            // ── LINE 瀏覽器 / Safari 整頁跳轉模式：直接帶參數跳回首頁 ──
+            var homeUrl = 'https://rexshop-delta.vercel.app/';
+            var params = new URLSearchParams();
+            params.set('store_id',   sd.CVSStoreID   || '');
+            params.set('store_name', encodeURIComponent(sd.CVSStoreName || ''));
+            params.set('store_addr', encodeURIComponent(sd.CVSAddress   || ''));
+            params.set('store_tel',  sd.CVSTelephone || '');
+            // 1 秒後跳回（讓用戶看到成功畫面）
+            setTimeout(function() {
+                window.location.href = homeUrl + '?' + params.toString();
+            }, 1000);
+            // 倒數顯示
+            var c = 1, el = document.getElementById('cd');
+            el.textContent = c;
+            var t = setInterval(function() {
+                c--; el.textContent = c;
+                if (c <= 0) clearInterval(t);
+            }, 1000);
         }
-
-        // 倒數關閉（Vercel 同域，window.close() 正常執行）
-        var c = 2, el = document.getElementById('cd');
-        var t = setInterval(function() {
-            c--; el.textContent = c;
-            if (c <= 0) { clearInterval(t); window.close(); }
-        }, 1000);
     </script>
 </body>
 </html>`;
