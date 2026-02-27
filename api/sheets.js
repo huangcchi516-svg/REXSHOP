@@ -5,6 +5,11 @@ export default async function handler(req, res) {
     // 允許跨域（同個 Vercel 專案不需要，但保留以防萬一）
     res.setHeader('Access-Control-Allow-Origin', '*');
 
+    const { sheet } = req.query;
+    if (!sheet) {
+        return res.status(400).json({ error: '缺少 sheet 參數' });
+    }
+
     // 依表名設定不同快取時間
     const isSystemSheet = sheet === '系統設定';
     const isStockSheet  = sheet === '商品規格表';
@@ -13,11 +18,6 @@ export default async function handler(req, res) {
       : isStockSheet  ? 's-maxage=60, stale-while-revalidate=120' // 庫存：60秒
       :                 's-maxage=300, stale-while-revalidate=600' // 其他：5分鐘
     );
-
-    const { sheet } = req.query;
-    if (!sheet) {
-        return res.status(400).json({ error: '缺少 sheet 參數' });
-    }
 
     try {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/${encodeURIComponent(sheet)}?key=${process.env.GOOGLE_API_KEY}`;
