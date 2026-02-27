@@ -5722,6 +5722,61 @@ async function submitOrder() {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.6';
     submitBtn.style.cursor = 'not-allowed';
+    submitBtn.innerHTML = '🔍 確認庫存中...';
+
+    // ✅ 下單前重新抓最新庫存，確認每樣商品都足夠
+    try {
+        const latestSpecsRes = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`);
+        const latestSpecsData = await latestSpecsRes.json();
+        if (latestSpecsData.values && latestSpecsData.values.length > 1) {
+            // 建立最新庫存 map：key = productId_specName
+            const latestStockMap = {};
+            for (let i = 1; i < latestSpecsData.values.length; i++) {
+                const row = latestSpecsData.values[i];
+                const pid = String(row[0] || '').trim();
+                const spec = String(row[2] || '').trim();
+                const stock = parseInt(row[4]) || 0;
+                const multiplier = parseInt(row[6]) || 1;
+                if (pid && spec) {
+                    latestStockMap[`${pid}_${spec}`] = { stock, multiplier };
+                }
+            }
+            // 逐一檢查購物車
+            const insufficientItems = [];
+            for (const item of cart) {
+                const key = `${item.productId}_${item.specName}`;
+                const latest = latestStockMap[key];
+                // 找不到規格，用第一個同productId的規格庫存
+                let availableStock = 0;
+                if (latest) {
+                    availableStock = latest.stock;
+                } else {
+                    // 找同productId任一規格
+                    const fallback = Object.entries(latestStockMap).find(([k]) => k.startsWith(item.productId + '_'));
+                    if (fallback) availableStock = fallback[1].stock;
+                }
+                const multiplier = item.quantityMultiplier || 1;
+                const needed = item.quantity * multiplier;
+                if (needed > availableStock) {
+                    const avail = Math.floor(availableStock / multiplier);
+                    insufficientItems.push(`「${item.productName} - ${item.specName}」庫存剩 ${avail > 0 ? avail : 0} ${multiplier > 1 ? '組' : '件'}，您選了 ${item.quantity} ${multiplier > 1 ? '組' : '件'}`);
+                }
+            }
+            if (insufficientItems.length > 0) {
+                showToast('⚠️ 以下商品庫存不足，請調整數量後再送出：\n' + insufficientItems.join('\n'), 'error', 5000);
+                window.isSubmittingOrder = false;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '';
+                submitBtn.style.cursor = '';
+                submitBtn.innerHTML = originalBtnText;
+                return;
+            }
+        }
+    } catch (stockErr) {
+        console.warn('庫存確認失敗，繼續送出:', stockErr);
+        // 庫存確認失敗時不阻擋（由後端 GAS 做最後把關）
+    }
+
     submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
     const promotionResult = calculatePromotions(cart);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -5778,12 +5833,27 @@ async function submitOrder() {
     }));
 
     try {
-        await fetch('/api/script', {
+        const orderRes = await fetch('/api/script', {
             method: 'POST',
-
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
+
+        // ✅ 檢查後端是否回傳庫存不足
+        let resData = null;
+        try { resData = await orderRes.json(); } catch(e) {}
+        if (resData && resData.success === false) {
+            const errMsg = resData.error || '下單失敗，請稍後再試';
+            showToast('⚠️ ' + errMsg, 'error', 5000);
+            window.isSubmittingOrder = false;
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '';
+            submitBtn.style.cursor = '';
+            submitBtn.innerHTML = originalBtnText;
+            // 重新載入庫存讓畫面同步
+            try { await updatePurchasedProductsStock(cart.map(i => ({ productId: i.productId, specName: i.specName }))); } catch(e) {}
+            return;
+        }
         
         showToast('✅ 訂單已送出！', 'success');
         cart = [];
@@ -6318,11 +6388,13 @@ async function autoCheckExpiredOrders() {
     }
 }
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', duration = 3000) {
     const toast = document.getElementById('toast');
-    toast.textContent = message;
+    // 支援多行訊息
+    toast.innerHTML = message.replace(/\n/g, '<br>');
     toast.className = 'toast show ' + (type === 'error' ? 'error' : '');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    if (toast._toastTimer) clearTimeout(toast._toastTimer);
+    toast._toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 function lineLogin() {
