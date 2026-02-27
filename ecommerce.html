@@ -3058,8 +3058,8 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label">姓名</label>
-                <input type="text" class="form-input" id="customerName" placeholder="請輸入姓名">
+                <label class="form-label">姓名 <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,0.5);">（請填真實姓名，勿填LINE名稱）</span></label>
+                <input type="text" class="form-input" id="customerName" placeholder="請填寫本名">
             </div>
 
             <div class="form-group">
@@ -3990,7 +3990,7 @@ function displayPromotionHints(cartItems) {
             }
         });
         const categoryLabel = promo.allowedCategories.length > 0
-            ? `<br><span style="font-size:12px;opacity:0.75;">（${promo.allowedCategories.join('、')}）</span>`
+            ? `<br><span style="font-size:12px;opacity:0.75;">↗（${promo.allowedCategories.join('、')}）</span>`
             : '';
 
         let hint = '';
