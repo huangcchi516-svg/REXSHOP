@@ -5826,7 +5826,13 @@ async function pollMaintenanceStatus() {
             const currentLineId = currentMember ? currentMember.lineId : '';
             const whitelist = Array.isArray(window._adminWhitelist) ? window._adminWhitelist : [];
             const isAdmin = currentLineId && whitelist.includes(currentLineId);
-            if (!isAdmin) showMaintenanceScreen();
+            if (!isAdmin) {
+                if (window._maintenanceInterval) {
+                    clearInterval(window._maintenanceInterval);
+                    window._maintenanceInterval = null;
+                }
+                showMaintenanceScreen();
+            }
         }
     } catch (e) {
     }
@@ -6848,7 +6854,7 @@ window.addEventListener('load', () => {
     startAutoRefresh(300);
 
     // 維護模式輪詢
-    window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
+    window._maintenanceInterval = setInterval(pollMaintenanceStatus, 5000);
 
     // 逾時訂單背景掃描
     setTimeout(() => {
@@ -6868,7 +6874,7 @@ window.addEventListener('load', () => {
             startAutoRefresh(300);
             refreshAllStock();
             if (!window._maintenanceInterval) {
-                window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
+                window._maintenanceInterval = setInterval(pollMaintenanceStatus, 5000);
             }
         }
     });
