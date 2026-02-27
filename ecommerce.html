@@ -1369,52 +1369,6 @@
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
         }
 
-        /* 分類列表模式 */
-        .spec-options.list-mode {
-            display: block;
-        }
-        .spec-category-group {
-            margin-bottom: 18px;
-        }
-        .spec-category-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--primary);
-            padding: 6px 0 4px;
-            margin-bottom: 4px;
-            border-bottom: 1px solid rgba(255,215,0,0.2);
-            letter-spacing: 0.5px;
-        }
-        .spec-list-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.15s;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .spec-list-item:hover {
-            background: rgba(255,215,0,0.08);
-        }
-        .spec-list-item.selected {
-            background: rgba(255,215,0,0.15);
-        }
-        .spec-list-item.out-of-stock {
-            opacity: 0.38;
-            cursor: not-allowed;
-        }
-        .spec-list-item-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-light);
-            flex: 1;
-        }
-        .spec-list-item-oos {
-            font-size: 12px;
-            color: #ff6666;
-            margin-left: 6px;
-        }
 
         .spec-option {
             background: rgba(255, 255, 255, 0.05);
@@ -1429,6 +1383,24 @@
             align-items: center;
             justify-content: center;
             min-height: 42px;
+        }
+
+        /* ✅ 商品口味列（flavor-*）改成全寬列表樣式 */
+        [id^="flavor-"].spec-option {
+            grid-column: 1 / -1;
+            justify-content: flex-start;
+            text-align: left;
+            padding: 11px 14px;
+            min-height: 44px;
+            border-radius: 8px;
+            border-color: rgba(255, 215, 0, 0.15);
+        }
+        [id^="flavor-"].spec-option .spec-name {
+            font-size: 14px;
+        }
+        [id^="flavor-"].spec-option.selected {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.15);
         }
 
         .spec-option:hover {
@@ -4252,40 +4224,6 @@ function displayFeaturedProducts() {
         featuredGrid.appendChild(card);
     });
 }
-// ✅ 把商品清單按 category 分組，產生列表 HTML
-function _buildCategoryListHTML(products_list, firstProduct, onSelectFnName) {
-    // 依 category 分組，保留原始順序
-    const groups = [];
-    const groupMap = {};
-    products_list.forEach((product, index) => {
-        const cat = product.category || '其他';
-        if (!groupMap[cat]) {
-            groupMap[cat] = [];
-            groups.push(cat);
-        }
-        groupMap[cat].push({ product, index });
-    });
-
-    return groups.map(cat => {
-        const items = groupMap[cat].map(({ product, index }) => {
-            const specs = productSpecs[product.id];
-            const hasStock = specs && specs.some(s => s.stock > 0);
-            const isSelected = firstProduct && product.id === firstProduct.id;
-            return `<div class="spec-list-item ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;${onSelectFnName}(${index})"
-                onclick="if(window._specTouchFired){window._specTouchFired=false;return;}${onSelectFnName}(${index})"
-                id="flavor-${index}">
-                <span class="spec-list-item-name">${product.name}</span>
-                ${!hasStock ? '<span class="spec-list-item-oos">售完</span>' : ''}
-            </div>`;
-        }).join('');
-        return `<div class="spec-category-group">
-            <div class="spec-category-label">${cat}</div>
-            ${items}
-        </div>`;
-    }).join('');
-}
-
 function openCustomBlockModal(blockName) {
     if (checkMaintenance()) return;
     currentCategoryProducts = products.filter(p => p.customBlock === blockName);
@@ -4325,7 +4263,20 @@ function openCustomBlockModal(blockName) {
     window.currentQuantitySpecs = defaultCustomSpecs;
     selectedFlavor = firstCustomProduct || null;
 
-    const flavorOptions = _buildCategoryListHTML(currentCategoryProducts, firstCustomProduct, 'selectFlavor');
+    const flavorOptions = currentCategoryProducts.map((product, index) => {
+        const specs = productSpecs[product.id];
+        const hasStock = specs && specs.some(s => s.stock > 0);
+        const hasSale = specs && specs.some(s => s.originalPrice > 0);
+        const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
+        return `
+            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})"
+                 onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
+                 id="flavor-${index}"
+                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
+            </div>`;
+    }).join('');
     selectedSpec = null;
     quantity = 1;
     updateQuantityDisplay();
@@ -4367,12 +4318,10 @@ function openCustomBlockModal(blockName) {
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
-        optionsContainer.classList.add('list-mode');
-        optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
+            optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
         updateAddToCartButton();
     } else {
-        optionsContainer.classList.add('list-mode');
-        optionsContainer.innerHTML = flavorTitle + flavorOptions;
+            optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
 function openFeaturedCategoryModal() {
@@ -4435,7 +4384,22 @@ function renderFeaturedFlavorOptions() {
     updateQuantityDisplay();
     updateAddToCartButton();
 
-    const flavorOptions = _buildCategoryListHTML(currentCategoryProducts, firstFeaturedProduct, 'selectFeaturedFlavor');
+    const flavorOptions = currentCategoryProducts.map((product, index) => {
+        const specs = productSpecs[product.id];
+        const hasStock = specs && specs.some(s => s.stock > 0);
+        const isOutOfStock = !hasStock;
+        const hasSale = specs && specs.some(s => s.originalPrice > 0);
+        const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
+        return `
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFeaturedFlavor(${index})"
+                 onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFeaturedFlavor(${index})"
+                 id="flavor-${index}"
+                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
+            </div>
+        `;
+    }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
         defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
@@ -4473,12 +4437,10 @@ function renderFeaturedFlavorOptions() {
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
-        optionsContainer.classList.add('list-mode');
-        optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
+            optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
         updateAddToCartButton();
     } else {
-        optionsContainer.classList.add('list-mode');
-        optionsContainer.innerHTML = flavorTitle + flavorOptions;
+            optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
 function displayProducts() {
@@ -5168,7 +5130,6 @@ function closeSpecModal() {
 function renderSpecOptions() {
     const specs = productSpecs[currentProduct.id];
     const optionsContainer = document.getElementById('specOptions');
-    optionsContainer.classList.remove('list-mode');
     
     const specTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">📦 選擇規格 (${specs.length} 種選項)</div>`;
     
