@@ -2493,17 +2493,26 @@
             display: flex;
             justify-content: center;
             gap: 7px;
-            padding: 7px 0 5px;
-            background: rgba(0,0,0,0.5);
+            padding: 6px 0;
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .carousel-dot {
+            pointer-events: all;
         }
 
         .carousel-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.45);
             cursor: pointer;
             transition: background 0.2s, transform 0.2s;
+            pointer-events: all;
         }
 
         .carousel-dot.active {
@@ -2978,6 +2987,7 @@
                     <div class="carousel-track" id="carouselTrack"></div>
                     <button class="carousel-btn carousel-prev" id="carouselPrev" onclick="event.stopPropagation();carouselMove(-1)">&#8249;</button>
                     <button class="carousel-btn carousel-next" id="carouselNext" onclick="event.stopPropagation();carouselMove(1)">&#8250;</button>
+                    <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
                 </div>
                 <div style="display:flex; align-items:center; background:rgba(0,0,0,0.7); padding: 4px 10px;">
                     <div id="specThumbStrip" style="display:flex; flex-wrap:nowrap; gap:5px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; flex:1; min-width:0;"></div>
@@ -2986,7 +2996,6 @@
                         <div class="spec-info-stock" id="specInfoStock" style="font-size:12px; margin:0;"></div>
                     </div>
                 </div>
-                <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
             </div>
             <!-- 燈箱 -->
             <div id="specLightbox" onclick="closeSpecLightbox()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
