@@ -3,6 +3,7 @@
 
 import crypto from 'crypto';
 
+
 function ecpayUrlEncode(str) {
     let encoded = encodeURIComponent(str);
     encoded = encoded.replace(/%2D/g, '-');

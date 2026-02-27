@@ -5,6 +5,9 @@ export default async function handler(req, res) {
     // 允許跨域（同個 Vercel 專案不需要，但保留以防萬一）
     res.setHeader('Access-Control-Allow-Origin', '*');
 
+    // ✅ CDN 快取 60 秒，60 秒內相同請求直接從 Edge 回傳，Function 不執行
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+
     const { sheet } = req.query;
     if (!sheet) {
         return res.status(400).json({ error: '缺少 sheet 參數' });
