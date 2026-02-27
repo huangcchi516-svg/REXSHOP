@@ -3485,22 +3485,19 @@ async function loadProductsData() {
     try {
         showToast('載入商品資料中...', 'success');
 
-        // ✅ 合併請求：同時發出所有需要的 fetch，減少 Function Invocations
-        const [
-            productsRes, specsRes, categoryImgRes,
-            categoriesRes, announcementRes, promotionRes
-        ] = await Promise.all([
-            fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`)
-        ]);
+        // ✅ 單一請求：一次取得所有初始資料（6合1，減少 Invocations）
+        const initRes = await fetch('/api/sheets-init');
+        if (!initRes.ok) throw new Error('無法載入商品資料');
+        const initData = await initRes.json();
+
+        const productsData   = initData['商品列表']      || { values: [] };
+        const specsData_init = initData['商品規格表']    || { values: [] };
+        const catImgData     = initData['分類照片設定']  || { values: [] };
+        const catData        = initData['分類設定']      || { values: [] };
+        const annoData       = initData['公告設定']      || { values: [] };
+        const promoData      = initData['優惠設定']      || { values: [] };
 
         // --- 商品 ---
-        if (!productsRes.ok) throw new Error('無法載入商品資料');
-        const productsData = await productsRes.json();
         if (!productsData.values || productsData.values.length < 2) throw new Error('商品資料為空');
 
         products = productsData.values.slice(1).map(row => ({
@@ -3516,8 +3513,8 @@ async function loadProductsData() {
         })).filter(p => p.id);
 
         // --- 規格 ---
-        if (specsRes.ok) {
-            const specsData = await specsRes.json();
+        if (true) {
+            const specsData = specsData_init;
             if (specsData.values && specsData.values.length > 1) {
                 specsData.values.slice(1).forEach(row => {
                     const productId = row[0];
@@ -3547,8 +3544,8 @@ async function loadProductsData() {
         }
 
         // --- 分類照片 ---
-        if (categoryImgRes.ok) {
-            const data = await categoryImgRes.json();
+        if (true) {
+            const data = catImgData;
             if (data.values && data.values.length > 1) {
                 categoryImages = {}; categoryCarouselImages = {}; categorySubtitles = {};
                 if (!window.categoryCustomPrices) window.categoryCustomPrices = {};
@@ -3586,8 +3583,8 @@ async function loadProductsData() {
 
         // --- 分類設定 ---
         categories = [];
-        if (categoriesRes.ok) {
-            const data = await categoriesRes.json();
+        if (true) {
+            const data = catData;
             if (data.values && data.values.length > 1) {
                 categories = data.values.slice(1).map(row => ({
                     name: row[0] || '',
@@ -3618,8 +3615,8 @@ async function loadProductsData() {
         if (typeof updateDrawerCategories === 'function') updateDrawerCategories();
 
         // --- 公告 ---
-        if (announcementRes.ok) {
-            const data = await announcementRes.json();
+        if (true) {
+            const data = annoData;
             if (data.values && data.values.length > 1) {
                 const allAnnouncements = data.values.slice(1)
                     .filter(row => row[0] && (row[1] || '').trim() === '是')
@@ -3632,8 +3629,8 @@ async function loadProductsData() {
         }
 
         // --- 優惠 ---
-        if (promotionRes.ok) {
-            const data = await promotionRes.json();
+        if (true) {
+            const data = promoData;
             if (data.values && data.values.length > 1) {
                 promotions = data.values.slice(1)
                     .filter(row => row[0] && (row[5] || '').trim() === '是')
@@ -4813,30 +4810,7 @@ function openSpecModal(productId) {
     updateQuantityDisplay();
     updateAddToCartButton();
 
-    // ✅ 每次開商品時，背景靜默抓最新庫存並重繪
-    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-        .then(r => r.json())
-        .then(data => {
-            if (!data.values || data.values.length < 2) return;
-            data.values.slice(1).forEach(row => {
-                const pid = String(row[0] || '').trim();
-                if (pid !== productId) return;
-                const specName = row[2] || '';
-                const stock = parseInt(row[4]) || 0;
-                const multiplier = parseInt(row[6]) || 1;
-                if (!productSpecs[pid]) return;
-                const s = productSpecs[pid].find(x => x.specName === specName);
-                if (s) { s.stock = stock; s.quantityMultiplier = multiplier; }
-            });
-            // 更新商品總庫存
-            if (productSpecs[productId]) {
-                const p = products.find(x => x.id === productId);
-                if (p) p.stock = productSpecs[productId].reduce((sum, s) => sum + s.stock, 0);
-            }
-            // 如果還停在同一個商品 modal 就重繪
-            if (currentProduct && currentProduct.id === productId) renderSpecOptions();
-        })
-        .catch(() => {});
+    // 規格彈窗不重拉庫存（防超賣由結帳時的 API 驗證負責，此處重拉無必要且消耗用量）
 }
 let _carouselImgs = [];
 let _carouselIdx = 0;
