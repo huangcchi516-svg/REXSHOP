@@ -5,8 +5,14 @@ export default async function handler(req, res) {
     // 允許跨域（同個 Vercel 專案不需要，但保留以防萬一）
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    // ✅ CDN 快取 60 秒，60 秒內相同請求直接從 Edge 回傳，Function 不執行
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    // 依表名設定不同快取時間
+    const isSystemSheet = sheet === '系統設定';
+    const isStockSheet  = sheet === '商品規格表';
+    res.setHeader('Cache-Control',
+        isSystemSheet ? 's-maxage=5, stale-while-revalidate=5'    // 維護模式：5秒快取
+      : isStockSheet  ? 's-maxage=60, stale-while-revalidate=120' // 庫存：60秒
+      :                 's-maxage=300, stale-while-revalidate=600' // 其他：5分鐘
+    );
 
     const { sheet } = req.query;
     if (!sheet) {
