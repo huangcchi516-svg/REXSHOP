@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/sheets.js": { "memory": 512 },
+    "api/script.js": { "memory": 512 },
+    "api/script-get.js": { "memory": 512 }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/", "dest": "/ecommerce.html" },
