@@ -1075,11 +1075,6 @@
             padding: 10px 12px;
         }
 
-        .cart-item-no-stock {
-            background: rgba(255, 68, 68, 0.08) !important;
-            border: 1px solid rgba(255, 68, 68, 0.3) !important;
-            border-radius: 8px;
-        }
         .cart-item {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
@@ -3427,9 +3422,9 @@ function processStoreData(storeData) {
     }
     const savedTradeNo = localStorage.getItem('ecpay_merchant_trade_no');
     
-    // ✅ 驗證失敗只 log，不擋住（避免 tradeNo 時序問題）
-    if (storeData.MerchantTradeNo && savedTradeNo && storeData.MerchantTradeNo !== savedTradeNo) {
-        console.warn('MerchantTradeNo 不符:', storeData.MerchantTradeNo, '!=', savedTradeNo);
+    if (storeData.MerchantTradeNo !== savedTradeNo) {
+        showToast('門市資料驗證失敗', 'error');
+        return;
     }
     selectedStore = {
         id: storeData.CVSStoreID,
@@ -3491,7 +3486,7 @@ async function loadProductsData() {
             categoriesRes, announcementRes, promotionRes
         ] = await Promise.all([
             fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`),
             fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
             fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
             fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
@@ -4246,10 +4241,9 @@ function openCustomBlockModal(blockName) {
     updateAddToCartButton();
 
     if (defaultCustomSpecs.length > 0) {
-        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
-        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4271,6 +4265,7 @@ function openCustomBlockModal(blockName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
+        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4365,10 +4360,9 @@ function renderFeaturedFlavorOptions() {
     }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
-        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
-        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4390,6 +4384,7 @@ function renderFeaturedFlavorOptions() {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
+        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4585,10 +4580,9 @@ function renderFlavorOptions(categoryName) {
 
     if (defaultSpecs.length > 0) {
         // 預先決定自動選哪個規格
-        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
-        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
         // 直接在渲染時設好 selected，不再呼叫 selectQuantitySpec（避免觸發兩次）
         if (autoIdx !== -1) {
@@ -4612,6 +4606,7 @@ function renderFlavorOptions(categoryName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
+        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4677,10 +4672,9 @@ function _renderQtySpecs(specs) {
     }).join('');
 
     // 預選規格
-    specs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
-    let autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
-    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+    let autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('台') && s.stock > 0);
+    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.stock > 0);
 
     if (autoIdx !== -1) {
@@ -4697,6 +4691,7 @@ function _renderQtySpecs(specs) {
     }
 
     const qtyTitle = `<div class="spec-section-title" style="grid-column:1/-1;margin-top:20px;">📦 選擇項目</div>`;
+    specs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
     const qtyHTML = specs.map((spec, i) => {
         const oos = spec.stock === 0;
         const sel = i === autoIdx;
@@ -4806,37 +4801,12 @@ function openSpecModal(productId) {
     window._currentModalCategoryName = currentProduct.category || '';
     openCategoryPage(currentProduct.name, '');
     updateModalPromoHint();
-
+    
     renderSpecOptions();
     quantity = 1;
     selectedSpec = null;
     updateQuantityDisplay();
     updateAddToCartButton();
-
-    // ✅ 每次開商品時，背景靜默抓最新庫存並重繪
-    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-        .then(r => r.json())
-        .then(data => {
-            if (!data.values || data.values.length < 2) return;
-            data.values.slice(1).forEach(row => {
-                const pid = String(row[0] || '').trim();
-                if (pid !== productId) return;
-                const specName = row[2] || '';
-                const stock = parseInt(row[4]) || 0;
-                const multiplier = parseInt(row[6]) || 1;
-                if (!productSpecs[pid]) return;
-                const s = productSpecs[pid].find(x => x.specName === specName);
-                if (s) { s.stock = stock; s.quantityMultiplier = multiplier; }
-            });
-            // 更新商品總庫存
-            if (productSpecs[productId]) {
-                const p = products.find(x => x.id === productId);
-                if (p) p.stock = productSpecs[productId].reduce((sum, s) => sum + s.stock, 0);
-            }
-            // 如果還停在同一個商品 modal 就重繪
-            if (currentProduct && currentProduct.id === productId) renderSpecOptions();
-        })
-        .catch(() => {});
 }
 let _carouselImgs = [];
 let _carouselIdx = 0;
@@ -5210,11 +5180,7 @@ function changeQuantity(change) {
     }
     
     if (newQty > selectedSpec.stock) {
-            showToast('已達庫存上限，重新整理中...', 'error', 2000);
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-                .then(r => r.json())
-                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
-                .catch(() => {});
+        showToast('已達庫存上限', 'error');
         return;
     }
 
@@ -5229,24 +5195,6 @@ function updateQuantityDisplay() {
 function updateAddToCartButton() {
     const btn = document.getElementById('addToCartModalBtn');
     btn.disabled = !selectedSpec;
-}
-
-// ✅ 把規格表套用到前端快取並重繪
-function _applySpecsData(values) {
-    if (!values || values.length < 2) return;
-    values.slice(1).forEach(row => {
-        const pid = String(row[0] || '').trim();
-        const sn  = row[2] || '';
-        const st  = parseInt(row[4]) || 0;
-        const ml  = parseInt(row[6]) || 1;
-        if (!pid || !productSpecs[pid]) return;
-        const s = productSpecs[pid].find(x => x.specName === sn);
-        if (s) { s.stock = st; s.quantityMultiplier = ml; }
-    });
-    products.forEach(p => {
-        const specs = productSpecs[p.id];
-        if (specs) p.stock = specs.reduce((sum, s) => sum + s.stock, 0);
-    });
 }
 
 function confirmAddToCart() {
@@ -5273,22 +5221,14 @@ function confirmAddToCart() {
         const totalUnits = newQty * multiplier;  // 實際佔用庫存
         
         if (totalUnits > actualStock) {
-            showToast('已達庫存上限，重新整理中...', 'error', 2000);
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-                .then(r => r.json())
-                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
-                .catch(() => {});
+            showToast('已達庫存上限', 'error');
             return;
         }
         cart[existingIndex].quantity = newQty;
     } else {
         const totalUnits = quantity * multiplier;
         if (totalUnits > actualStock) {
-            showToast('庫存不足，重新整理中...', 'error', 2000);
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-                .then(r => r.json())
-                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
-                .catch(() => {});
+            showToast('庫存不足', 'error');
             return;
         }
         cart.push({
@@ -5339,43 +5279,20 @@ function updateCart() {
         return;
     }
 
-    cartItems.innerHTML = cart.map((item, index) => {
-        const multiplier = item.quantityMultiplier || 1;
-        let spec = null;
-        const specs = productSpecs[item.productId];
-        if (specs) spec = specs.find(s => s.specName === item.specName);
-        if (!spec) {
-            for (let pid in productSpecs) {
-                const f = productSpecs[pid].find(s => s.specName === item.specName);
-                if (f) { spec = f; break; }
-            }
-        }
-        const availableStock = spec ? spec.stock : Infinity;
-        const isOutOfStock = availableStock === 0;
-        const isOverStock = availableStock !== Infinity && (item.quantity * multiplier) > availableStock;
-        const hasStockIssue = isOutOfStock || isOverStock;
-        let stockWarning = '';
-        if (isOutOfStock) {
-            stockWarning = `<div style="color:#ff4444;font-size:11px;margin-top:3px;">⚠️ 此商品已無庫存，請移除</div>`;
-        } else if (isOverStock) {
-            const maxQty = Math.floor(availableStock / multiplier);
-            stockWarning = `<div style="color:#ff9900;font-size:11px;margin-top:3px;">⚠️ 庫存不足，最多可購買 ${maxQty} 件，請調整數量</div>`;
-        }
-        return `
-        <div class="cart-item${hasStockIssue ? ' cart-item-no-stock' : ''}" data-cart-index="${index}">
-            <div class="cart-item-name" style="${hasStockIssue ? 'text-decoration:line-through;color:#888;' : ''}">${item.productName} <span style="color:${hasStockIssue ? '#888' : 'var(--primary)'};">/ ${item.specName}</span></div>
-            ${stockWarning}
+    cartItems.innerHTML = cart.map((item, index) => `
+        <div class="cart-item" data-cart-index="${index}">
+            <div class="cart-item-name">${item.productName} <span style="color:var(--primary);">/ ${item.specName}</span></div>
             <div class="cart-item-bottom">
-                <div class="cart-item-price" data-price="${item.price}" style="${hasStockIssue ? 'color:#888;' : ''}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
+                <div class="cart-item-price" data-price="${item.price}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
                 <div class="cart-item-controls">
                     <button class="remove-item" onclick="removeCartItem(${index})" title="移除">✖</button>
                     <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},-1)" onclick="updateCartQuantity(${index}, -1)">−</button>
-                    <span class="cart-qty-num" style="font-size:14px;min-width:18px;text-align:center;">${item.quantity}</span>
+                    <span class="cart-qty-num" style="font-size:14px; min-width:18px; text-align:center;">${item.quantity}</span>
                     <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},1)" onclick="updateCartQuantity(${index}, 1)">+</button>
                 </div>
             </div>
-        </div>`;
-    }).join('');
+        </div>
+    `).join('');
 
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const promotionResult = calculatePromotions(cart);
@@ -5432,8 +5349,7 @@ function updateCartQuantity(index, change) {
         }
     }
     if (!spec) { showToast('找不到商品規格', 'error'); return; }
-    const multiplier = item.quantityMultiplier || 1;
-    if (newQty * multiplier > spec.stock) { showToast('已達庫存上限', 'error'); return; }
+    if (newQty > spec.stock) { showToast('已達庫存上限', 'error'); return; }
 
     item.quantity = newQty;
 
@@ -5512,37 +5428,6 @@ function openCheckout() {
     if (checkMaintenance()) return;
     if (cart.length === 0) {
         showToast('購物車是空的', 'error');
-        return;
-    }
-    // ── 結帳前庫存檢查 ──
-    const stockIssues = [];
-    cart.forEach((item) => {
-        const multiplier = item.quantityMultiplier || 1;
-        let spec = null;
-        const specs = productSpecs[item.productId];
-        if (specs) spec = specs.find(s => s.specName === item.specName);
-        if (!spec) {
-            for (let pid in productSpecs) {
-                const f = productSpecs[pid].find(s => s.specName === item.specName);
-                if (f) { spec = f; break; }
-            }
-        }
-        if (spec !== null) {
-            if (spec.stock === 0) {
-                stockIssues.push(`「${item.productName} - ${item.specName}」已無庫存`);
-            } else if ((item.quantity * multiplier) > spec.stock) {
-                const maxQty = Math.floor(spec.stock / multiplier);
-                stockIssues.push(`「${item.productName} - ${item.specName}」庫存不足，最多可購買 ${maxQty} 件`);
-            }
-        }
-    });
-    if (stockIssues.length > 0) {
-        showToast('⚠️ 購物車有庫存問題，請調整後再結帳', 'error', 3000);
-        // 開啟購物車側邊欄讓用戶看到問題商品
-        const cartSidebar = document.getElementById('cartSidebar');
-        if (cartSidebar && !cartSidebar.classList.contains('active')) {
-            toggleCart();
-        }
         return;
     }
     const existingDetail = document.getElementById('orderDetailView');
@@ -5837,64 +5722,6 @@ async function submitOrder() {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.6';
     submitBtn.style.cursor = 'not-allowed';
-    submitBtn.innerHTML = '🔍 確認庫存中...';
-
-    // ✅ 下單前重新抓最新庫存，逐一確認
-    try {
-        const latestSpecsRes = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`);
-        const latestSpecsData = await latestSpecsRes.json();
-        if (latestSpecsData.values && latestSpecsData.values.length > 1) {
-            // 建立最新庫存 map：key = productId_specName
-            const latestStockMap = {};
-            for (let i = 1; i < latestSpecsData.values.length; i++) {
-                const row = latestSpecsData.values[i];
-                const pid = String(row[0] || '').trim();
-                const spec = String(row[2] || '').trim();
-                const stock = parseInt(row[4]) || 0;
-                const multiplier = parseInt(row[6]) || 1;
-                if (pid && spec) latestStockMap[`${pid}_${spec}`] = { stock, multiplier };
-            }
-            // 同步更新前端快取
-            Object.entries(latestStockMap).forEach(([key, val]) => {
-                const [pid, specName] = key.split(/_(.+)/);
-                if (productSpecs[pid]) {
-                    const s = productSpecs[pid].find(x => x.specName === specName);
-                    if (s) { s.stock = val.stock; s.quantityMultiplier = val.multiplier; }
-                }
-            });
-            // 逐一檢查購物車
-            const insufficientItems = [];
-            for (const item of cart) {
-                const key = `${item.productId}_${item.specName}`;
-                const latest = latestStockMap[key];
-                let availableStock = 0;
-                if (latest) {
-                    availableStock = latest.stock;
-                } else {
-                    const fallback = Object.entries(latestStockMap).find(([k]) => k.startsWith(item.productId + '_'));
-                    if (fallback) availableStock = fallback[1].stock;
-                }
-                const multiplier = item.quantityMultiplier || 1;
-                const needed = item.quantity * multiplier;
-                if (needed > availableStock) {
-                    const avail = Math.floor(availableStock / multiplier);
-                    insufficientItems.push(`「${item.productName} - ${item.specName}」庫存剩 ${avail} ${multiplier > 1 ? '組' : '件'}，您選了 ${item.quantity} ${multiplier > 1 ? '組' : '件'}`);
-                }
-            }
-            if (insufficientItems.length > 0) {
-                showToast('⚠️ 庫存不足：\n' + insufficientItems.join('\n'), 'error', 5000);
-                window.isSubmittingOrder = false;
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '';
-                submitBtn.style.cursor = '';
-                submitBtn.innerHTML = originalBtnText;
-                return;
-            }
-        }
-    } catch (stockErr) {
-        console.warn('庫存確認失敗，繼續送出:', stockErr);
-    }
-
     submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
     const promotionResult = calculatePromotions(cart);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -5951,27 +5778,13 @@ async function submitOrder() {
     }));
 
     try {
-        const orderRes = await fetch('/api/script', {
+        await fetch('/api/script', {
             method: 'POST',
+
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
-
-        // ✅ 後端回傳 success:false 時（如庫存不足），阻擋並提示
-        let resData = null;
-        try { resData = await orderRes.json(); } catch(e) {}
-        if (resData && resData.success === false) {
-            const errMsg = resData.error || '下單失敗，請稍後再試';
-            showToast('⚠️ ' + errMsg, 'error', 5000);
-            window.isSubmittingOrder = false;
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '';
-            submitBtn.style.cursor = '';
-            submitBtn.innerHTML = originalBtnText;
-            try { await refreshAllStock(); } catch(e) {}
-            return;
-        }
-
+        
         showToast('✅ 訂單已送出！', 'success');
         cart = [];
         updateCart();
@@ -6505,12 +6318,11 @@ async function autoCheckExpiredOrders() {
     }
 }
 
-function showToast(message, type = 'success', duration = 3000) {
+function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
-    toast.innerHTML = message.replace(/\n/g, '<br>');
+    toast.textContent = message;
     toast.className = 'toast show ' + (type === 'error' ? 'error' : '');
-    if (toast._toastTimer) clearTimeout(toast._toastTimer);
-    toast._toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+    setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 function lineLogin() {
@@ -6804,7 +6616,7 @@ window.addEventListener('load', () => {
     loadSystemSettings();
     updateCart();
     checkMemberStatus();
-    startAutoRefresh(300);
+    startAutoRefresh(120);
 
     // 維護模式輪詢
     window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
@@ -6824,7 +6636,7 @@ window.addEventListener('load', () => {
                 window._maintenanceInterval = null;
             }
         } else {
-            startAutoRefresh(300);
+            startAutoRefresh(120);
             refreshAllStock();
             if (!window._maintenanceInterval) {
                 window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
