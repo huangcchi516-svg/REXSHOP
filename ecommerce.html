@@ -5508,14 +5508,37 @@ function toggleCart() {
         isModalOpen = false;
     }
 }
-function openCheckout() {
+async function openCheckout() {
     if (checkMaintenance()) return;
     if (cart.length === 0) {
         showToast('購物車是空的', 'error');
         return;
     }
-    // ── 結帳前庫存檢查 ──
-    const stockIssues = [];
+
+    // ── 結帳前：先重新拉最新庫存 ──
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    const originalBtnText = checkoutBtn ? checkoutBtn.textContent : '';
+    if (checkoutBtn) {
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = '⏳ 確認庫存中...';
+    }
+    try {
+        const res = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.values) {
+            _applySpecsData(data.values);
+        }
+    } catch(e) {
+        // 拉取失敗就用舊資料繼續比對
+    } finally {
+        if (checkoutBtn) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = originalBtnText;
+        }
+    }
+
+    // ── 比對最新庫存，找出有問題的商品 ──
+    let hasIssue = false;
     cart.forEach((item) => {
         const multiplier = item.quantityMultiplier || 1;
         let spec = null;
@@ -5528,28 +5551,29 @@ function openCheckout() {
             }
         }
         if (spec !== null) {
-            if (spec.stock === 0) {
-                stockIssues.push(`「${item.productName} - ${item.specName}」已無庫存`);
-            } else if ((item.quantity * multiplier) > spec.stock) {
-                const maxQty = Math.floor(spec.stock / multiplier);
-                stockIssues.push(`「${item.productName} - ${item.specName}」庫存不足，最多可購買 ${maxQty} 件`);
+            if (spec.stock === 0 || (item.quantity * multiplier) > spec.stock) {
+                hasIssue = true;
             }
         }
     });
-    if (stockIssues.length > 0) {
-        showToast('⚠️ 購物車有庫存問題，請調整後再結帳', 'error', 3000);
-        // 開啟購物車側邊欄讓用戶看到問題商品
+
+    if (hasIssue) {
+        // 重新渲染購物車（會自動標記反灰警告）
+        updateCart();
+        showToast('⚠️ 部分商品庫存不足，已標示於購物車，請調整後再結帳', 'error', 4000);
+        // 確保購物車側邊欄是打開的
         const cartSidebar = document.getElementById('cartSidebar');
         if (cartSidebar && !cartSidebar.classList.contains('active')) {
             toggleCart();
         }
         return;
     }
+
     const existingDetail = document.getElementById('orderDetailView');
     if (existingDetail) existingDetail.remove();
     updateCheckoutSummary();
     displaySelectedStore();
-    
+
     document.getElementById('checkoutModal').classList.add('active');
     history.pushState({ modal: 'checkout' }, '');
     isModalOpen = true;
