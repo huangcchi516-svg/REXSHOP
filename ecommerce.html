@@ -3486,16 +3486,35 @@ async function loadProductsData() {
         showToast('載入商品資料中...', 'success');
 
         // ✅ 單一請求：一次取得所有初始資料（6合1，減少 Invocations）
-        const initRes = await fetch('/api/sheets-init');
-        if (!initRes.ok) throw new Error('無法載入商品資料');
-        const initData = await initRes.json();
-
-        const productsData   = initData['商品列表']      || { values: [] };
-        const specsData_init = initData['商品規格表']    || { values: [] };
-        const catImgData     = initData['分類照片設定']  || { values: [] };
-        const catData        = initData['分類設定']      || { values: [] };
-        const annoData       = initData['公告設定']      || { values: [] };
-        const promoData      = initData['優惠設定']      || { values: [] };
+        // fallback：若 sheets-init 尚未部署則退回 6 個獨立請求
+        let productsData, specsData_init, catImgData, catData, annoData, promoData;
+        try {
+            const initRes = await fetch('/api/sheets-init');
+            if (!initRes.ok) throw new Error('sheets-init 不可用');
+            const initData = await initRes.json();
+            productsData   = initData['商品列表']     || { values: [] };
+            specsData_init = initData['商品規格表']   || { values: [] };
+            catImgData     = initData['分類照片設定'] || { values: [] };
+            catData        = initData['分類設定']     || { values: [] };
+            annoData       = initData['公告設定']     || { values: [] };
+            promoData      = initData['優惠設定']     || { values: [] };
+        } catch(e) {
+            // fallback：分別打 6 次
+            const [pRes, sRes, ciRes, cRes, aRes, prRes] = await Promise.all([
+                fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
+                fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`),
+                fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
+                fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
+                fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
+                fetch(`/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`)
+            ]);
+            productsData   = pRes.ok  ? await pRes.json()  : { values: [] };
+            specsData_init = sRes.ok  ? await sRes.json()  : { values: [] };
+            catImgData     = ciRes.ok ? await ciRes.json() : { values: [] };
+            catData        = cRes.ok  ? await cRes.json()  : { values: [] };
+            annoData       = aRes.ok  ? await aRes.json()  : { values: [] };
+            promoData      = prRes.ok ? await prRes.json() : { values: [] };
+        }
 
         // --- 商品 ---
         if (!productsData.values || productsData.values.length < 2) throw new Error('商品資料為空');
@@ -5785,6 +5804,18 @@ async function pollMaintenanceStatus() {
         const res = await fetch(url);
         const data = await res.json();
         const rows = data.values || [];
+
+        // 檢查監控模式是否開啟，若未開啟則停止 polling
+        const monitorRow = rows.find(r => String(r[0]).trim() === '監控模式');
+        const isMonitorOn = monitorRow ? String(monitorRow[1]).trim().toUpperCase() === 'TRUE' : false;
+        if (!isMonitorOn) {
+            if (window._maintenanceInterval) {
+                clearInterval(window._maintenanceInterval);
+                window._maintenanceInterval = null;
+            }
+            return;
+        }
+
         const adminRow = rows.find(r => String(r[0]).trim() === 'ADMIN白名單');
         if (adminRow) {
             window._adminWhitelist = String(adminRow[1] || '').split(',').map(s => s.trim()).filter(Boolean);

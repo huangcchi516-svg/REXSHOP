@@ -392,6 +392,10 @@
                 style="padding:6px 14px;border-radius:20px;border:1.5px solid #555;background:rgba(255,255,255,0.05);color:#888;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;">
                 🔧 維護模式
             </button>
+            <button id="monitorBtn" onclick="toggleMonitor()"
+                style="padding:6px 14px;border-radius:20px;border:1.5px solid #555;background:rgba(255,255,255,0.05);color:#888;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;">
+                👁️ 監控模式
+            </button>
             <button class="logout-btn" onclick="adminLogout()">登出</button>
         </div>
     </nav>
@@ -2636,11 +2640,14 @@ let isMaintenance = false;
 async function loadMaintenanceStatus() {
     try {
         const data = await sheetsRead(SYSTEM_SHEET);
-        // slice(0) 掃全部列，不跳標題（ecommerce.html 也是此格式）
         const rows = (data.values || []);
-        const row = rows.find(r => String(r[0]).trim() === '維護模式');
-        isMaintenance = row ? String(row[1]).trim().toUpperCase() === 'TRUE' : false;
+        const maintRow = rows.find(r => String(r[0]).trim() === '維護模式');
+        isMaintenance = maintRow ? String(maintRow[1]).trim().toUpperCase() === 'TRUE' : false;
         updateMaintenanceBtn();
+        // 同時載入監控模式狀態
+        const monitorRow = rows.find(r => String(r[0]).trim() === '監控模式');
+        isMonitorMode = monitorRow ? String(monitorRow[1]).trim().toUpperCase() === 'TRUE' : false;
+        updateMonitorBtn();
     } catch(e) {
         console.warn('讀取系統設定失敗：', e.message);
     }
@@ -2688,6 +2695,68 @@ async function toggleMaintenance() {
     } catch(e) {
         showToast('❌ 操作失敗：' + e.message, 'error');
         updateMaintenanceBtn(); // 還原按鈕狀態
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ==========================================
+// 👁️ 監控模式（控制 ecommerce.html 的 pollMaintenanceStatus）
+// ==========================================
+let isMonitorMode = false;
+
+async function loadMonitorStatus() {
+    try {
+        const data = await sheetsRead(SYSTEM_SHEET);
+        const rows = data.values || [];
+        const row = rows.find(r => String(r[0]).trim() === '監控模式');
+        isMonitorMode = row ? String(row[1]).trim().toUpperCase() === 'TRUE' : false;
+        updateMonitorBtn();
+    } catch(e) {
+        console.warn('讀取監控模式失敗：', e.message);
+    }
+}
+
+function updateMonitorBtn() {
+    const btn = document.getElementById('monitorBtn');
+    if (!btn) return;
+    if (isMonitorMode) {
+        btn.textContent = '🟢 監控中（點擊關閉）';
+        btn.style.background  = 'rgba(0,255,0,0.1)';
+        btn.style.borderColor = '#00FF00';
+        btn.style.color       = '#00FF00';
+    } else {
+        btn.textContent = '👁️ 監控模式';
+        btn.style.background  = 'rgba(255,255,255,0.05)';
+        btn.style.borderColor = '#555';
+        btn.style.color       = '#888';
+    }
+}
+
+async function toggleMonitor() {
+    const newVal = !isMonitorMode;
+    const label = newVal ? '開啟監控模式' : '關閉監控模式';
+    if (!confirm(`確定要${label}嗎？
+
+開啟後，前台每 30 秒會檢查維護狀態（消耗 API 用量）。
+關閉後前台停止輪詢，建議平時關閉、需要即時監控時再開。`)) return;
+
+    const btn = document.getElementById('monitorBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '處理中...'; }
+
+    try {
+        await scriptPost({
+            action:      'setSystemSetting',
+            adminLineId: adminMember.lineId,
+            key:         '監控模式',
+            value:       newVal ? 'TRUE' : 'FALSE'
+        });
+        isMonitorMode = newVal;
+        updateMonitorBtn();
+        showToast(newVal ? '🟢 監控模式已開啟，前台開始輪詢維護狀態' : '⚪ 監控模式已關閉，前台停止輪詢');
+    } catch(e) {
+        showToast('❌ 操作失敗：' + e.message, 'error');
+        updateMonitorBtn();
     } finally {
         if (btn) btn.disabled = false;
     }
