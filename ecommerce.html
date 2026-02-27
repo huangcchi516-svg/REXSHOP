@@ -2696,6 +2696,51 @@
             z-index: 10;
         }
 
+        /* 商品頁內購物車按鈕 */
+        .catpage-cart-btn {
+            position: relative;
+            background: linear-gradient(145deg, #1a1600 0%, #0a0a0a 100%);
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            cursor: pointer;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 0 10px rgba(255,215,0,0.35);
+            transition: transform 0.2s ease;
+        }
+        .catpage-cart-btn:active { transform: scale(0.92); }
+        .catpage-cart-btn-label {
+            font-size: 8px;
+            font-weight: 700;
+            color: #FFD700;
+            letter-spacing: 0.3px;
+            line-height: 1;
+        }
+        .catpage-cart-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: linear-gradient(135deg, #ff4444, #ff2020);
+            color: #fff;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 0 4px;
+            border: 2px solid #0a0a0a;
+        }
+
     </style>
     <!-- LINE 瀏覽器內嵌門市地圖 Modal -->
     <div id="ecpayIframeModal">
@@ -2908,6 +2953,15 @@
                 <div class="catpage-title" id="catPageTitle">分類</div>
                 <div class="catpage-subtitle" id="catPageSubtitle" style="display:none;"></div>
             </div>
+            <button class="catpage-cart-btn" onclick="closeCategoryPage(); toggleCart()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="3" y1="6" x2="21" y2="6" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M16 10a4 4 0 01-8 0" stroke="#FFA500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="catpage-cart-btn-label">購物車</span>
+                <div class="catpage-cart-badge" id="catPageCartBadge">0</div>
+            </button>
         </div>
         <!-- 可捲動主體 -->
         <div class="catpage-body" id="catPageBody">
@@ -4209,7 +4263,7 @@ function openCustomBlockModal(blockName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
+        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4328,7 +4382,7 @@ function renderFeaturedFlavorOptions() {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
+        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4550,7 +4604,7 @@ function renderFlavorOptions(categoryName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
+        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4635,7 +4689,7 @@ function _renderQtySpecs(specs) {
     }
 
     const qtyTitle = `<div class="spec-section-title" style="grid-column:1/-1;margin-top:20px;">📦 選擇項目</div>`;
-    specs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
+    specs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
     const qtyHTML = specs.map((spec, i) => {
         const oos = spec.stock === 0;
         const sel = i === autoIdx;
@@ -5213,6 +5267,8 @@ function updateCart() {
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartBadge.textContent = totalItems;
+    const catPageBadge = document.getElementById('catPageCartBadge');
+    if (catPageBadge) catPageBadge.textContent = totalItems;
 
     if (cart.length === 0) {
         cartItems.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">購物車是空的</p>';
@@ -5314,6 +5370,8 @@ function _updateCartTotalsOnly() {
     const cartTotal = document.getElementById('cartTotal');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     if (cartBadge) cartBadge.textContent = totalItems;
+    const catPageBadge = document.getElementById('catPageCartBadge');
+    if (catPageBadge) catPageBadge.textContent = totalItems;
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const promotionResult = calculatePromotions(cart);
     const finalTotal = subtotal - promotionResult.totalDiscount;
