@@ -1369,7 +1369,6 @@
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
         }
 
-
         .spec-option {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(255, 215, 0, 0.3);
@@ -1383,24 +1382,6 @@
             align-items: center;
             justify-content: center;
             min-height: 42px;
-        }
-
-        /* ✅ 商品口味列（flavor-*）改成全寬列表樣式 */
-        .spec-option.flavor-item {
-            grid-column: 1 / -1;
-            justify-content: flex-start;
-            text-align: left;
-            padding: 11px 14px;
-            min-height: 44px;
-            border-radius: 8px;
-            border-color: rgba(255, 215, 0, 0.15);
-        }
-        .spec-option.flavor-item .spec-name {
-            font-size: 14px;
-        }
-        .spec-option.flavor-item.selected {
-            border-color: var(--primary);
-            background: rgba(255, 215, 0, 0.15);
         }
 
         .spec-option:hover {
@@ -2512,17 +2493,26 @@
             display: flex;
             justify-content: center;
             gap: 7px;
-            padding: 7px 0 5px;
-            background: rgba(0,0,0,0.5);
+            padding: 6px 0;
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .carousel-dot {
+            pointer-events: all;
         }
 
         .carousel-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.45);
             cursor: pointer;
             transition: background 0.2s, transform 0.2s;
+            pointer-events: all;
         }
 
         .carousel-dot.active {
@@ -2997,6 +2987,7 @@
                     <div class="carousel-track" id="carouselTrack"></div>
                     <button class="carousel-btn carousel-prev" id="carouselPrev" onclick="event.stopPropagation();carouselMove(-1)">&#8249;</button>
                     <button class="carousel-btn carousel-next" id="carouselNext" onclick="event.stopPropagation();carouselMove(1)">&#8250;</button>
+                    <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
                 </div>
                 <div style="display:flex; align-items:center; background:rgba(0,0,0,0.7); padding: 4px 10px;">
                     <div id="specThumbStrip" style="display:flex; flex-wrap:nowrap; gap:5px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; flex:1; min-width:0;"></div>
@@ -3005,7 +2996,6 @@
                         <div class="spec-info-stock" id="specInfoStock" style="font-size:12px; margin:0;"></div>
                     </div>
                 </div>
-                <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
             </div>
             <!-- 燈箱 -->
             <div id="specLightbox" onclick="closeSpecLightbox()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
@@ -4269,10 +4259,8 @@ function openCustomBlockModal(blockName) {
         const hasSale = specs && specs.some(s => s.originalPrice > 0);
         const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
         return `
-            <div class="spec-option flavor-item ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})"
-                 onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
-                 id="flavor-${index}"
+            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})" id="flavor-${index}"
                  title="${product.name}${!hasStock ? ' - 已售完' : ''}">
                 <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
             </div>`;
@@ -4318,10 +4306,10 @@ function openCustomBlockModal(blockName) {
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
-            optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
+        optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
         updateAddToCartButton();
     } else {
-            optionsContainer.innerHTML = flavorTitle + flavorOptions;
+        optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
 function openFeaturedCategoryModal() {
@@ -4390,10 +4378,10 @@ function renderFeaturedFlavorOptions() {
         const isOutOfStock = !hasStock;
         const hasSale = specs && specs.some(s => s.originalPrice > 0);
         const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
+        
         return `
-            <div class="spec-option flavor-item ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFeaturedFlavor(${index})"
-                 onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFeaturedFlavor(${index})"
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
                 <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
@@ -4437,10 +4425,10 @@ function renderFeaturedFlavorOptions() {
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
-            optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
+        optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
         updateAddToCartButton();
     } else {
-            optionsContainer.innerHTML = flavorTitle + flavorOptions;
+        optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
 function displayProducts() {
@@ -4611,7 +4599,7 @@ function renderFlavorOptions(categoryName) {
         const isSelected = firstProduct && product.id === firstProduct.id;
         
         return `
-            <div class="spec-option flavor-item ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
                  ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
@@ -4705,7 +4693,7 @@ function _renderQtySpecs(specs) {
         const hasStock = pSpecs && pSpecs.some(s => s.stock > 0);
         const hasSale = pSpecs && pSpecs.some(s => s.originalPrice > 0);
         const sel = selectedFlavor && product.id === selectedFlavor.id;
-        return `<div class="spec-option flavor-item${!hasStock ? ' out-of-stock' : ''}${sel ? ' selected' : ''}"
+        return `<div class="spec-option${!hasStock ? ' out-of-stock' : ''}${sel ? ' selected' : ''}"
                      ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${i})"
                      onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${i})"
                      id="flavor-${i}" title="${product.name}">
