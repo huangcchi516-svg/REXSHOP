@@ -1369,6 +1369,53 @@
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
         }
 
+        /* 分類列表模式 */
+        .spec-options.list-mode {
+            display: block;
+        }
+        .spec-category-group {
+            margin-bottom: 18px;
+        }
+        .spec-category-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            padding: 6px 0 4px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            letter-spacing: 0.5px;
+        }
+        .spec-list-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .spec-list-item:hover {
+            background: rgba(255,215,0,0.08);
+        }
+        .spec-list-item.selected {
+            background: rgba(255,215,0,0.15);
+        }
+        .spec-list-item.out-of-stock {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+        .spec-list-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            flex: 1;
+        }
+        .spec-list-item-oos {
+            font-size: 12px;
+            color: #ff6666;
+            margin-left: 6px;
+        }
+
         .spec-option {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(255, 215, 0, 0.3);
@@ -2493,26 +2540,17 @@
             display: flex;
             justify-content: center;
             gap: 7px;
-            padding: 6px 0;
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .carousel-dot {
-            pointer-events: all;
+            padding: 7px 0 5px;
+            background: rgba(0,0,0,0.5);
         }
 
         .carousel-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.35);
             cursor: pointer;
             transition: background 0.2s, transform 0.2s;
-            pointer-events: all;
         }
 
         .carousel-dot.active {
@@ -2987,7 +3025,6 @@
                     <div class="carousel-track" id="carouselTrack"></div>
                     <button class="carousel-btn carousel-prev" id="carouselPrev" onclick="event.stopPropagation();carouselMove(-1)">&#8249;</button>
                     <button class="carousel-btn carousel-next" id="carouselNext" onclick="event.stopPropagation();carouselMove(1)">&#8250;</button>
-                    <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
                 </div>
                 <div style="display:flex; align-items:center; background:rgba(0,0,0,0.7); padding: 4px 10px;">
                     <div id="specThumbStrip" style="display:flex; flex-wrap:nowrap; gap:5px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; flex:1; min-width:0;"></div>
@@ -2996,6 +3033,7 @@
                         <div class="spec-info-stock" id="specInfoStock" style="font-size:12px; margin:0;"></div>
                     </div>
                 </div>
+                <div class="carousel-dots" id="carouselDots" style="display:none;"></div>
             </div>
             <!-- 燈箱 -->
             <div id="specLightbox" onclick="closeSpecLightbox()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
@@ -4214,6 +4252,40 @@ function displayFeaturedProducts() {
         featuredGrid.appendChild(card);
     });
 }
+// ✅ 把商品清單按 category 分組，產生列表 HTML
+function _buildCategoryListHTML(products_list, firstProduct, onSelectFnName) {
+    // 依 category 分組，保留原始順序
+    const groups = [];
+    const groupMap = {};
+    products_list.forEach((product, index) => {
+        const cat = product.category || '其他';
+        if (!groupMap[cat]) {
+            groupMap[cat] = [];
+            groups.push(cat);
+        }
+        groupMap[cat].push({ product, index });
+    });
+
+    return groups.map(cat => {
+        const items = groupMap[cat].map(({ product, index }) => {
+            const specs = productSpecs[product.id];
+            const hasStock = specs && specs.some(s => s.stock > 0);
+            const isSelected = firstProduct && product.id === firstProduct.id;
+            return `<div class="spec-list-item ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+                ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;${onSelectFnName}(${index})"
+                onclick="if(window._specTouchFired){window._specTouchFired=false;return;}${onSelectFnName}(${index})"
+                id="flavor-${index}">
+                <span class="spec-list-item-name">${product.name}</span>
+                ${!hasStock ? '<span class="spec-list-item-oos">售完</span>' : ''}
+            </div>`;
+        }).join('');
+        return `<div class="spec-category-group">
+            <div class="spec-category-label">${cat}</div>
+            ${items}
+        </div>`;
+    }).join('');
+}
+
 function openCustomBlockModal(blockName) {
     if (checkMaintenance()) return;
     currentCategoryProducts = products.filter(p => p.customBlock === blockName);
@@ -4253,18 +4325,7 @@ function openCustomBlockModal(blockName) {
     window.currentQuantitySpecs = defaultCustomSpecs;
     selectedFlavor = firstCustomProduct || null;
 
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
-        return `
-            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})" id="flavor-${index}"
-                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
-            </div>`;
-    }).join('');
+    const flavorOptions = _buildCategoryListHTML(currentCategoryProducts, firstCustomProduct, 'selectFlavor');
     selectedSpec = null;
     quantity = 1;
     updateQuantityDisplay();
@@ -4306,9 +4367,11 @@ function openCustomBlockModal(blockName) {
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
+        optionsContainer.classList.add('list-mode');
         optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
         updateAddToCartButton();
     } else {
+        optionsContainer.classList.add('list-mode');
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
@@ -4372,22 +4435,7 @@ function renderFeaturedFlavorOptions() {
     updateQuantityDisplay();
     updateAddToCartButton();
 
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const isOutOfStock = !hasStock;
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
-        
-        return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
-                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
-                 id="flavor-${index}"
-                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
-            </div>
-        `;
-    }).join('');
+    const flavorOptions = _buildCategoryListHTML(currentCategoryProducts, firstFeaturedProduct, 'selectFeaturedFlavor');
 
     if (defaultFeaturedSpecs.length > 0) {
         defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
@@ -4425,9 +4473,11 @@ function renderFeaturedFlavorOptions() {
                         <div class="spec-name">${spec.specName}${isOutOfStock ? ' ❌' : ''}</div>
                     </div>`;
         }).join('');
+        optionsContainer.classList.add('list-mode');
         optionsContainer.innerHTML = flavorTitle + flavorOptions + quantityTitle + quantityOptions;
         updateAddToCartButton();
     } else {
+        optionsContainer.classList.add('list-mode');
         optionsContainer.innerHTML = flavorTitle + flavorOptions;
     }
 }
@@ -5118,6 +5168,7 @@ function closeSpecModal() {
 function renderSpecOptions() {
     const specs = productSpecs[currentProduct.id];
     const optionsContainer = document.getElementById('specOptions');
+    optionsContainer.classList.remove('list-mode');
     
     const specTitle = `<div class="spec-section-title" style="grid-column: 1 / -1;">📦 選擇規格 (${specs.length} 種選項)</div>`;
     
