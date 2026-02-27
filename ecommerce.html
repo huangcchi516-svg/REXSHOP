@@ -4209,7 +4209,7 @@ function openCustomBlockModal(blockName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:1, bp=b.specName.includes('包')?0:1; return ap-bp; });
+        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4328,7 +4328,7 @@ function renderFeaturedFlavorOptions() {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:1, bp=b.specName.includes('包')?0:1; return ap-bp; });
+        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4550,7 +4550,7 @@ function renderFlavorOptions(categoryName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:1, bp=b.specName.includes('包')?0:1; return ap-bp; });
+        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4635,7 +4635,7 @@ function _renderQtySpecs(specs) {
     }
 
     const qtyTitle = `<div class="spec-section-title" style="grid-column:1/-1;margin-top:20px;">📦 選擇項目</div>`;
-    specs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:1, bp=b.specName.includes('包')?0:1; return ap-bp; });
+    specs.sort((a,b)=>{ const ap=a.specName.includes('條')?0:a.specName.includes('台')?1:2, bp=b.specName.includes('條')?0:b.specName.includes('台')?1:2; return ap-bp; });
     const qtyHTML = specs.map((spec, i) => {
         const oos = spec.stock === 0;
         const sel = i === autoIdx;
