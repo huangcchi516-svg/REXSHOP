@@ -1075,6 +1075,11 @@
             padding: 10px 12px;
         }
 
+        .cart-item-no-stock {
+            background: rgba(255, 68, 68, 0.08) !important;
+            border: 1px solid rgba(255, 68, 68, 0.3) !important;
+            border-radius: 8px;
+        }
         .cart-item {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
@@ -5334,20 +5339,43 @@ function updateCart() {
         return;
     }
 
-    cartItems.innerHTML = cart.map((item, index) => `
-        <div class="cart-item" data-cart-index="${index}">
-            <div class="cart-item-name">${item.productName} <span style="color:var(--primary);">/ ${item.specName}</span></div>
+    cartItems.innerHTML = cart.map((item, index) => {
+        const multiplier = item.quantityMultiplier || 1;
+        let spec = null;
+        const specs = productSpecs[item.productId];
+        if (specs) spec = specs.find(s => s.specName === item.specName);
+        if (!spec) {
+            for (let pid in productSpecs) {
+                const f = productSpecs[pid].find(s => s.specName === item.specName);
+                if (f) { spec = f; break; }
+            }
+        }
+        const availableStock = spec ? spec.stock : Infinity;
+        const isOutOfStock = availableStock === 0;
+        const isOverStock = availableStock !== Infinity && (item.quantity * multiplier) > availableStock;
+        const hasStockIssue = isOutOfStock || isOverStock;
+        let stockWarning = '';
+        if (isOutOfStock) {
+            stockWarning = `<div style="color:#ff4444;font-size:11px;margin-top:3px;">⚠️ 此商品已無庫存，請移除</div>`;
+        } else if (isOverStock) {
+            const maxQty = Math.floor(availableStock / multiplier);
+            stockWarning = `<div style="color:#ff9900;font-size:11px;margin-top:3px;">⚠️ 庫存不足，最多可購買 ${maxQty} 件，請調整數量</div>`;
+        }
+        return `
+        <div class="cart-item${hasStockIssue ? ' cart-item-no-stock' : ''}" data-cart-index="${index}">
+            <div class="cart-item-name" style="${hasStockIssue ? 'text-decoration:line-through;color:#888;' : ''}">${item.productName} <span style="color:${hasStockIssue ? '#888' : 'var(--primary)'};">/ ${item.specName}</span></div>
+            ${stockWarning}
             <div class="cart-item-bottom">
-                <div class="cart-item-price" data-price="${item.price}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
+                <div class="cart-item-price" data-price="${item.price}" style="${hasStockIssue ? 'color:#888;' : ''}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
                 <div class="cart-item-controls">
                     <button class="remove-item" onclick="removeCartItem(${index})" title="移除">✖</button>
                     <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},-1)" onclick="updateCartQuantity(${index}, -1)">−</button>
-                    <span class="cart-qty-num" style="font-size:14px; min-width:18px; text-align:center;">${item.quantity}</span>
+                    <span class="cart-qty-num" style="font-size:14px;min-width:18px;text-align:center;">${item.quantity}</span>
                     <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},1)" onclick="updateCartQuantity(${index}, 1)">+</button>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const promotionResult = calculatePromotions(cart);
@@ -5404,7 +5432,8 @@ function updateCartQuantity(index, change) {
         }
     }
     if (!spec) { showToast('找不到商品規格', 'error'); return; }
-    if (newQty > spec.stock) { showToast('已達庫存上限', 'error'); return; }
+    const multiplier = item.quantityMultiplier || 1;
+    if (newQty * multiplier > spec.stock) { showToast('已達庫存上限', 'error'); return; }
 
     item.quantity = newQty;
 
@@ -5483,6 +5512,37 @@ function openCheckout() {
     if (checkMaintenance()) return;
     if (cart.length === 0) {
         showToast('購物車是空的', 'error');
+        return;
+    }
+    // ── 結帳前庫存檢查 ──
+    const stockIssues = [];
+    cart.forEach((item) => {
+        const multiplier = item.quantityMultiplier || 1;
+        let spec = null;
+        const specs = productSpecs[item.productId];
+        if (specs) spec = specs.find(s => s.specName === item.specName);
+        if (!spec) {
+            for (let pid in productSpecs) {
+                const f = productSpecs[pid].find(s => s.specName === item.specName);
+                if (f) { spec = f; break; }
+            }
+        }
+        if (spec !== null) {
+            if (spec.stock === 0) {
+                stockIssues.push(`「${item.productName} - ${item.specName}」已無庫存`);
+            } else if ((item.quantity * multiplier) > spec.stock) {
+                const maxQty = Math.floor(spec.stock / multiplier);
+                stockIssues.push(`「${item.productName} - ${item.specName}」庫存不足，最多可購買 ${maxQty} 件`);
+            }
+        }
+    });
+    if (stockIssues.length > 0) {
+        showToast('⚠️ 購物車有庫存問題，請調整後再結帳', 'error', 3000);
+        // 開啟購物車側邊欄讓用戶看到問題商品
+        const cartSidebar = document.getElementById('cartSidebar');
+        if (cartSidebar && !cartSidebar.classList.contains('active')) {
+            toggleCart();
+        }
         return;
     }
     const existingDetail = document.getElementById('orderDetailView');
