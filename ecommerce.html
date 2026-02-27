@@ -4241,9 +4241,9 @@ function openCustomBlockModal(blockName) {
     updateAddToCartButton();
 
     if (defaultCustomSpecs.length > 0) {
-        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4265,7 +4265,7 @@ function openCustomBlockModal(blockName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
+        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4360,9 +4360,9 @@ function renderFeaturedFlavorOptions() {
     }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
-        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4384,7 +4384,7 @@ function renderFeaturedFlavorOptions() {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
+        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4580,9 +4580,9 @@ function renderFlavorOptions(categoryName) {
 
     if (defaultSpecs.length > 0) {
         // 預先決定自動選哪個規格
-        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
-        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
         // 直接在渲染時設好 selected，不再呼叫 selectQuantitySpec（避免觸發兩次）
         if (autoIdx !== -1) {
@@ -4606,7 +4606,7 @@ function renderFlavorOptions(categoryName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
+        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4672,9 +4672,9 @@ function _renderQtySpecs(specs) {
     }).join('');
 
     // 預選規格
-    let autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+    let autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('台') && s.stock > 0);
-    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.stock > 0);
 
     if (autoIdx !== -1) {
@@ -4691,7 +4691,7 @@ function _renderQtySpecs(specs) {
     }
 
     const qtyTitle = `<div class="spec-section-title" style="grid-column:1/-1;margin-top:20px;">📦 選擇項目</div>`;
-    specs.sort((a,b)=>{ const ap=a.specName.includes('包')?0:a.specName.includes('條')?1:2, bp=b.specName.includes('包')?0:b.specName.includes('條')?1:2; return ap-bp; });
+    specs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
     const qtyHTML = specs.map((spec, i) => {
         const oos = spec.stock === 0;
         const sel = i === autoIdx;
@@ -4801,33 +4801,12 @@ function openSpecModal(productId) {
     window._currentModalCategoryName = currentProduct.category || '';
     openCategoryPage(currentProduct.name, '');
     updateModalPromoHint();
-
+    
     renderSpecOptions();
     quantity = 1;
     selectedSpec = null;
     updateQuantityDisplay();
     updateAddToCartButton();
-
-    // ✅ 開啟商品時靜默更新此商品庫存（不影響 UX，背景執行）
-    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`)
-        .then(r => r.json())
-        .then(data => {
-            if (!data.values || data.values.length < 2) return;
-            const rows = data.values.slice(1);
-            rows.forEach(row => {
-                const pid = String(row[0] || '').trim();
-                if (pid !== productId) return;
-                const specName = row[2] || '';
-                const stock = parseInt(row[4]) || 0;
-                const multiplier = parseInt(row[6]) || 1;
-                if (!productSpecs[pid]) return;
-                const s = productSpecs[pid].find(x => x.specName === specName);
-                if (s) { s.stock = stock; s.quantityMultiplier = multiplier; }
-            });
-            // 重繪規格選項反映最新庫存
-            if (currentProduct && currentProduct.id === productId) renderSpecOptions();
-        })
-        .catch(() => {});
 }
 let _carouselImgs = [];
 let _carouselIdx = 0;
@@ -5455,31 +5434,10 @@ function openCheckout() {
     if (existingDetail) existingDetail.remove();
     updateCheckoutSummary();
     displaySelectedStore();
-
+    
     document.getElementById('checkoutModal').classList.add('active');
     history.pushState({ modal: 'checkout' }, '');
     isModalOpen = true;
-
-    // ✅ 開結帳頁時，背景重抓最新庫存（用於 submitOrder 前的比對基準）
-    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`)
-        .then(r => r.json())
-        .then(data => {
-            if (!data.values || data.values.length < 2) return;
-            const rows = data.values.slice(1);
-            // 更新購物車內所有商品的最新庫存
-            const cartPids = new Set(cart.map(i => String(i.productId)));
-            rows.forEach(row => {
-                const pid = String(row[0] || '').trim();
-                if (!cartPids.has(pid)) return;
-                const specName = row[2] || '';
-                const stock = parseInt(row[4]) || 0;
-                const multiplier = parseInt(row[6]) || 1;
-                if (!productSpecs[pid]) return;
-                const s = productSpecs[pid].find(x => x.specName === specName);
-                if (s) { s.stock = stock; s.quantityMultiplier = multiplier; }
-            });
-        })
-        .catch(() => {});
 }
 
 function updateCheckoutSummary() {
@@ -6658,7 +6616,7 @@ window.addEventListener('load', () => {
     loadSystemSettings();
     updateCart();
     checkMemberStatus();
-    startAutoRefresh(300);
+    startAutoRefresh(120);
 
     // 維護模式輪詢
     window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
@@ -6678,7 +6636,7 @@ window.addEventListener('load', () => {
                 window._maintenanceInterval = null;
             }
         } else {
-            startAutoRefresh(300);
+            startAutoRefresh(120);
             refreshAllStock();
             if (!window._maintenanceInterval) {
                 window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
