@@ -6736,10 +6736,7 @@ function updateMemberUI() {
                 const phoneInput = document.getElementById('customerPhone');
                 if (phoneInput && phoneInput.value === '') phoneInput.value = currentMember.phone;
             }
-            if (currentMember.displayName) {
-                const nameInput = document.getElementById('customerName');
-                if (nameInput && nameInput.value === '') nameInput.value = currentMember.displayName;
-            }
+            // 不自動填入LINE名稱，請使用者填寫本名
             // 分類填入選單
             updateDrawerCategories();
         } else if (approvalStatus === '已拒絕') {
