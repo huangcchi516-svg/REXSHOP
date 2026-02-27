@@ -3236,7 +3236,7 @@ let announcements = [];  // 🆕 儲存公告資料
 let promotions = [];     // 🆕 儲存優惠資料
 let categories = [];     // 🆕 儲存分類設定（含圖片）
 let currentCategory = 'all';  // 當前選擇的分類
-let cart = [];
+let cart = (function() { try { const s = localStorage.getItem('rexlab_cart'); return s ? JSON.parse(s) : []; } catch(e) { return []; } })();
 let selectedStore = null;
 let systemSettings = {
     bankName: '',
@@ -5263,6 +5263,7 @@ function confirmAddToCart() {
     }
 }
 function updateCart() {
+    try { localStorage.setItem('rexlab_cart', JSON.stringify(cart)); } catch(e) {}
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.getElementById('cartBadge');
     const cartTotal = document.getElementById('cartTotal');
@@ -5368,6 +5369,7 @@ function updateCartQuantity(index, change) {
 
 // 只更新購物車 badge + 總金額 + 優惠，不重建商品列表
 function _updateCartTotalsOnly() {
+    try { localStorage.setItem('rexlab_cart', JSON.stringify(cart)); } catch(e) {}
     const cartBadge = document.getElementById('cartBadge');
     const cartTotal = document.getElementById('cartTotal');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
