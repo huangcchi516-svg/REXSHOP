@@ -1386,7 +1386,7 @@
         }
 
         /* ✅ 商品口味列（flavor-*）改成全寬列表樣式 */
-        [id^="flavor-"].spec-option {
+        .spec-option.flavor-item {
             grid-column: 1 / -1;
             justify-content: flex-start;
             text-align: left;
@@ -1395,10 +1395,10 @@
             border-radius: 8px;
             border-color: rgba(255, 215, 0, 0.15);
         }
-        [id^="flavor-"].spec-option .spec-name {
+        .spec-option.flavor-item .spec-name {
             font-size: 14px;
         }
-        [id^="flavor-"].spec-option.selected {
+        .spec-option.flavor-item.selected {
             border-color: var(--primary);
             background: rgba(255, 215, 0, 0.15);
         }
@@ -4269,7 +4269,7 @@ function openCustomBlockModal(blockName) {
         const hasSale = specs && specs.some(s => s.originalPrice > 0);
         const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
         return `
-            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+            <div class="spec-option flavor-item ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
                  ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})"
                  onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
                  id="flavor-${index}"
@@ -4391,7 +4391,7 @@ function renderFeaturedFlavorOptions() {
         const hasSale = specs && specs.some(s => s.originalPrice > 0);
         const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
         return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
+            <div class="spec-option flavor-item ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
                  ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFeaturedFlavor(${index})"
                  onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFeaturedFlavor(${index})"
                  id="flavor-${index}"
@@ -4611,7 +4611,7 @@ function renderFlavorOptions(categoryName) {
         const isSelected = firstProduct && product.id === firstProduct.id;
         
         return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
+            <div class="spec-option flavor-item ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
                  ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
                  id="flavor-${index}"
                  title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
@@ -4705,7 +4705,7 @@ function _renderQtySpecs(specs) {
         const hasStock = pSpecs && pSpecs.some(s => s.stock > 0);
         const hasSale = pSpecs && pSpecs.some(s => s.originalPrice > 0);
         const sel = selectedFlavor && product.id === selectedFlavor.id;
-        return `<div class="spec-option${!hasStock ? ' out-of-stock' : ''}${sel ? ' selected' : ''}"
+        return `<div class="spec-option flavor-item${!hasStock ? ' out-of-stock' : ''}${sel ? ' selected' : ''}"
                      ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${i})"
                      onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${i})"
                      id="flavor-${i}" title="${product.name}">
