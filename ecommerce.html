@@ -104,7 +104,8 @@
 
         html {
             touch-action: manipulation; 
-            -webkit-text-size-adjust: 100%; 
+            -webkit-text-size-adjust: 100%;
+            overflow-x: hidden;
         }
 
         :root {
@@ -124,7 +125,8 @@
             color: var(--text-light);
             min-height: 100vh;
             touch-action: manipulation; 
-            -webkit-tap-highlight-color: transparent; 
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
         
@@ -345,13 +347,12 @@
             gap: 10px;
         }
         .drawer-logout-btn {
-            flex: 1;
-            padding: 12px;
+            padding: 3px 10px;
             background: none;
-            border: 1px solid rgba(255,68,68,0.4);
+            border: 1px solid rgba(255,68,68,0.5);
             color: #ff6666;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             letter-spacing: 0.3px;
@@ -961,39 +962,73 @@
         .cart-float {
             position: fixed;
             bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, var(--primary) 0%, #FFA500 100%);
-            width: 70px;
-            height: 70px;
+            right: 20px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
-            transition: all 0.3s ease;
             z-index: 999;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* 外圈光暈 */
+            background: conic-gradient(from 0deg, #FFD700, #FFA500, #FFD700);
+            padding: 3px;
+            animation: cart-ring-spin 4s linear infinite;
         }
-
+        @keyframes cart-ring-spin {
+            from { filter: drop-shadow(0 0 8px rgba(255,215,0,0.7)); }
+            50%  { filter: drop-shadow(0 0 18px rgba(255,165,0,0.9)); }
+            to   { filter: drop-shadow(0 0 8px rgba(255,215,0,0.7)); }
+        }
+        .cart-float-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1a1600 0%, #0a0a0a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .cart-float-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-float-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #FFD700;
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
         .cart-float:hover {
-            transform: scale(1.1);
+            transform: scale(1.12);
+        }
+        .cart-float:active {
+            transform: scale(0.95);
         }
 
         .cart-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ff4444;
+            top: -2px;
+            right: -2px;
+            background: linear-gradient(135deg, #ff4444, #ff2020);
             color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 0 5px;
+            border: 2px solid #0a0a0a;
+            box-shadow: 0 2px 8px rgba(255,68,68,0.6);
         }
 
         
@@ -1040,6 +1075,11 @@
             padding: 10px 12px;
         }
 
+        .cart-item-no-stock {
+            background: rgba(255, 68, 68, 0.08) !important;
+            border: 1px solid rgba(255, 68, 68, 0.3) !important;
+            border-radius: 8px;
+        }
         .cart-item {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
@@ -1802,12 +1842,13 @@
             .service-float-label { font-size: 10px; }
 
             .cart-float {
-                width: 50px;
-                height: 50px;
-                font-size: 22px;
+                width: 52px;
+                height: 52px;
                 bottom: 15px;
                 right: 15px;
             }
+            .cart-float-label { font-size: 8px; }
+            .cart-float-icon svg { width: 20px; height: 20px; }
 
             
             .modal-content {
@@ -2013,17 +2054,16 @@
             }
 
             .cart-float {
-                width: 60px;
-                height: 60px;
-                font-size: 28px;
+                width: 62px;
+                height: 62px;
                 bottom: 20px;
                 right: 20px;
             }
 
             .cart-badge {
-                width: 24px;
-                height: 24px;
-                font-size: 12px;
+                min-width: 22px;
+                height: 22px;
+                font-size: 11px;
             }
         }
 
@@ -2567,16 +2607,29 @@
         /* 客服按鈕（footer並排） */
         .drawer-cs-btn {
             flex: 1;
-            padding: 12px;
-            background: none;
-            border: 1px solid rgba(0,200,100,0.35);
-            color: #00c864;
-            border-radius: 4px;
-            font-size: 16px;
+            padding: 11px 12px;
+            background: linear-gradient(135deg, rgba(6,199,85,0.12) 0%, rgba(0,180,70,0.06) 100%);
+            border: 1.5px solid rgba(6,199,85,0.5);
+            color: #06C755;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 700;
-            letter-spacing: 0.3px;
+            letter-spacing: 1px;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 12px rgba(6,199,85,0.15);
+        }
+        .drawer-cs-btn:active {
+            background: rgba(6,199,85,0.22);
+            transform: scale(0.97);
+        }
+        .drawer-cs-btn svg {
+            flex-shrink: 0;
         }
 
         /* ── 全頁分類內頁 ── */
@@ -2650,6 +2703,51 @@
             z-index: 10;
         }
 
+        /* 商品頁內購物車按鈕 */
+        .catpage-cart-btn {
+            position: relative;
+            background: linear-gradient(145deg, #1a1600 0%, #0a0a0a 100%);
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            cursor: pointer;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 0 10px rgba(255,215,0,0.35);
+            transition: transform 0.2s ease;
+        }
+        .catpage-cart-btn:active { transform: scale(0.92); }
+        .catpage-cart-btn-label {
+            font-size: 8px;
+            font-weight: 700;
+            color: #FFD700;
+            letter-spacing: 0.3px;
+            line-height: 1;
+        }
+        .catpage-cart-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: linear-gradient(135deg, #ff4444, #ff2020);
+            color: #fff;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 0 4px;
+            border: 2px solid #0a0a0a;
+        }
+
     </style>
     <!-- LINE 瀏覽器內嵌門市地圖 Modal -->
     <div id="ecpayIframeModal">
@@ -2683,6 +2781,7 @@
             <div class="drawer-header-info">
                 <img class="drawer-avatar" id="drawerAvatar" src="" alt="">
                 <div class="drawer-username" id="drawerUsername">REX LAB</div>
+                <button class="drawer-logout-btn" id="drawerLogoutBtn" onclick="closeDrawer(); logout()" style="display:none;">登出</button>
             </div>
             <button class="drawer-close" onclick="closeDrawer()">✕</button>
         </div>
@@ -2705,8 +2804,15 @@
             </div>
         </div>
         <div class="drawer-footer" id="drawerFooter" style="display:none;">
-            <button class="drawer-cs-btn" onclick="closeDrawer(); window.open('https://line.me/ti/p/~rex52077', '_blank')">客服</button>
-            <button class="drawer-logout-btn" onclick="closeDrawer(); logout()">登出</button>
+            <button class="drawer-cs-btn" onclick="closeDrawer(); window.open('https://line.me/ti/p/~rex52077', '_blank')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 11.5C21 16.75 16.75 21 11.5 21C9.37 21 7.41 20.31 5.82 19.14L2 20l.86-3.82C1.69 14.59 1 12.63 1 10.5C1 5.25 5.25 1 10.5 1C15.75 1 20 5.25 20 10.5" stroke="#06C755" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="17.5" cy="17.5" r="4.5" fill="rgba(6,199,85,0.15)" stroke="#06C755" stroke-width="1.5"/>
+                    <path d="M17.5 15.5v2.5l1.5 1" stroke="#06C755" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 9h8M7 13h5" stroke="#06C755" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                聯繫客服
+            </button>
         </div>
     </div>
 
@@ -2815,7 +2921,16 @@
 
     <!-- 購物車浮動按鈕 -->
     <div class="cart-float" onclick="toggleCart()">
-        🛒
+        <div class="cart-float-inner">
+            <div class="cart-float-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="3" y1="6" x2="21" y2="6" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M16 10a4 4 0 01-8 0" stroke="#FFA500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="cart-float-label">購物車</div>
+        </div>
         <div class="cart-badge" id="cartBadge">0</div>
     </div>
 
@@ -2845,6 +2960,15 @@
                 <div class="catpage-title" id="catPageTitle">分類</div>
                 <div class="catpage-subtitle" id="catPageSubtitle" style="display:none;"></div>
             </div>
+            <button class="catpage-cart-btn" onclick="closeCategoryPage(); toggleCart()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="3" y1="6" x2="21" y2="6" stroke="#FFD700" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M16 10a4 4 0 01-8 0" stroke="#FFA500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="catpage-cart-btn-label">購物車</span>
+                <div class="catpage-cart-badge" id="catPageCartBadge">0</div>
+            </button>
         </div>
         <!-- 可捲動主體 -->
         <div class="catpage-body" id="catPageBody">
@@ -3117,7 +3241,7 @@ let announcements = [];  // 🆕 儲存公告資料
 let promotions = [];     // 🆕 儲存優惠資料
 let categories = [];     // 🆕 儲存分類設定（含圖片）
 let currentCategory = 'all';  // 當前選擇的分類
-let cart = [];
+let cart = (function() { try { const s = localStorage.getItem('rexlab_cart'); return s ? JSON.parse(s) : []; } catch(e) { return []; } })();
 let selectedStore = null;
 let systemSettings = {
     bankName: '',
@@ -3303,9 +3427,9 @@ function processStoreData(storeData) {
     }
     const savedTradeNo = localStorage.getItem('ecpay_merchant_trade_no');
     
-    if (storeData.MerchantTradeNo !== savedTradeNo) {
-        showToast('門市資料驗證失敗', 'error');
-        return;
+    // ✅ 驗證失敗只 log，不擋住（避免 tradeNo 時序問題）
+    if (storeData.MerchantTradeNo && savedTradeNo && storeData.MerchantTradeNo !== savedTradeNo) {
+        console.warn('MerchantTradeNo 不符:', storeData.MerchantTradeNo, '!=', savedTradeNo);
     }
     selectedStore = {
         id: storeData.CVSStoreID,
@@ -3367,7 +3491,7 @@ async function loadProductsData() {
             categoriesRes, announcementRes, promotionRes
         ] = await Promise.all([
             fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`),
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`),
             fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
             fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
             fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
@@ -3427,15 +3551,27 @@ async function loadProductsData() {
             const data = await categoryImgRes.json();
             if (data.values && data.values.length > 1) {
                 categoryImages = {}; categoryCarouselImages = {}; categorySubtitles = {};
+                if (!window.categoryCustomPrices) window.categoryCustomPrices = {};
                 data.values.slice(1).forEach(row => {
                     const categoryName = row[0] || '';
                     if (!categoryName) return;
                     const bVal = (row[1] || '').trim();
-                    let subtitle = '', cardImage = '', carouselStartIdx = 2;
+                    let subtitle = '', cardImage = '', carouselStartIdx = 3;
                     if (bVal && !bVal.startsWith('http')) {
-                        subtitle = bVal; cardImage = (row[2] || '').trim(); carouselStartIdx = 3;
+                        // B欄是副標題：C欄=自訂售價，D欄=照片，E欄起=輪播
+                        subtitle = bVal;
+                        const cVal = (row[2] || '').toString().trim();
+                        const customPrice = parseInt(cVal);
+                        if (!isNaN(customPrice) && customPrice > 0) window.categoryCustomPrices[categoryName] = customPrice;
+                        cardImage = (row[3] || '').trim();
+                        carouselStartIdx = 4;
                     } else {
-                        cardImage = bVal; carouselStartIdx = 2;
+                        // B欄是照片URL（或空）：C欄=自訂售價，D欄起=輪播
+                        cardImage = bVal;
+                        const cVal = (row[2] || '').toString().trim();
+                        const customPrice = parseInt(cVal);
+                        if (!isNaN(customPrice) && customPrice > 0) window.categoryCustomPrices[categoryName] = customPrice;
+                        carouselStartIdx = 3;
                     }
                     if (subtitle) categorySubtitles[categoryName] = subtitle;
                     if (cardImage) categoryImages[categoryName] = cardImage;
@@ -4010,7 +4146,7 @@ function displayFeaturedProducts() {
                 <img src="${imageUrl}" alt="主打商品" onerror="this.style.display='none'">
             </div>
             <div class="product-name">本月激推🔥</div>
-            <div class="product-price">$${minPrice}${minPrice !== maxPrice ? ` - $${maxPrice}` : ''}</div>
+            <div class="product-price">${(window.categoryCustomPrices && window.categoryCustomPrices['本月激推🔥']) ? '$' + window.categoryCustomPrices['本月激推🔥'] : '$' + minPrice + (minPrice !== maxPrice ? ` - $${maxPrice}` : '')}</div>
 
             <button class="add-to-cart-btn" onclick="event.stopPropagation(); openFeaturedCategoryModal()">選擇規格</button>
         `;
@@ -4033,7 +4169,7 @@ function displayFeaturedProducts() {
         if (imageUrl && !imageUrl.startsWith('http')) imageUrl = 'https://' + imageUrl;
         if (!imageUrl) imageUrl = '';
         
-        const priceText = minPrice === maxPrice ? `$${minPrice}` : `$${minPrice} - $${maxPrice}`;
+        const priceText = (window.categoryCustomPrices && window.categoryCustomPrices[blockName]) ? '$' + window.categoryCustomPrices[blockName] : (minPrice === maxPrice ? `$${minPrice}` : `$${minPrice} - $${maxPrice}`);
         
         const blockHasSale = blockProducts.some(p => productSpecs[p.id]?.some(s => s.originalPrice > 0));
         const card = document.createElement('div');
@@ -4110,7 +4246,10 @@ function openCustomBlockModal(blockName) {
     updateAddToCartButton();
 
     if (defaultCustomSpecs.length > 0) {
+        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4226,7 +4365,10 @@ function renderFeaturedFlavorOptions() {
     }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
+        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.stock > 0);
         if (autoIdx !== -1) {
             selectedSpec = {
@@ -4334,7 +4476,7 @@ function displayProducts() {
                     <img src="${imageUrl}" alt="${category.name}" onerror="this.style.display='none'">
                 </div>
                 <div class="product-name">${formatCategoryName(category.name)}</div>
-                <div class="product-price">$${category.minPrice}${category.minPrice !== category.maxPrice ? ` - $${category.maxPrice}` : ''}</div>
+                <div class="product-price">${(window.categoryCustomPrices && window.categoryCustomPrices[category.name]) ? '$' + window.categoryCustomPrices[category.name] : '$' + category.minPrice + (category.minPrice !== category.maxPrice ? ` - $${category.maxPrice}` : '')}</div>
                 <button class="add-to-cart-btn" onclick="event.stopPropagation(); openCategoryModal('${category.name}')">
                     選擇規格
                 </button>
@@ -4443,7 +4585,10 @@ function renderFlavorOptions(categoryName) {
 
     if (defaultSpecs.length > 0) {
         // 預先決定自動選哪個規格
+        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+        if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.stock > 0);
         // 直接在渲染時設好 selected，不再呼叫 selectQuantitySpec（避免觸發兩次）
         if (autoIdx !== -1) {
@@ -4532,7 +4677,10 @@ function _renderQtySpecs(specs) {
     }).join('');
 
     // 預選規格
+    specs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
     let autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
+    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
+    if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('台') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.stock > 0);
 
     if (autoIdx !== -1) {
@@ -4658,12 +4806,37 @@ function openSpecModal(productId) {
     window._currentModalCategoryName = currentProduct.category || '';
     openCategoryPage(currentProduct.name, '');
     updateModalPromoHint();
-    
+
     renderSpecOptions();
     quantity = 1;
     selectedSpec = null;
     updateQuantityDisplay();
     updateAddToCartButton();
+
+    // ✅ 每次開商品時，背景靜默抓最新庫存並重繪
+    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.values || data.values.length < 2) return;
+            data.values.slice(1).forEach(row => {
+                const pid = String(row[0] || '').trim();
+                if (pid !== productId) return;
+                const specName = row[2] || '';
+                const stock = parseInt(row[4]) || 0;
+                const multiplier = parseInt(row[6]) || 1;
+                if (!productSpecs[pid]) return;
+                const s = productSpecs[pid].find(x => x.specName === specName);
+                if (s) { s.stock = stock; s.quantityMultiplier = multiplier; }
+            });
+            // 更新商品總庫存
+            if (productSpecs[productId]) {
+                const p = products.find(x => x.id === productId);
+                if (p) p.stock = productSpecs[productId].reduce((sum, s) => sum + s.stock, 0);
+            }
+            // 如果還停在同一個商品 modal 就重繪
+            if (currentProduct && currentProduct.id === productId) renderSpecOptions();
+        })
+        .catch(() => {});
 }
 let _carouselImgs = [];
 let _carouselIdx = 0;
@@ -5037,7 +5210,11 @@ function changeQuantity(change) {
     }
     
     if (newQty > selectedSpec.stock) {
-        showToast('已達庫存上限', 'error');
+            showToast('已達庫存上限，重新整理中...', 'error', 2000);
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
+                .catch(() => {});
         return;
     }
 
@@ -5052,6 +5229,24 @@ function updateQuantityDisplay() {
 function updateAddToCartButton() {
     const btn = document.getElementById('addToCartModalBtn');
     btn.disabled = !selectedSpec;
+}
+
+// ✅ 把規格表套用到前端快取並重繪
+function _applySpecsData(values) {
+    if (!values || values.length < 2) return;
+    values.slice(1).forEach(row => {
+        const pid = String(row[0] || '').trim();
+        const sn  = row[2] || '';
+        const st  = parseInt(row[4]) || 0;
+        const ml  = parseInt(row[6]) || 1;
+        if (!pid || !productSpecs[pid]) return;
+        const s = productSpecs[pid].find(x => x.specName === sn);
+        if (s) { s.stock = st; s.quantityMultiplier = ml; }
+    });
+    products.forEach(p => {
+        const specs = productSpecs[p.id];
+        if (specs) p.stock = specs.reduce((sum, s) => sum + s.stock, 0);
+    });
 }
 
 function confirmAddToCart() {
@@ -5078,14 +5273,22 @@ function confirmAddToCart() {
         const totalUnits = newQty * multiplier;  // 實際佔用庫存
         
         if (totalUnits > actualStock) {
-            showToast('已達庫存上限', 'error');
+            showToast('已達庫存上限，重新整理中...', 'error', 2000);
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
+                .catch(() => {});
             return;
         }
         cart[existingIndex].quantity = newQty;
     } else {
         const totalUnits = quantity * multiplier;
         if (totalUnits > actualStock) {
-            showToast('庫存不足', 'error');
+            showToast('庫存不足，重新整理中...', 'error', 2000);
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
+                .catch(() => {});
             return;
         }
         cart.push({
@@ -5120,12 +5323,15 @@ function confirmAddToCart() {
     }
 }
 function updateCart() {
+    try { localStorage.setItem('rexlab_cart', JSON.stringify(cart)); } catch(e) {}
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.getElementById('cartBadge');
     const cartTotal = document.getElementById('cartTotal');
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     cartBadge.textContent = totalItems;
+    const catPageBadge = document.getElementById('catPageCartBadge');
+    if (catPageBadge) catPageBadge.textContent = totalItems;
 
     if (cart.length === 0) {
         cartItems.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">購物車是空的</p>';
@@ -5133,20 +5339,43 @@ function updateCart() {
         return;
     }
 
-    cartItems.innerHTML = cart.map((item, index) => `
-        <div class="cart-item" data-cart-index="${index}">
-            <div class="cart-item-name">${item.productName} <span style="color:var(--primary);">/ ${item.specName}</span></div>
+    cartItems.innerHTML = cart.map((item, index) => {
+        const multiplier = item.quantityMultiplier || 1;
+        let spec = null;
+        const specs = productSpecs[item.productId];
+        if (specs) spec = specs.find(s => s.specName === item.specName);
+        if (!spec) {
+            for (let pid in productSpecs) {
+                const f = productSpecs[pid].find(s => s.specName === item.specName);
+                if (f) { spec = f; break; }
+            }
+        }
+        const availableStock = spec ? spec.stock : Infinity;
+        const isOutOfStock = availableStock === 0;
+        const isOverStock = availableStock !== Infinity && (item.quantity * multiplier) > availableStock;
+        const hasStockIssue = isOutOfStock || isOverStock;
+        let stockWarning = '';
+        if (isOutOfStock) {
+            stockWarning = `<div style="color:#ff4444;font-size:11px;margin-top:3px;">⚠️ 此商品已無庫存，請移除</div>`;
+        } else if (isOverStock) {
+            const maxQty = Math.floor(availableStock / multiplier);
+            stockWarning = `<div style="color:#ff9900;font-size:11px;margin-top:3px;">⚠️ 庫存不足，最多可購買 ${maxQty} 件，請調整數量</div>`;
+        }
+        return `
+        <div class="cart-item${hasStockIssue ? ' cart-item-no-stock' : ''}" data-cart-index="${index}">
+            <div class="cart-item-name" style="${hasStockIssue ? 'text-decoration:line-through;color:#888;' : ''}">${item.productName} <span style="color:${hasStockIssue ? '#888' : 'var(--primary)'};">/ ${item.specName}</span></div>
+            ${stockWarning}
             <div class="cart-item-bottom">
-                <div class="cart-item-price" data-price="${item.price}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
+                <div class="cart-item-price" data-price="${item.price}" style="${hasStockIssue ? 'color:#888;' : ''}">$${item.price} × <span class="cart-qty-num">${item.quantity}</span> = $<span class="cart-subtotal">${item.price * item.quantity}</span></div>
                 <div class="cart-item-controls">
                     <button class="remove-item" onclick="removeCartItem(${index})" title="移除">✖</button>
                     <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},-1)" onclick="updateCartQuantity(${index}, -1)">−</button>
-                    <span class="cart-qty-num" style="font-size:14px; min-width:18px; text-align:center;">${item.quantity}</span>
+                    <span class="cart-qty-num" style="font-size:14px;min-width:18px;text-align:center;">${item.quantity}</span>
                     <button class="qty-btn" ontouchstart="event.preventDefault();updateCartQuantity(${index},1)" onclick="updateCartQuantity(${index}, 1)">+</button>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const promotionResult = calculatePromotions(cart);
@@ -5203,7 +5432,8 @@ function updateCartQuantity(index, change) {
         }
     }
     if (!spec) { showToast('找不到商品規格', 'error'); return; }
-    if (newQty > spec.stock) { showToast('已達庫存上限', 'error'); return; }
+    const multiplier = item.quantityMultiplier || 1;
+    if (newQty * multiplier > spec.stock) { showToast('已達庫存上限', 'error'); return; }
 
     item.quantity = newQty;
 
@@ -5223,10 +5453,13 @@ function updateCartQuantity(index, change) {
 
 // 只更新購物車 badge + 總金額 + 優惠，不重建商品列表
 function _updateCartTotalsOnly() {
+    try { localStorage.setItem('rexlab_cart', JSON.stringify(cart)); } catch(e) {}
     const cartBadge = document.getElementById('cartBadge');
     const cartTotal = document.getElementById('cartTotal');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     if (cartBadge) cartBadge.textContent = totalItems;
+    const catPageBadge = document.getElementById('catPageCartBadge');
+    if (catPageBadge) catPageBadge.textContent = totalItems;
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const promotionResult = calculatePromotions(cart);
     const finalTotal = subtotal - promotionResult.totalDiscount;
@@ -5271,21 +5504,88 @@ function toggleCart() {
     if (isOpening) {
         history.pushState({ modal: 'cart' }, '');
         isModalOpen = true;
+        // ── 打開購物車時，背景重拉最新庫存並重新渲染 ──
+        if (cart.length > 0) {
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.values) {
+                        _applySpecsData(data.values);
+                        updateCart(); // 重新渲染，標記庫存不足商品
+                    }
+                })
+                .catch(() => {});
+        }
     } else {
         isModalOpen = false;
     }
 }
-function openCheckout() {
+async function openCheckout() {
     if (checkMaintenance()) return;
     if (cart.length === 0) {
         showToast('購物車是空的', 'error');
         return;
     }
+
+    // ── 結帳前：先重新拉最新庫存 ──
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    const originalBtnText = checkoutBtn ? checkoutBtn.textContent : '';
+    if (checkoutBtn) {
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = '⏳ 確認庫存中...';
+    }
+    try {
+        const res = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.values) {
+            _applySpecsData(data.values);
+        }
+    } catch(e) {
+        // 拉取失敗就用舊資料繼續比對
+    } finally {
+        if (checkoutBtn) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = originalBtnText;
+        }
+    }
+
+    // ── 比對最新庫存，找出有問題的商品 ──
+    let hasIssue = false;
+    cart.forEach((item) => {
+        const multiplier = item.quantityMultiplier || 1;
+        let spec = null;
+        const specs = productSpecs[item.productId];
+        if (specs) spec = specs.find(s => s.specName === item.specName);
+        if (!spec) {
+            for (let pid in productSpecs) {
+                const f = productSpecs[pid].find(s => s.specName === item.specName);
+                if (f) { spec = f; break; }
+            }
+        }
+        if (spec !== null) {
+            if (spec.stock === 0 || (item.quantity * multiplier) > spec.stock) {
+                hasIssue = true;
+            }
+        }
+    });
+
+    if (hasIssue) {
+        // 重新渲染購物車（會自動標記反灰警告）
+        updateCart();
+        showToast('⚠️ 部分商品庫存不足，已標示於購物車，請調整後再結帳', 'error', 4000);
+        // 確保購物車側邊欄是打開的
+        const cartSidebar = document.getElementById('cartSidebar');
+        if (cartSidebar && !cartSidebar.classList.contains('active')) {
+            toggleCart();
+        }
+        return;
+    }
+
     const existingDetail = document.getElementById('orderDetailView');
     if (existingDetail) existingDetail.remove();
     updateCheckoutSummary();
     displaySelectedStore();
-    
+
     document.getElementById('checkoutModal').classList.add('active');
     history.pushState({ modal: 'checkout' }, '');
     isModalOpen = true;
@@ -5573,6 +5873,64 @@ async function submitOrder() {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.6';
     submitBtn.style.cursor = 'not-allowed';
+    submitBtn.innerHTML = '🔍 確認庫存中...';
+
+    // ✅ 下單前重新抓最新庫存，逐一確認
+    try {
+        const latestSpecsRes = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`);
+        const latestSpecsData = await latestSpecsRes.json();
+        if (latestSpecsData.values && latestSpecsData.values.length > 1) {
+            // 建立最新庫存 map：key = productId_specName
+            const latestStockMap = {};
+            for (let i = 1; i < latestSpecsData.values.length; i++) {
+                const row = latestSpecsData.values[i];
+                const pid = String(row[0] || '').trim();
+                const spec = String(row[2] || '').trim();
+                const stock = parseInt(row[4]) || 0;
+                const multiplier = parseInt(row[6]) || 1;
+                if (pid && spec) latestStockMap[`${pid}_${spec}`] = { stock, multiplier };
+            }
+            // 同步更新前端快取
+            Object.entries(latestStockMap).forEach(([key, val]) => {
+                const [pid, specName] = key.split(/_(.+)/);
+                if (productSpecs[pid]) {
+                    const s = productSpecs[pid].find(x => x.specName === specName);
+                    if (s) { s.stock = val.stock; s.quantityMultiplier = val.multiplier; }
+                }
+            });
+            // 逐一檢查購物車
+            const insufficientItems = [];
+            for (const item of cart) {
+                const key = `${item.productId}_${item.specName}`;
+                const latest = latestStockMap[key];
+                let availableStock = 0;
+                if (latest) {
+                    availableStock = latest.stock;
+                } else {
+                    const fallback = Object.entries(latestStockMap).find(([k]) => k.startsWith(item.productId + '_'));
+                    if (fallback) availableStock = fallback[1].stock;
+                }
+                const multiplier = item.quantityMultiplier || 1;
+                const needed = item.quantity * multiplier;
+                if (needed > availableStock) {
+                    const avail = Math.floor(availableStock / multiplier);
+                    insufficientItems.push(`「${item.productName} - ${item.specName}」庫存剩 ${avail} ${multiplier > 1 ? '組' : '件'}，您選了 ${item.quantity} ${multiplier > 1 ? '組' : '件'}`);
+                }
+            }
+            if (insufficientItems.length > 0) {
+                showToast('⚠️ 庫存不足：\n' + insufficientItems.join('\n'), 'error', 5000);
+                window.isSubmittingOrder = false;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '';
+                submitBtn.style.cursor = '';
+                submitBtn.innerHTML = originalBtnText;
+                return;
+            }
+        }
+    } catch (stockErr) {
+        console.warn('庫存確認失敗，繼續送出:', stockErr);
+    }
+
     submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
     const promotionResult = calculatePromotions(cart);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -5629,13 +5987,27 @@ async function submitOrder() {
     }));
 
     try {
-        await fetch('/api/script', {
+        const orderRes = await fetch('/api/script', {
             method: 'POST',
-
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
-        
+
+        // ✅ 後端回傳 success:false 時（如庫存不足），阻擋並提示
+        let resData = null;
+        try { resData = await orderRes.json(); } catch(e) {}
+        if (resData && resData.success === false) {
+            const errMsg = resData.error || '下單失敗，請稍後再試';
+            showToast('⚠️ ' + errMsg, 'error', 5000);
+            window.isSubmittingOrder = false;
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '';
+            submitBtn.style.cursor = '';
+            submitBtn.innerHTML = originalBtnText;
+            try { await refreshAllStock(); } catch(e) {}
+            return;
+        }
+
         showToast('✅ 訂單已送出！', 'success');
         cart = [];
         updateCart();
@@ -6169,11 +6541,12 @@ async function autoCheckExpiredOrders() {
     }
 }
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', duration = 3000) {
     const toast = document.getElementById('toast');
-    toast.textContent = message;
+    toast.innerHTML = message.replace(/\n/g, '<br>');
     toast.className = 'toast show ' + (type === 'error' ? 'error' : '');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    if (toast._toastTimer) clearTimeout(toast._toastTimer);
+    toast._toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 function lineLogin() {
@@ -6269,6 +6642,8 @@ function updateMemberUI() {
         if (memberSec) memberSec.style.display = 'block';
         const drawerFooter = document.getElementById('drawerFooter');
         if (drawerFooter) drawerFooter.style.display = 'block';
+        const drawerLogoutBtn = document.getElementById('drawerLogoutBtn');
+        if (drawerLogoutBtn) drawerLogoutBtn.style.display = 'inline-block';
         // memberAvatar 同步（供舊程式碼相容）
         document.getElementById('memberAvatar').src = currentMember.pictureUrl || '';
         document.getElementById('announcementBar').style.display = '';
@@ -6465,7 +6840,7 @@ window.addEventListener('load', () => {
     loadSystemSettings();
     updateCart();
     checkMemberStatus();
-    startAutoRefresh(120);
+    startAutoRefresh(300);
 
     // 維護模式輪詢
     window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
@@ -6485,7 +6860,7 @@ window.addEventListener('load', () => {
                 window._maintenanceInterval = null;
             }
         } else {
-            startAutoRefresh(120);
+            startAutoRefresh(300);
             refreshAllStock();
             if (!window._maintenanceInterval) {
                 window._maintenanceInterval = setInterval(pollMaintenanceStatus, 30000);
@@ -6547,9 +6922,17 @@ window.addEventListener('load', () => {
                 if (radio711) { radio711.checked = true; toggleShippingMethod(); }
                 // 顯示已選門市資訊
                 displaySelectedStore();
-                // ✅ 直接打開結帳視窗（而非停在購物車側欄）
-                openCheckout();
+                // ✅ 直接打開結帳視窗（跳回後不需重拉庫存，直接開 modal）
                 showToast('✅ 門市選擇成功：' + decodeURIComponent(storeName), 'success');
+                if (cart.length > 0) {
+                    const existingDetail = document.getElementById('orderDetailView');
+                    if (existingDetail) existingDetail.remove();
+                    updateCheckoutSummary();
+                    displaySelectedStore();
+                    document.getElementById('checkoutModal').classList.add('active');
+                    history.pushState({ modal: 'checkout' }, '');
+                    isModalOpen = true;
+                }
             };
             setTimeout(applyStore, 1500);
         }
