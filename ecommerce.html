@@ -3963,7 +3963,7 @@ function displayPromotionHints(cartItems) {
 }
 async function updatePurchasedProductsStock(purchasedItems) {
     try {
-        const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`;
+        const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`;
         const specsResponse = await fetch(specsUrl);
         
         if (!specsResponse.ok) return;
@@ -4007,7 +4007,7 @@ let autoRefreshInterval = null;
 
 async function refreshAllStock() {
     try {
-        const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`;
+        const specsUrl = `/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`;
         const specsResponse = await fetch(specsUrl);
         
         if (!specsResponse.ok) return;
@@ -4241,6 +4241,7 @@ function openCustomBlockModal(blockName) {
     updateAddToCartButton();
 
     if (defaultCustomSpecs.length > 0) {
+        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         let autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultCustomSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
@@ -4265,7 +4266,6 @@ function openCustomBlockModal(blockName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultCustomSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         const quantityOptions = defaultCustomSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4360,6 +4360,7 @@ function renderFeaturedFlavorOptions() {
     }).join('');
 
     if (defaultFeaturedSpecs.length > 0) {
+        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         let autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultFeaturedSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
@@ -4384,7 +4385,6 @@ function renderFeaturedFlavorOptions() {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         const quantityOptions = defaultFeaturedSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4580,6 +4580,7 @@ function renderFlavorOptions(categoryName) {
 
     if (defaultSpecs.length > 0) {
         // 預先決定自動選哪個規格
+        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         let autoIdx = defaultSpecs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('條') && s.stock > 0);
         if (autoIdx === -1) autoIdx = defaultSpecs.findIndex(s => s.specName.includes('台') && s.stock > 0);
@@ -4606,7 +4607,6 @@ function renderFlavorOptions(categoryName) {
             }
         }
         const quantityTitle = `<div class="spec-section-title" style="grid-column: 1 / -1; margin-top: 20px;">📦 選擇項目</div>`;
-        defaultSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
         const quantityOptions = defaultSpecs.map((spec, index) => {
             const isOutOfStock = spec.stock === 0;
             const isPreSelected = index === autoIdx;
@@ -4672,6 +4672,7 @@ function _renderQtySpecs(specs) {
     }).join('');
 
     // 預選規格
+    specs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
     let autoIdx = specs.findIndex(s => s.specName.includes('單包') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('條') && s.stock > 0);
     if (autoIdx === -1) autoIdx = specs.findIndex(s => s.specName.includes('台') && s.stock > 0);
@@ -4691,7 +4692,6 @@ function _renderQtySpecs(specs) {
     }
 
     const qtyTitle = `<div class="spec-section-title" style="grid-column:1/-1;margin-top:20px;">📦 選擇項目</div>`;
-    specs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
     const qtyHTML = specs.map((spec, i) => {
         const oos = spec.stock === 0;
         const sel = i === autoIdx;
@@ -4809,7 +4809,7 @@ function openSpecModal(productId) {
     updateAddToCartButton();
 
     // ✅ 每次開商品時，背景靜默抓最新庫存並重繪
-    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+    fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`)
         .then(r => r.json())
         .then(data => {
             if (!data.values || data.values.length < 2) return;
@@ -5751,7 +5751,7 @@ async function submitOrder() {
 
     // ✅ 下單前重新抓最新庫存，逐一確認
     try {
-        const latestSpecsRes = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`);
+        const latestSpecsRes = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`);
         const latestSpecsData = await latestSpecsRes.json();
         if (latestSpecsData.values && latestSpecsData.values.length > 1) {
             // 建立最新庫存 map：key = productId_specName
