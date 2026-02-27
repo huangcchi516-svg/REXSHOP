@@ -1360,6 +1360,29 @@
             border-radius: 10px;
         }
 
+        /* ✅ 主打/精選 口味分類群組 */
+        .featured-flavor-group {
+            grid-column: 1 / -1;
+            margin-bottom: 6px;
+        }
+        .featured-flavor-cat {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255, 215, 0, 0.55);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 4px 4px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,215,0,0.12);
+        }
+        .featured-flavor-item {
+            grid-column: 1 / -1 !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            padding: 10px 14px !important;
+            min-height: 40px !important;
+        }
+
         .spec-section-title {
             font-size: 14px;
             font-weight: 700;
@@ -2040,7 +2063,30 @@
                 font-size: 9px;
             }
             
-            .spec-section-title {
+            /* ✅ 主打/精選 口味分類群組 */
+        .featured-flavor-group {
+            grid-column: 1 / -1;
+            margin-bottom: 6px;
+        }
+        .featured-flavor-cat {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255, 215, 0, 0.55);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 4px 4px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,215,0,0.12);
+        }
+        .featured-flavor-item {
+            grid-column: 1 / -1 !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            padding: 10px 14px !important;
+            min-height: 40px !important;
+        }
+
+        .spec-section-title {
                 font-size: 13px;
                 margin-bottom: 8px;
                 padding-bottom: 5px;
@@ -4214,6 +4260,36 @@ function displayFeaturedProducts() {
         featuredGrid.appendChild(card);
     });
 }
+// ✅ 主打/精選專用：按 category 分組產生口味列表
+function _buildFlavorListHTML(productsList, selectedProduct, onClickFn) {
+    const groups = {};
+    const groupOrder = [];
+    productsList.forEach((product, index) => {
+        const cat = (product.category || '').trim() || '其他';
+        if (!groups[cat]) { groups[cat] = []; groupOrder.push(cat); }
+        groups[cat].push({ product, index });
+    });
+    return groupOrder.map(cat => {
+        const items = groups[cat].map(({ product, index }) => {
+            const specs = productSpecs[product.id];
+            const hasStock = specs && specs.some(s => s.stock > 0);
+            const hasSale  = specs && specs.some(s => s.originalPrice > 0);
+            const sel = selectedProduct && product.id === selectedProduct.id;
+            return `<div class="spec-option featured-flavor-item${!hasStock ? ' out-of-stock' : ''}${sel ? ' selected' : ''}"
+                ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;${onClickFn}(${index})"
+                onclick="if(window._specTouchFired){window._specTouchFired=false;return;}${onClickFn}(${index})"
+                id="flavor-${index}"
+                title="${product.name}${!hasStock ? ' - 已售完' : ''}">
+                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
+            </div>`;
+        }).join('');
+        return `<div class="featured-flavor-group" style="grid-column:1/-1;">
+            <div class="featured-flavor-cat">${cat}</div>
+            ${items}
+        </div>`;
+    }).join('');
+}
+
 function openCustomBlockModal(blockName) {
     if (checkMaintenance()) return;
     currentCategoryProducts = products.filter(p => p.customBlock === blockName);
@@ -4253,18 +4329,7 @@ function openCustomBlockModal(blockName) {
     window.currentQuantitySpecs = defaultCustomSpecs;
     selectedFlavor = firstCustomProduct || null;
 
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstCustomProduct && product.id === firstCustomProduct.id;
-        return `
-            <div class="spec-option ${!hasStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}"
-                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})" id="flavor-${index}"
-                 title="${product.name}${!hasStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
-            </div>`;
-    }).join('');
+    const flavorOptions = _buildFlavorListHTML(currentCategoryProducts, firstCustomProduct, 'selectFlavor');
     selectedSpec = null;
     quantity = 1;
     updateQuantityDisplay();
@@ -4372,22 +4437,7 @@ function renderFeaturedFlavorOptions() {
     updateQuantityDisplay();
     updateAddToCartButton();
 
-    const flavorOptions = currentCategoryProducts.map((product, index) => {
-        const specs = productSpecs[product.id];
-        const hasStock = specs && specs.some(s => s.stock > 0);
-        const isOutOfStock = !hasStock;
-        const hasSale = specs && specs.some(s => s.originalPrice > 0);
-        const isSelected = firstFeaturedProduct && product.id === firstFeaturedProduct.id;
-        
-        return `
-            <div class="spec-option ${isOutOfStock ? 'out-of-stock' : ''} ${isSelected ? 'selected' : ''}" 
-                 ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${index})" onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${index})"
-                 id="flavor-${index}"
-                 title="${product.name}${isOutOfStock ? ' - 已售完' : ''}">
-                <div class="spec-name">${product.name}${isOutOfStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
-            </div>
-        `;
-    }).join('');
+    const flavorOptions = _buildFlavorListHTML(currentCategoryProducts, firstFeaturedProduct, 'selectFeaturedFlavor');
 
     if (defaultFeaturedSpecs.length > 0) {
         defaultFeaturedSpecs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
@@ -4688,18 +4738,7 @@ function _renderQtySpecs(specs) {
     window.currentQuantitySpecs = specs;
 
     const flavorTitle = `<div class="spec-section-title" style="grid-column:1/-1;">🎯 選擇口味 (${currentCategoryProducts.length} 種選項)</div>`;
-    const flavorHTML = currentCategoryProducts.map((product, i) => {
-        const pSpecs = productSpecs[product.id];
-        const hasStock = pSpecs && pSpecs.some(s => s.stock > 0);
-        const hasSale = pSpecs && pSpecs.some(s => s.originalPrice > 0);
-        const sel = selectedFlavor && product.id === selectedFlavor.id;
-        return `<div class="spec-option${!hasStock ? ' out-of-stock' : ''}${sel ? ' selected' : ''}"
-                     ontouchstart="if(event.touches.length>1)return;event.preventDefault();event.stopPropagation();window._specTouchFired=true;selectFlavor(${i})"
-                     onclick="if(window._specTouchFired){window._specTouchFired=false;return;}selectFlavor(${i})"
-                     id="flavor-${i}" title="${product.name}">
-                    <div class="spec-name">${product.name}${!hasStock ? ' ❌' : ''}${hasSale ? '<span class="sale-badge">特</span>' : ''}</div>
-                </div>`;
-    }).join('');
+    const flavorHTML = _buildFlavorListHTML(currentCategoryProducts, selectedFlavor, 'selectFlavor');
 
     // 預選規格
     specs.sort((a,b)=>{ const ap=a.specName.includes('單包')?0:a.specName.includes('條')?1:a.specName.includes('台')?2:3, bp=b.specName.includes('單包')?0:b.specName.includes('條')?1:b.specName.includes('台')?2:3; return ap-bp; });
