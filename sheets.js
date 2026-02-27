@@ -1,10 +1,6 @@
 // api/sheets.js
 // 代理所有 Google Sheets 讀取請求，金鑰藏在 Vercel 環境變數
 
-export const config = {
-    memory: 512, // 從預設 2048MB 降至 512MB，節省 GB-Hrs
-};
-
 export default async function handler(req, res) {
     // 允許跨域（同個 Vercel 專案不需要，但保留以防萬一）
     res.setHeader('Access-Control-Allow-Origin', '*');
