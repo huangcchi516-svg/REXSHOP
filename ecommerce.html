@@ -5222,7 +5222,7 @@ function updateAddToCartButton() {
     btn.disabled = !selectedSpec;
 }
 
-// ✅ 把規格表 values 套用到 productSpecs / products 快取
+// ✅ 把規格表套用到前端快取並重繪
 function _applySpecsData(values) {
     if (!values || values.length < 2) return;
     values.slice(1).forEach(row => {
@@ -5264,24 +5264,22 @@ function confirmAddToCart() {
         const totalUnits = newQty * multiplier;  // 實際佔用庫存
         
         if (totalUnits > actualStock) {
-            showToast('已達庫存上限，正在重新整理...', 'error', 2000);
-                // ✅ 庫存不足：重抓最新庫存後重繪
-                fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-                    .then(r => r.json())
-                    .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
-                    .catch(() => {});
+            showToast('已達庫存上限，重新整理中...', 'error', 2000);
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
+                .catch(() => {});
             return;
         }
         cart[existingIndex].quantity = newQty;
     } else {
         const totalUnits = quantity * multiplier;
         if (totalUnits > actualStock) {
-            showToast('庫存不足，正在重新整理...', 'error', 2000);
-                // ✅ 庫存不足：重抓最新庫存後重繪
-                fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
-                    .then(r => r.json())
-                    .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
-                    .catch(() => {});
+            showToast('庫存不足，重新整理中...', 'error', 2000);
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+                .then(r => r.json())
+                .then(data => { if (data.values) { _applySpecsData(data.values); renderSpecOptions(); } })
+                .catch(() => {});
             return;
         }
         cart.push({
