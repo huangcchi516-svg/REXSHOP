@@ -5,8 +5,8 @@ const SHEETS = ['商品列表', '商品規格表', '分類照片設定', '分類
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    // 整包快取 5 分鐘（由商品規格表的 polling 補足庫存更新）
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+    // 快取 30 分鐘（與 sheets.js 其他資料一致）
+    res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=3600');
 
     try {
         const results = await Promise.all(
