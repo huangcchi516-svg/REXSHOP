@@ -1,11 +1,13 @@
 {
   "functions": {
-    "api/sheets.js":          { "memory": 512 },
-    "api/script.js":          { "memory": 512 },
-    "api/script-get.js":      { "memory": 512 },
-    "api/line-callback.js":   { "memory": 256 },
-    "api/ecpay-map.js":       { "memory": 256 },
-    "api/ecpay-callback.js":  { "memory": 256 }
+    "api/sheets.js":          { "memory": 128 },
+    "api/sheets-init.js":     { "memory": 128 },
+    "api/script.js":          { "memory": 128 },
+    "api/script-get.js":      { "memory": 128 },
+    "api/line-callback.js":   { "memory": 128 },
+    "api/ecpay-map.js":       { "memory": 128 },
+    "api/ecpay-callback.js":  { "memory": 128 },
+    "api/ecpay-map-redirect.js": { "memory": 128 }
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
