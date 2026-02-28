@@ -5948,63 +5948,9 @@ async function submitOrder() {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.6';
     submitBtn.style.cursor = 'not-allowed';
-    submitBtn.innerHTML = '🔍 確認庫存中...';
+    submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
 
-    // ✅ 下單前重新抓最新庫存，逐一確認
-    try {
-        const latestSpecsRes = await fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`);
-        const latestSpecsData = await latestSpecsRes.json();
-        if (latestSpecsData.values && latestSpecsData.values.length > 1) {
-            // 建立最新庫存 map：key = productId_specName
-            const latestStockMap = {};
-            for (let i = 1; i < latestSpecsData.values.length; i++) {
-                const row = latestSpecsData.values[i];
-                const pid = String(row[0] || '').trim();
-                const spec = String(row[2] || '').trim();
-                const stock = parseInt(row[4]) || 0;
-                const multiplier = parseInt(row[6]) || 1;
-                if (pid && spec) latestStockMap[`${pid}_${spec}`] = { stock, multiplier };
-            }
-            // 同步更新前端快取
-            Object.entries(latestStockMap).forEach(([key, val]) => {
-                const [pid, specName] = key.split(/_(.+)/);
-                if (productSpecs[pid]) {
-                    const s = productSpecs[pid].find(x => x.specName === specName);
-                    if (s) { s.stock = val.stock; s.quantityMultiplier = val.multiplier; }
-                }
-            });
-            // 逐一檢查購物車
-            const insufficientItems = [];
-            for (const item of cart) {
-                const key = `${item.productId}_${item.specName}`;
-                const latest = latestStockMap[key];
-                let availableStock = 0;
-                if (latest) {
-                    availableStock = latest.stock;
-                } else {
-                    const fallback = Object.entries(latestStockMap).find(([k]) => k.startsWith(item.productId + '_'));
-                    if (fallback) availableStock = fallback[1].stock;
-                }
-                const multiplier = item.quantityMultiplier || 1;
-                const needed = item.quantity * multiplier;
-                if (needed > availableStock) {
-                    const avail = Math.floor(availableStock / multiplier);
-                    insufficientItems.push(`「${item.productName} - ${item.specName}」庫存剩 ${avail} ${multiplier > 1 ? '組' : '件'}，您選了 ${item.quantity} ${multiplier > 1 ? '組' : '件'}`);
-                }
-            }
-            if (insufficientItems.length > 0) {
-                showToast('⚠️ 庫存不足：\n' + insufficientItems.join('\n'), 'error', 5000);
-                window.isSubmittingOrder = false;
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '';
-                submitBtn.style.cursor = '';
-                submitBtn.innerHTML = originalBtnText;
-                return;
-            }
-        }
-    } catch (stockErr) {
-        console.warn('庫存確認失敗，繼續送出:', stockErr);
-    }
+    submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
 
     submitBtn.innerHTML = '⏳ 訂單處理中，請稍候...';
     const promotionResult = calculatePromotions(cart);
