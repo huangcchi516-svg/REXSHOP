@@ -5561,14 +5561,14 @@ function toggleCart() {
     if (isOpening) {
         history.pushState({ modal: 'cart' }, '');
         isModalOpen = true;
-        // ── 打開購物車時，背景重拉最新庫存並重新渲染 ──
+        // ── 打開購物車時，背景重拉最新庫存並重新渲染（使用CDN快取，不強制bypass）──
         if (cart.length > 0) {
-            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}&_t=${Date.now()}`)
+            fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.values) {
                         _applySpecsData(data.values);
-                        updateCart(); // 重新渲染，標記庫存不足商品
+                        updateCart();
                     }
                 })
                 .catch(() => {});
@@ -6608,24 +6608,45 @@ async function checkMemberStatus() {
 
 async function fetchMemberApprovalStatus() {
     if (!currentMember || !currentMember.lineId) return;
-    
+
+    // ✅ localStorage 快取 30 分鐘，減少 GAS 呼叫
+    const CACHE_KEY = `member_status_${currentMember.lineId}`;
+    const CACHE_TTL = 30 * 60 * 1000;
+    try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const { data, ts } = JSON.parse(cached);
+            if (Date.now() - ts < CACHE_TTL) {
+                currentMember.approvalStatus = data.approvalStatus || '待審核';
+                if (data.phone) currentMember.phone = data.phone;
+                if (data.email) currentMember.email = data.email;
+                return;
+            }
+        }
+    } catch(e) {}
+
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
+
         const response = await fetch(
             `/api/script-get?action=getMember&lineId=${encodeURIComponent(currentMember.lineId)}`,
             { signal: controller.signal }
         );
         clearTimeout(timeoutId);
-        
+
         const result = await response.json();
-        
+
         if (result.success && result.member) {
             currentMember.approvalStatus = result.member.approvalStatus || '待審核';
             if (result.member.phone) currentMember.phone = result.member.phone;
             if (result.member.email) currentMember.email = result.member.email;
             localStorage.setItem('candyboss_member', JSON.stringify(currentMember));
+            // ✅ 存入快取
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                data: { approvalStatus: currentMember.approvalStatus, phone: currentMember.phone, email: currentMember.email },
+                ts: Date.now()
+            }));
         }
     } catch (error) {
         currentMember.approvalStatus = currentMember.approvalStatus || '待審核';
@@ -6863,11 +6884,7 @@ window.addEventListener('load', () => {
     // 維護模式輪詢
     window._maintenanceInterval = setInterval(pollMaintenanceStatus, 5000);
 
-    // 逾時訂單背景掃描
-    setTimeout(() => {
-        autoCheckExpiredOrders();
-        setInterval(autoCheckExpiredOrders, 60 * 1000);
-    }, 30000);
+    // 逾時訂單由 GAS 定時觸發器處理，前端不需要輪詢
 
     // ✅ Tab 不活躍時暫停所有輪詢，恢復時重啟
     document.addEventListener('visibilitychange', () => {
