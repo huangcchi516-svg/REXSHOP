@@ -3332,7 +3332,7 @@ function generateMerchantTradeNo() {
  * 偵測裝置類型
  */
 function getDeviceType() {
-    return '0'; // 永遠使用手機版
+    return '1'; // 手機版地圖
 }
 async function openECPayMap() {
     if (checkMaintenance()) return;
@@ -6534,7 +6534,7 @@ async function loadMemberOrders() {
 
     try {
         if (!result) {
-            const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}`);
+            const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}&_t=${Date.now()}`);
             result = await response.json();
             if (result.success) {
                 try { localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify({ data: result, ts: Date.now() })); } catch(e) {}
