@@ -2812,7 +2812,9 @@ async function refreshCache() {
         const res = await fetch('/api/sheets-refresh', { method: 'POST' });
         const json = await res.json();
         if (json.ok) {
-            showToast('⚡ 快取已清除！前台下次開啟將抓取最新資料', 'success');
+            // ✅ 同時清除前端 localStorage 快取，確保管理員自己也立即看到最新資料
+            try { localStorage.removeItem('rexshop_init_cache'); } catch(e) {}
+            showToast('⚡ 快取已清除！所有使用者下次開啟將抓取最新資料', 'success');
         } else {
             showToast('❌ 刷新失敗：' + (json.error || '未知錯誤'), 'error');
         }
