@@ -2850,7 +2850,7 @@
 
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:4px;">
-            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;">
+            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;" onerror="this.style.display='none'">
             <div class="logo">REX LAB</div>
         </div>
         <!-- LINE登入按鈕（未登入時） -->
@@ -2858,7 +2858,7 @@
             <img src="https://developers.line.biz/media/line-login/btn_base.png" alt="LINE Login" style="height:36px;">
         </button>
         <!-- 漢堡選單按鈕（fixed右上角） -->
-        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none; position:fixed; top:12px; right:14px; z-index:300; background:rgba(0,0,0,0.5); border-radius:8px; padding:8px;" aria-label="選單">
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none; background:rgba(0,0,0,0.5); border-radius:8px; padding:8px;" aria-label="選單">
             <span></span><span></span><span></span>
         </button>
         <!-- 保留隱藏的 id 供原本 JS 使用 -->
@@ -6067,9 +6067,10 @@ async function submitOrder() {
         }
 
         showToast('✅ 訂單已送出！', 'success');
-        // ✅ 下單成功，清除訂單快取，下次查詢強制重取
+        // ✅ 下單成功，清除訂單快取並背景重取
         if (currentMember && currentMember.lineId) {
             try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
+            setTimeout(() => loadMemberOrders(), 2000); // GAS 寫入後重取
         }
         cart = [];
         updateCart();
@@ -6088,9 +6089,10 @@ async function submitOrder() {
     } catch (error) {
         showToast('✅ 訂單已送出！', 'success');
         cart = [];
-        // ✅ 下單成功，清除訂單快取，下次查詢強制重取
+        // ✅ 下單成功，清除訂單快取並背景重取
         if (currentMember && currentMember.lineId) {
             try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
+            setTimeout(() => loadMemberOrders(), 2000);
         }
         updateCart();
         window.isSubmittingOrder = false;
@@ -6462,9 +6464,10 @@ async function submitPaymentCode(orderId) {
         showToast('✅ 付款確認成功！', 'success');
         
 
-        // ✅ 付款成功，清除訂單快取，下次查詢強制重取
+        // ✅ 付款成功，清除訂單快取並立刻重取最新狀態
         if (currentMember && currentMember.lineId) {
             try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
+            setTimeout(() => loadMemberOrders(), 1500); // 等 GAS 寫入後再重取
         }
     } catch (error) {
         showToast('❌ 提交失敗，請稍後再試', 'error');
