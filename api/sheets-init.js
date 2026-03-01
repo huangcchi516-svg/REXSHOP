@@ -5,7 +5,7 @@
 //   1. Memory Cache (模組層級) — 同一 worker 實例內 0ms
 //   2. Vercel KV               — 跨 worker / 跨機器，~10ms
 //   3. SWR 背景更新            — 用戶永遠拿到快取，絕不等 Google API
-//   4. Google Sheets 批次請求  — 1 次 batchGet 取代 7 次獨立 fetch
+//   4. Google Sheets 並行請求  — 7 張同時抓，等最慢的一張（比 batchGet 快）
 //   5. ETag 條件請求           — 資料未變時 Google 回 304，不重傳
 
 import { kv } from '@vercel/kv';
@@ -22,22 +22,24 @@ const REVALIDATE_LOCK_TTL = 30; // 防止多個 worker 同時更新（秒）
 let _memCache    = null;   // { data, ts }
 let _isRevalidating = false;
 
-// ── Google batchGet（1 次請求取得全部 sheet）──────────────
+// ── Google 並行 fetch（7張同時抓，等最慢的一張）──────────
 async function fetchFromGoogle() {
-    const ranges = SHEETS.map(s => encodeURIComponent(s)).join('&ranges=');
-    const url    = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values:batchGet`
-                 + `?ranges=${ranges}&key=${process.env.GOOGLE_API_KEY}`;
+    const results = await Promise.all(
+        SHEETS.map(sheet =>
+            fetch(
+                `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/${encodeURIComponent(sheet)}?key=${process.env.GOOGLE_API_KEY}`,
+                { signal: AbortSignal.timeout(10000) }
+            )
+            .then(r => r.json())
+            .catch(() => ({ values: [] }))
+        )
+    );
 
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) throw new Error(`Google Sheets batchGet 失敗: ${res.status}`);
-
-    const json = await res.json();
     const data = {};
-    (json.valueRanges || []).forEach((vr, i) => {
-        data[SHEETS[i]] = { values: vr.values || [] };
+    SHEETS.forEach((sheet, i) => {
+        data[sheet] = results[i];
     });
 
-    // 用回應 body hash 模擬 ETag（Google Sheets API 不回 ETag header）
     const etag = String(Date.now());
     return { data, etag };
 }
