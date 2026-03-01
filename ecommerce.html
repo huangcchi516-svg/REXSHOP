@@ -181,6 +181,10 @@
             flex-direction: column;
             gap: 5px;
             -webkit-tap-highlight-color: transparent;
+            position: fixed;
+            top: 12px;
+            right: 16px;
+            z-index: 200;
         }
         .hamburger-btn span {
             display: block;
@@ -1782,9 +1786,10 @@
         @media (max-width: 480px) {
             .navbar {
                 padding: 8px 10px;
-                flex-direction: column;
+                flex-direction: row;
                 gap: 8px;
-                align-items: stretch;
+                align-items: center;
+                justify-content: space-between;
             }
 
             .logo {
@@ -2850,7 +2855,7 @@
 
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:4px;">
-            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;" onerror="this.style.display='none'">
+            <img id="logoImage" alt="REX LAB" style="height:42px; object-fit:contain; display:none;" onerror="this.style.display='none'; this.src='';">
             <div class="logo">REX LAB</div>
         </div>
         <!-- LINE登入按鈕（未登入時） -->
