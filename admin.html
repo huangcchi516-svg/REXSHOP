@@ -388,6 +388,10 @@
         <div class="admin-info">
             <img id="adminAvatar" src="" alt="">
             <span class="admin-name" id="adminName"></span>
+            <button id="cacheRefreshBtn" onclick="refreshCache()"
+                style="padding:6px 14px;border-radius:20px;border:1.5px solid #00bfff;background:rgba(0,191,255,0.08);color:#00bfff;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;">
+                ⚡ 刷新快取
+            </button>
             <button id="maintenanceBtn" onclick="toggleMaintenance()"
                 style="padding:6px 14px;border-radius:20px;border:1.5px solid #555;background:rgba(255,255,255,0.05);color:#888;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;">
                 🔧 維護模式
@@ -2759,6 +2763,35 @@ async function toggleMonitor() {
         updateMonitorBtn();
     } finally {
         if (btn) btn.disabled = false;
+    }
+}
+
+// ==========================================
+// ⚡ 刷新 KV 快取
+// ==========================================
+async function refreshCache() {
+    const btn = document.getElementById('cacheRefreshBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '⏳ 刷新中...';
+    btn.style.borderColor = '#555';
+    btn.style.color = '#888';
+
+    try {
+        const res = await fetch('/api/sheets-refresh', { method: 'POST' });
+        const json = await res.json();
+        if (json.ok) {
+            showToast('⚡ 快取已清除！前台下次開啟將抓取最新資料', 'success');
+        } else {
+            showToast('❌ 刷新失敗：' + (json.error || '未知錯誤'), 'error');
+        }
+    } catch(e) {
+        showToast('❌ 刷新失敗：' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ 刷新快取';
+        btn.style.borderColor = '#00bfff';
+        btn.style.color = '#00bfff';
     }
 }
 
