@@ -6460,6 +6460,12 @@ async function submitPaymentCode(orderId) {
         `;
         
         showToast('✅ 付款確認成功！', 'success');
+
+        // ✅ 繞過快取重新載入頁面（確保資料最新）
+        setTimeout(() => {
+            const cacheBustUrl = location.pathname + '?_cb=' + Date.now();
+            location.replace(cacheBustUrl);
+        }, 1500);
         
     } catch (error) {
         showToast('❌ 提交失敗，請稍後再試', 'error');
