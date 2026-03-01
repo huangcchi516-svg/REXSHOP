@@ -14,7 +14,7 @@ import { kv } from '@vercel/kv';
 const SHEETS   = ['系統設定', '商品列表', '商品規格表', '分類照片設定', '分類設定', '公告設定', '優惠設定'];
 const KV_KEY   = 'sheets:init:data';
 const ETAG_KEY = 'sheets:init:etag';
-const KV_TTL   = 3600;          // KV 快取 60 分鐘（秒）
+const KV_TTL   = 1800;          // KV 快取 30 分鐘（秒）
 const MEM_TTL  = 60_000;        // 記憶體快取 60 秒（ms）
 const REVALIDATE_LOCK_TTL = 30; // 防止多個 worker 同時更新（秒）
 
