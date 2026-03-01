@@ -3580,8 +3580,13 @@ async function loadProductsData() {
             }
             // 更新 UI（LOGO、客服圖等）
             if (systemSettings.logoImage) {
-                const logoEls = document.querySelectorAll('.logo-img, #headerLogo');
-                logoEls.forEach(el => { if (el) el.src = systemSettings.logoImage; });
+                const logoEls = document.querySelectorAll('.logo-img, #headerLogo, #logoImage');
+                logoEls.forEach(el => {
+                    if (el) {
+                        el.src = systemSettings.logoImage;
+                        el.style.display = 'block';
+                    }
+                });
             }
         }
 
