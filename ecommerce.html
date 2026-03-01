@@ -181,10 +181,6 @@
             flex-direction: column;
             gap: 5px;
             -webkit-tap-highlight-color: transparent;
-            position: fixed;
-            top: 12px;
-            right: 16px;
-            z-index: 200;
         }
         .hamburger-btn span {
             display: block;
@@ -1786,10 +1782,9 @@
         @media (max-width: 480px) {
             .navbar {
                 padding: 8px 10px;
-                flex-direction: row;
+                flex-direction: column;
                 gap: 8px;
-                align-items: center;
-                justify-content: space-between;
+                align-items: stretch;
             }
 
             .logo {
@@ -2855,7 +2850,7 @@
 
     <nav class="navbar">
         <div style="display:flex; align-items:center; gap:4px;">
-            <img id="logoImage" alt="REX LAB" style="height:42px; object-fit:contain; display:none;" onerror="this.style.display='none'; this.src='';">
+            <img id="logoImage" src="" alt="REX LAB" style="height:42px; object-fit:contain; display:none;">
             <div class="logo">REX LAB</div>
         </div>
         <!-- LINE登入按鈕（未登入時） -->
@@ -2863,7 +2858,7 @@
             <img src="https://developers.line.biz/media/line-login/btn_base.png" alt="LINE Login" style="height:36px;">
         </button>
         <!-- 漢堡選單按鈕（fixed右上角） -->
-        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none; background:rgba(0,0,0,0.5); border-radius:8px; padding:8px;" aria-label="選單">
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" style="display:none; position:fixed; top:12px; right:14px; z-index:300; background:rgba(0,0,0,0.5); border-radius:8px; padding:8px;" aria-label="選單">
             <span></span><span></span><span></span>
         </button>
         <!-- 保留隱藏的 id 供原本 JS 使用 -->
@@ -3332,7 +3327,7 @@ function generateMerchantTradeNo() {
  * 偵測裝置類型
  */
 function getDeviceType() {
-    return '1'; // 手機版地圖
+    return '0'; // 永遠使用手機版
 }
 async function openECPayMap() {
     if (checkMaintenance()) return;
@@ -3583,13 +3578,10 @@ async function loadProductsData() {
                     window._adminWhitelist.includes(currentLineId);
                 if (!isAdmin) showMaintenanceScreen();
             }
-            // 更新 UI（LOGO）
-            const logoEl = document.getElementById('logoImage');
-            if (logoEl && systemSettings.logoImage) {
-                logoEl.src = systemSettings.logoImage;
-                logoEl.style.display = 'block';
-            } else if (logoEl) {
-                logoEl.style.display = 'none';
+            // 更新 UI（LOGO、客服圖等）
+            if (systemSettings.logoImage) {
+                const logoEls = document.querySelectorAll('.logo-img, #headerLogo');
+                logoEls.forEach(el => { if (el) el.src = systemSettings.logoImage; });
             }
         }
 
@@ -5641,6 +5633,7 @@ async function openCheckout() {
         const data = await res.json();
         if (data.values) {
             _applySpecsData(data.values);
+            displayProducts(); // ✅ 同步更新商品列表顯示
         }
     } catch(e) {
         // 拉取失敗就用舊資料繼續比對
@@ -6075,11 +6068,6 @@ async function submitOrder() {
         }
 
         showToast('✅ 訂單已送出！', 'success');
-        // ✅ 下單成功，清除訂單快取並背景重取
-        if (currentMember && currentMember.lineId) {
-            try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
-            setTimeout(() => loadMemberOrders(), 2000); // GAS 寫入後重取
-        }
         cart = [];
         updateCart();
         window.isSubmittingOrder = false;
@@ -6097,11 +6085,6 @@ async function submitOrder() {
     } catch (error) {
         showToast('✅ 訂單已送出！', 'success');
         cart = [];
-        // ✅ 下單成功，清除訂單快取並背景重取
-        if (currentMember && currentMember.lineId) {
-            try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
-            setTimeout(() => loadMemberOrders(), 2000);
-        }
         updateCart();
         window.isSubmittingOrder = false;
         submitBtn.disabled = false;
@@ -6471,20 +6454,6 @@ async function submitPaymentCode(orderId) {
         
         showToast('✅ 付款確認成功！', 'success');
         
-
-        // ✅ 付款成功，清除訂單快取並立刻重取，更新詳細頁狀態
-        if (currentMember && currentMember.lineId) {
-            try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
-            setTimeout(async () => {
-                await loadMemberOrders(); // 重取並更新 window.memberOrders
-                // 若詳細頁還開著，用新資料重新渲染
-                const detailView = document.getElementById('orderDetailView');
-                if (detailView && window._currentOrderId && window.memberOrders) {
-                    const updatedOrder = window.memberOrders.find(o => o.訂單編號 === window._currentOrderId);
-                    if (updatedOrder) showOrderDetailByData(updatedOrder);
-                }
-            }, 2000); // 等 GAS 寫入完成
-        }
     } catch (error) {
         showToast('❌ 提交失敗，請稍後再試', 'error');
         btn.innerHTML = originalText;
@@ -6520,26 +6489,9 @@ async function loadMemberOrders() {
         return;
     }
     
-    // ✅ 30分鐘快取，下單後會強制清除
-    const ORDERS_CACHE_KEY = `orders_${currentMember.lineId}`;
-    const ORDERS_CACHE_TTL = 30 * 60 * 1000;
-    let result;
     try {
-        const cached = localStorage.getItem(ORDERS_CACHE_KEY);
-        if (cached) {
-            const { data, ts } = JSON.parse(cached);
-            if (Date.now() - ts < ORDERS_CACHE_TTL) result = data;
-        }
-    } catch(e) {}
-
-    try {
-        if (!result) {
-            const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}&_t=${Date.now()}`);
-            result = await response.json();
-            if (result.success) {
-                try { localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify({ data: result, ts: Date.now() })); } catch(e) {}
-            }
-        }
+        const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}`);
+        const result = await response.json();
         
         const ordersList = document.getElementById('ordersList');
         
