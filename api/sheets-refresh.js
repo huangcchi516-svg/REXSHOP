@@ -16,8 +16,12 @@ export default async function handler(req, res) {
     }
 
     try {
-        await kv.del(KV_KEY);
-        return res.status(200).json({ ok: true, message: '快取已清除，下次請求將重新抓取資料' });
+        const newVersion = Date.now();
+        await Promise.all([
+            kv.del(KV_KEY),
+            kv.set('sheets:cache:version', newVersion, { ex: 86400 }) // 版本號保留 24 小時
+        ]);
+        return res.status(200).json({ ok: true, version: newVersion, message: '快取已清除，下次請求將重新抓取資料' });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }

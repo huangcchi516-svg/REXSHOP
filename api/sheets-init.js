@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         if (!forceRefresh && _memCache && (Date.now() - _memCache.ts) < MEM_TTL) {
             res.setHeader('X-Cache', 'MEM-HIT');
             res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
-            return res.status(200).json(_memCache.data);
+            return res.status(200).json({ ..._memCache.data, _version: _memCache.version || 0 });
         }
 
         // ── Layer 2：Vercel KV 快取（~10ms）────────────────
@@ -90,6 +90,9 @@ export default async function handler(req, res) {
             if (cached) {
                 // 回傳給用戶，背景更新記憶體 + 觸發 SWR（若快取已過半）
                 _memCache = { data: cached, ts: Date.now() };
+                // 嘗試取版本號加入回應
+                const ver = await kv.get('sheets:cache:version').catch(() => 0);
+                _memCache.version = ver || 0;
 
                 // 非同步背景刷新（不 await，不阻塞回應）
                 const age = await kv.ttl(KV_KEY);
@@ -99,13 +102,21 @@ export default async function handler(req, res) {
 
                 res.setHeader('X-Cache', 'KV-HIT');
                 res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
-                return res.status(200).json(cached);
+                const ver2 = await kv.get('sheets:cache:version').catch(() => 0);
+                return res.status(200).json({ ...cached, _version: ver2 || 0 });
             }
         }
 
         // ── Layer 3：Cache miss → 從 Google 抓（batchGet，1 次請求）──
         console.log('[sheets-init] Cache MISS，呼叫 Google batchGet...');
         const { data, etag } = await fetchFromGoogle();
+
+        // 取得目前版本號（若沒有就用現在時間建立）
+        let version = await kv.get('sheets:cache:version').catch(() => null);
+        if (!version) {
+            version = Date.now();
+            kv.set('sheets:cache:version', version, { ex: 86400 }).catch(() => {});
+        }
 
         // 非同步寫 KV（不阻塞回應）
         Promise.all([
@@ -117,7 +128,7 @@ export default async function handler(req, res) {
 
         res.setHeader('X-Cache', 'MISS');
         res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
-        return res.status(200).json(data);
+        return res.status(200).json({ ...data, _version: version });
 
     } catch (err) {
         console.error('[sheets-init] 錯誤:', err);
@@ -125,7 +136,7 @@ export default async function handler(req, res) {
         // 錯誤時嘗試回傳 stale 快取（降級保護）
         if (_memCache) {
             res.setHeader('X-Cache', 'MEM-STALE');
-            return res.status(200).json(_memCache.data);
+            return res.status(200).json({ ..._memCache.data, _version: _memCache.version || 0 });
         }
         try {
             const stale = await kv.get(KV_KEY);
