@@ -388,6 +388,10 @@
         <div class="admin-info">
             <img id="adminAvatar" src="" alt="">
             <span class="admin-name" id="adminName"></span>
+            <button id="speedTestBtn" onclick="testInitSpeed()"
+                style="padding:6px 14px;border-radius:20px;border:1.5px solid #ffa500;background:rgba(255,165,0,0.08);color:#ffa500;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;">
+                🏎️ 測速
+            </button>
             <button id="cacheRefreshBtn" onclick="refreshCache()"
                 style="padding:6px 14px;border-radius:20px;border:1.5px solid #00bfff;background:rgba(0,191,255,0.08);color:#00bfff;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;">
                 ⚡ 刷新快取
@@ -2763,6 +2767,33 @@ async function toggleMonitor() {
         updateMonitorBtn();
     } finally {
         if (btn) btn.disabled = false;
+    }
+}
+
+// ==========================================
+// 🏎️ 測速：測試 sheets-init 回應時間
+// ==========================================
+async function testInitSpeed() {
+    const btn = document.getElementById('speedTestBtn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '⏳ 測速中...';
+
+    try {
+        const t0 = performance.now();
+        const res = await fetch('/api/sheets-init?t=' + Date.now()); // 加時間戳避免瀏覽器快取
+        await res.json();
+        const ms = Math.round(performance.now() - t0);
+        const cacheHit = res.headers.get('X-Cache') === 'HIT';
+
+        let emoji = ms < 300 ? '🚀' : ms < 1000 ? '⚡' : ms < 3000 ? '🐢' : '🐌';
+        let label = cacheHit ? '快取命中' : '直接抓取';
+        showToast(`${emoji} sheets-init：${ms} ms（${label}）`, ms < 1000 ? 'success' : '');
+    } catch(e) {
+        showToast('❌ 測速失敗：' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🏎️ 測速';
     }
 }
 
