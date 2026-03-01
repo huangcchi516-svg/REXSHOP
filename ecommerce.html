@@ -6067,6 +6067,10 @@ async function submitOrder() {
         }
 
         showToast('✅ 訂單已送出！', 'success');
+        // ✅ 下單成功，清除訂單快取，下次查詢強制重取
+        if (currentMember && currentMember.lineId) {
+            try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
+        }
         cart = [];
         updateCart();
         window.isSubmittingOrder = false;
@@ -6084,6 +6088,10 @@ async function submitOrder() {
     } catch (error) {
         showToast('✅ 訂單已送出！', 'success');
         cart = [];
+        // ✅ 下單成功，清除訂單快取，下次查詢強制重取
+        if (currentMember && currentMember.lineId) {
+            try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
+        }
         updateCart();
         window.isSubmittingOrder = false;
         submitBtn.disabled = false;
@@ -6453,6 +6461,11 @@ async function submitPaymentCode(orderId) {
         
         showToast('✅ 付款確認成功！', 'success');
         
+
+        // ✅ 付款成功，清除訂單快取，下次查詢強制重取
+        if (currentMember && currentMember.lineId) {
+            try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
+        }
     } catch (error) {
         showToast('❌ 提交失敗，請稍後再試', 'error');
         btn.innerHTML = originalText;
@@ -6488,9 +6501,26 @@ async function loadMemberOrders() {
         return;
     }
     
+    // ✅ 30分鐘快取，下單後會強制清除
+    const ORDERS_CACHE_KEY = `orders_${currentMember.lineId}`;
+    const ORDERS_CACHE_TTL = 30 * 60 * 1000;
+    let result;
     try {
-        const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}`);
-        const result = await response.json();
+        const cached = localStorage.getItem(ORDERS_CACHE_KEY);
+        if (cached) {
+            const { data, ts } = JSON.parse(cached);
+            if (Date.now() - ts < ORDERS_CACHE_TTL) result = data;
+        }
+    } catch(e) {}
+
+    try {
+        if (!result) {
+            const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}`);
+            result = await response.json();
+            if (result.success) {
+                try { localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify({ data: result, ts: Date.now() })); } catch(e) {}
+            }
+        }
         
         const ordersList = document.getElementById('ordersList');
         
