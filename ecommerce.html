@@ -3778,11 +3778,13 @@ function displayBulletinBoard() {
     const eggImg = document.getElementById('bulletinEggImg');
     const eggPlaceholder = document.getElementById('bulletinEggPlaceholder');
     if (systemSettings.bulletinImage) {
-        eggImg.src = systemSettings.bulletinImage;
-        eggImg.style.display = 'block';
+        if (eggImg) {
+            eggImg.src = systemSettings.bulletinImage;
+            eggImg.style.display = 'block';
+        }
         if (eggPlaceholder) eggPlaceholder.style.display = 'none';
     } else {
-        eggImg.style.display = 'none';
+        if (eggImg) eggImg.style.display = 'none';
         if (eggPlaceholder) eggPlaceholder.style.display = 'flex';
     }
 
@@ -5856,8 +5858,8 @@ async function loadSystemSettings() {
             if (logoEl && systemSettings.logoImage) {
                 logoEl.src = systemSettings.logoImage;
                 logoEl.style.display = 'block';
-            } else if (logoEl) {
-                logoEl.style.display = 'none';
+                const textLogo = document.querySelector('.navbar .logo');
+                if (textLogo) textLogo.style.display = 'none';
             }
             const csEl = document.getElementById('serviceFloatImg');
             if (csEl && systemSettings.csImage) {
