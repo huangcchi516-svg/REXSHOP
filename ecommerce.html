@@ -3583,10 +3583,13 @@ async function loadProductsData() {
                     window._adminWhitelist.includes(currentLineId);
                 if (!isAdmin) showMaintenanceScreen();
             }
-            // 更新 UI（LOGO、客服圖等）
-            if (systemSettings.logoImage) {
-                const logoEls = document.querySelectorAll('.logo-img, #headerLogo');
-                logoEls.forEach(el => { if (el) el.src = systemSettings.logoImage; });
+            // 更新 UI（LOGO）
+            const logoEl = document.getElementById('logoImage');
+            if (logoEl && systemSettings.logoImage) {
+                logoEl.src = systemSettings.logoImage;
+                logoEl.style.display = 'block';
+            } else if (logoEl) {
+                logoEl.style.display = 'none';
             }
         }
 
@@ -6469,10 +6472,18 @@ async function submitPaymentCode(orderId) {
         showToast('✅ 付款確認成功！', 'success');
         
 
-        // ✅ 付款成功，清除訂單快取並立刻重取最新狀態
+        // ✅ 付款成功，清除訂單快取並立刻重取，更新詳細頁狀態
         if (currentMember && currentMember.lineId) {
             try { localStorage.removeItem(`orders_${currentMember.lineId}`); } catch(e) {}
-            setTimeout(() => loadMemberOrders(), 1500); // 等 GAS 寫入後再重取
+            setTimeout(async () => {
+                await loadMemberOrders(); // 重取並更新 window.memberOrders
+                // 若詳細頁還開著，用新資料重新渲染
+                const detailView = document.getElementById('orderDetailView');
+                if (detailView && window._currentOrderId && window.memberOrders) {
+                    const updatedOrder = window.memberOrders.find(o => o.訂單編號 === window._currentOrderId);
+                    if (updatedOrder) showOrderDetailByData(updatedOrder);
+                }
+            }, 2000); // 等 GAS 寫入完成
         }
     } catch (error) {
         showToast('❌ 提交失敗，請稍後再試', 'error');
