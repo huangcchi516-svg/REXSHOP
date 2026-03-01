@@ -2,6 +2,8 @@
   "functions": {
     "api/sheets.js":          { "memory": 128 },
     "api/sheets-init.js":     { "memory": 128 },
+    "api/member.js":          { "memory": 128 },
+    "api/orders.js":          { "memory": 128 },
     "api/script.js":          { "memory": 128 },
     "api/script-get.js":      { "memory": 128 },
     "api/line-callback.js":   { "memory": 128 },
