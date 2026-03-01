@@ -1810,6 +1810,7 @@
 
             
             #memberInfo {
+                display: flex !important;
                 gap: 6px !important;
                 align-items: center !important;
                 justify-content: center !important;
@@ -2862,7 +2863,7 @@
         </button>
         <!-- 保留隱藏的 id 供原本 JS 使用 -->
         <div id="navButtons" style="display:none;"></div>
-        <div id="memberInfo" style="display:none;">
+        <div id="memberInfo" style="display:none !important;">
             <img id="memberAvatar" src="" style="display:none;">
         </div>
     </nav>
@@ -6675,6 +6676,10 @@ function showLoginWall() {
     if (cartFloat) cartFloat.style.display = 'none';
     document.getElementById('hamburgerBtn').style.display = 'none';
     document.getElementById('lineLoginBtn').style.display = 'block';
+    // ✅ 清除頭像，避免顯示破圖問號
+    const avatar = document.getElementById('memberAvatar');
+    if (avatar) { avatar.src = ''; avatar.style.display = 'none'; }
+    document.getElementById('memberInfo').style.display = 'none';
 }
 
 function updateMemberUI() {
