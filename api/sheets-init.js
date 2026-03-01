@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         // ── Layer 1：記憶體快取（最快，0ms）────────────────
         if (!forceRefresh && _memCache && (Date.now() - _memCache.ts) < MEM_TTL) {
             res.setHeader('X-Cache', 'MEM-HIT');
-            res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=3600');
+            res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
             return res.status(200).json(_memCache.data);
         }
 
@@ -96,7 +96,7 @@ export default async function handler(req, res) {
                 }
 
                 res.setHeader('X-Cache', 'KV-HIT');
-                res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=3600');
+                res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
                 return res.status(200).json(cached);
             }
         }
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
         _memCache = { data, ts: Date.now() };
 
         res.setHeader('X-Cache', 'MISS');
-        res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=3600');
+        res.setHeader('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=3600');
         return res.status(200).json(data);
 
     } catch (err) {
