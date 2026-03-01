@@ -3519,7 +3519,7 @@ async function loadProductsData() {
 
         // ✅ 單一請求：一次取得所有初始資料（6合1，減少 Invocations）
         // fallback：若 sheets-init 尚未部署則退回 6 個獨立請求
-        let productsData, specsData_init, catImgData, catData, annoData, promoData;
+        let productsData, specsData_init, catImgData, catData, annoData, promoData, sysData;
         try {
             const initRes = await fetch('/api/sheets-init');
             if (!initRes.ok) throw new Error('sheets-init 不可用');
@@ -3530,15 +3530,17 @@ async function loadProductsData() {
             catData        = initData['分類設定']     || { values: [] };
             annoData       = initData['公告設定']     || { values: [] };
             promoData      = initData['優惠設定']     || { values: [] };
+            sysData        = initData['系統設定']     || { values: [] };
         } catch(e) {
-            // fallback：分別打 6 次
-            const [pRes, sRes, ciRes, cRes, aRes, prRes] = await Promise.all([
+            // fallback：分別打 7 次
+            const [pRes, sRes, ciRes, cRes, aRes, prRes, syRes] = await Promise.all([
                 fetch(`/api/sheets?sheet=${encodeURIComponent(PRODUCTS_SHEET)}`),
                 fetch(`/api/sheets?sheet=${encodeURIComponent(SPECS_SHEET)}`),
                 fetch(`/api/sheets?sheet=${encodeURIComponent('分類照片設定')}`),
                 fetch(`/api/sheets?sheet=${encodeURIComponent('分類設定')}`),
                 fetch(`/api/sheets?sheet=${encodeURIComponent(ANNOUNCEMENT_SHEET)}`),
-                fetch(`/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`)
+                fetch(`/api/sheets?sheet=${encodeURIComponent(PROMOTION_SHEET)}`),
+                fetch(`/api/sheets?sheet=${encodeURIComponent('系統設定')}`)
             ]);
             productsData   = pRes.ok  ? await pRes.json()  : { values: [] };
             specsData_init = sRes.ok  ? await sRes.json()  : { values: [] };
@@ -3546,6 +3548,41 @@ async function loadProductsData() {
             catData        = cRes.ok  ? await cRes.json()  : { values: [] };
             annoData       = aRes.ok  ? await aRes.json()  : { values: [] };
             promoData      = prRes.ok ? await prRes.json() : { values: [] };
+            sysData        = syRes.ok ? await syRes.json() : { values: [] };
+        }
+
+        // ✅ 從 sheets-init 解析系統設定（不再需要單獨呼叫 loadSystemSettings API）
+        if (sysData.values && sysData.values.length > 0) {
+            sysData.values.forEach(row => {
+                if (row[0] === '匯款銀行')     systemSettings.bankName       = row[1] || '';
+                if (row[0] === '匯款帳號')     systemSettings.bankAccount    = row[1] || '';
+                if (row[0] === '匯款戶名')     systemSettings.bankHolder     = row[1] || '';
+                if (row[0] === 'LINE Pay帳號') systemSettings.linePayAccount  = row[1] || '';
+                if (row[0] === 'LOGO圖片')     systemSettings.logoImage      = row[1] || '';
+                if (row[0] === '客服圖片')     systemSettings.csImage        = row[1] || '';
+                if (row[0] === '布告欄圖片')   systemSettings.bulletinImage  = row[1] || '';
+                if (row[0] === 'ADMIN白名單') {
+                    window._adminWhitelist = String(row[1] || '').split(',').map(s => s.trim()).filter(Boolean);
+                }
+                if (row[0] === '維護模式') {
+                    systemSettings._maintenanceRaw = String(row[1] || '').trim().toUpperCase();
+                }
+                if (row[0] === '監控模式') {
+                    systemSettings._monitorMode = String(row[1] || '').trim().toUpperCase() === 'TRUE';
+                }
+            });
+            // 維護模式檢查
+            if (systemSettings._maintenanceRaw === 'TRUE') {
+                const currentLineId = currentMember ? currentMember.lineId : '';
+                const isAdmin = Array.isArray(window._adminWhitelist) && currentLineId &&
+                    window._adminWhitelist.includes(currentLineId);
+                if (!isAdmin) showMaintenanceScreen();
+            }
+            // 更新 UI（LOGO、客服圖等）
+            if (systemSettings.logoImage) {
+                const logoEls = document.querySelectorAll('.logo-img, #headerLogo');
+                logoEls.forEach(el => { if (el) el.src = systemSettings.logoImage; });
+            }
         }
 
         // --- 商品 ---
@@ -6452,7 +6489,7 @@ async function loadMemberOrders() {
     }
     
     try {
-        const response = await fetch(`/api/script-get?action=getOrdersByLine&lineId=${encodeURIComponent(currentMember.lineId)}`);
+        const response = await fetch(`/api/orders?lineId=${encodeURIComponent(currentMember.lineId)}`);
         const result = await response.json();
         
         const ordersList = document.getElementById('ordersList');
@@ -6534,33 +6571,8 @@ async function loadMemberOrders() {
         `;
     }
 }
-async function autoCheckExpiredOrders() {
-    if (!currentMember || !currentMember.lineId) return;
-    try {
-        const response = await fetch(`/api/script-get?action=getOrdersByLine&lineId=${encodeURIComponent(currentMember.lineId)}`);
-        const result = await response.json();
-        if (!result.success || !result.orders) return;
-
-        const now = new Date();
-        result.orders.forEach(order => {
-            if (order.取貨方式 !== '7-11店到店') return;
-            if (['取消訂單','訂單取消','已取消','已付款待出貨','已完成'].includes(order.訂單狀態)) return;
-            const isLinePay = order.付款方式 === 'LINE Pay';
-            const hasPaid = isLinePay
-                ? order.訂單狀態 === '已付款待出貨'
-                : (order.匯款末五碼 && order.匯款末五碼 !== '-' && order.匯款末五碼 !== '' && !order.匯款末五碼.startsWith('LINE:'));
-            if (hasPaid) return;
-
-            const orderTime = new Date(order.訂購時間);
-            if (isNaN(orderTime)) return;
-            const deadline = new Date(orderTime.getTime() + 30 * 60 * 1000); // 30分鐘
-            if (now >= deadline) {
-                cancelExpiredOrder(order.訂單編號);
-            }
-        });
-    } catch (e) {
-    }
-}
+// ✅ autoCheckExpiredOrders 已移除（死代碼，從未被呼叫）
+// 逾期訂單取消完全由 GAS 定時觸發器 autoancelExpiredOrders 處理
 
 function showToast(message, type = 'success', duration = 3000) {
     const toast = document.getElementById('toast');
@@ -6630,7 +6642,7 @@ async function fetchMemberApprovalStatus() {
         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
         const response = await fetch(
-            `/api/script-get?action=getMember&lineId=${encodeURIComponent(currentMember.lineId)}`,
+            `/api/member?lineId=${encodeURIComponent(currentMember.lineId)}`,
             { signal: controller.signal }
         );
         clearTimeout(timeoutId);
@@ -6875,14 +6887,16 @@ window.addEventListener('load', () => {
         }
         lastTouchEnd = now;
     }, false);
-    loadProductsData();
-    loadSystemSettings();
+    loadProductsData().then(() => {
+        // ✅ 系統設定已在 loadProductsData 中從 sheets-init 解析
+        // 只有監控模式開啟時才啟動維護模式輪詢（省掉大量無用請求）
+        if (systemSettings._monitorMode === true) {
+            window._maintenanceInterval = setInterval(pollMaintenanceStatus, 5000);
+        }
+    }).catch(() => {});
     updateCart();
     checkMemberStatus();
     startAutoRefresh(300);
-
-    // 維護模式輪詢
-    window._maintenanceInterval = setInterval(pollMaintenanceStatus, 5000);
 
     // 逾時訂單由 GAS 定時觸發器處理，前端不需要輪詢
 
@@ -6897,7 +6911,8 @@ window.addEventListener('load', () => {
         } else {
             startAutoRefresh(300);
             refreshAllStock();
-            if (!window._maintenanceInterval) {
+            // ✅ 只有監控模式開啟時才重啟維護模式輪詢
+            if (systemSettings._monitorMode === true && !window._maintenanceInterval) {
                 window._maintenanceInterval = setInterval(pollMaintenanceStatus, 5000);
             }
         }
