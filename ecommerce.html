@@ -4296,7 +4296,7 @@ function displayFeaturedProducts() {
             <div class="featured-badge">⭐ 主打推薦</div>
 
             <div class="product-image">
-                <img src="${imageUrl}" alt="主打商品" onerror="this.style.display='none'">
+                <img src="${imageUrl}" alt="主打商品" loading="lazy" onerror="this.style.display='none'">
             </div>
             <div class="product-name">本月激推🔥</div>
             ${_categoryPriceHTML('本月激推🔥', minPrice === Infinity ? 0 : minPrice, maxPrice)}
@@ -4332,7 +4332,7 @@ function displayFeaturedProducts() {
             <div class="custom-block-badge">🎯 精選</div>
 
             <div class="product-image">
-                <img src="${imageUrl}" alt="${blockName}" onerror="this.style.display='none'">
+                <img src="${imageUrl}" alt="${blockName}" loading="lazy" onerror="this.style.display='none'">
             </div>
             <div class="product-name">${blockName}</div>
             ${priceText}
@@ -4626,7 +4626,7 @@ function displayProducts() {
         return `
             <div class="product-card" onclick="openCategoryModal('${category.name}')">
                 <div class="product-image">
-                    <img src="${imageUrl}" alt="${category.name}" onerror="this.style.display='none'">
+                    <img src="${imageUrl}" alt="${category.name}" loading="lazy" onerror="this.style.display='none'">
                 </div>
                 <div class="product-name">${formatCategoryName(category.name)}</div>
                 ${_categoryPriceHTML(category.name, null, null)}
@@ -5051,7 +5051,7 @@ function initCarouselFromUrls(rawUrls) {
     _carouselIdx = 0;
     track.innerHTML = _carouselImgs.map((url, i) => `
         <div class="carousel-slide">
-            <img src="${url}" alt="商品圖 ${i + 1}" onerror="this.style.opacity='0.15'">
+            <img src="${url}" alt="商品圖 ${i + 1}" loading="lazy" onerror="this.style.opacity='0.15'">
         </div>
     `).join('');
     dots.innerHTML = _carouselImgs.map((_, i) => `
@@ -5125,7 +5125,7 @@ function updateSpecThumbStrip(urls) {
     strip.innerHTML = urls.map((src, i) => {
         const s = (src || '').trim();
         const finalSrc = s.startsWith('http') ? s : 'https://' + s;
-        return '<img src="' + finalSrc + '" data-idx="' + i + '" class="' + (i === 0 ? 'th-active' : '') + '" '
+        return '<img src="' + finalSrc + '" data-idx="' + i + '" class="' + (i === 0 ? 'th-active' : '') + '" loading="lazy" '
             + 'onerror="this.style.background=\'#333\';this.style.opacity=\'0.4\';this.removeAttribute(\'src\')" '
             + 'onclick="specThumbClick(this,' + i + ')">';
     }).join('');
